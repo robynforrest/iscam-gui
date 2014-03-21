@@ -1,17 +1,17 @@
 #**********************************************************************************
-# pcod_iscam.r
-# This file contains the code for a front end GUI controller for pcod_iscam using
+# iscam.r
+# This file contains the code for a front end GUI controller for iscam using
 # Tcl/Tk windows implemented using the R package 'PBSModelling'.  The data
 # structure used is an opList, which is a list of lists, see loadScenarios.r for
 # details on this structure. This file assumes that an object called 'opList'
 # exists and is a valid opList.
 #
 # Author            : Chris Grandin/Robyn Forrest
-# Development Date  : December 2011 - February 2012
+# Development Date  : December 2011 - Present
 #
-# Source this file, then call pcod_iscam() with whatever arguments you need.
+# Source this file, then call iscam() with whatever arguments you need.
 #
-# pcod_iscam(reload=F,silent=F,copyADMBExecutables=F)
+# iscam(reload=F,silent=F,copyADMBExecutables=F)
 #
 # To change/create global variables, find the function assignGlobals() in this file
 # 
@@ -24,7 +24,6 @@ removeAllExcept <- function(vars="opList", envir = .GlobalEnv) {
   # which tells the software that the model has already been loaded.
   # - vars - A list of objects to keep, typically just 'opList'
   # - envir - environment to clear, typically .GlobalEnv
-  
   vars <- c(vars, "removeAllExcept")
   keep <- match(x = vars, table = ls(all=T,envir = envir))
   if(any(is.na(keep))){
@@ -46,7 +45,7 @@ require(grDevices)
 
 options(stringsAsFactors=FALSE)
 # make warnings print out when they occur instead of at the end
-options(warn=1) 
+options(warn=1)
 
 # Runtime stats constants for plotting
 .MAXGRAD <- 0.0001
@@ -54,15 +53,15 @@ options(warn=1)
 .PCHCODE <- 16
 
 source("reptolist.r")
-source("pcod_iscamFriedEgg.r")
-source("pcod_iscamExecutiveSummary.r")
-source("pcod_iscamFigs.r")
-source("pcod_iscamTables.r")
-source("pcod_iscamSens.r")
-source("pcod_iscamRetro.r")
-source("pcod_iscamADMBFileControl.r")
-source("pcod_iscamLoadScenarios.r")
-source("pcod_iscamUtils.r")
+source("iscamFriedEgg.r")
+source("iscamExecutiveSummary.r")
+source("iscamFigs.r")
+source("iscamTables.r")
+source("iscamSens.r")
+source("iscamRetro.r")
+source("iscamADMBFileControl.r")
+source("iscamLoadScenarios.r")
+source("iscamUtils.r")
 
 getShade <- function(color,opacity){
   # getShade()
@@ -1054,6 +1053,6 @@ pcod_iscam <- function(reloadScenarios=F,copyADMBExecutables=T,silent=F){
   return(win)
 }
 
-cat("Type pcod_iscam() to start GUI\n")
+cat("Type iscam() to start GUI\n")
 cat("Optional arguments: pcod_iscam(reload=T,silent=F,copyADMBExecutables=F)\n\n")
 
