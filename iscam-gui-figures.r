@@ -1,10 +1,10 @@
 #**********************************************************************************
-# ss-explore-figures.r
+# iscam-gui-figures.r
 # This file contains the code for plotting SS outputs using the infrastructure
-# provided with ss-explore and r4ss.
+# provided with iscam-gui and r4ss.
 #
 # Author            : Chris Grandin
-# Development Date  : August 2013
+# Development Date  : August 2013 - Present
 # Current version   : 1.0
 #**********************************************************************************
 

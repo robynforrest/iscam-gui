@@ -477,6 +477,8 @@ iscam <- function(reloadScenarios      = FALSE,
              .createScenarioInfoFile(dired = op[[row]]$names$dir,
                                      scenario = row,
                                      default = FALSE)
+             op[[val$entryScenario]]$inputs$color <<- val$scenarioHeader$Color
+             op[[val$entryScenario]]$inputs$order <<- val$scenarioHeader$Order
              cat("\n")
            }
            sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)

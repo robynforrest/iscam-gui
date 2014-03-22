@@ -1,10 +1,10 @@
 #**********************************************************************************
-# ss-explore-figures-timeseries.r
+# iscam-gui-figures-timeseries.r
 # This file contains the code for plotting time series values SS outputs using the
-# infrastructure provided with ss-explore.
+# infrastructure provided with iscam-gui.
 #
 # Author            : Chris Grandin
-# Development Date  : October 2013 - 2014
+# Development Date  : October 2013 - Present
 # Current version   : 1.0
 #**********************************************************************************
 
@@ -21,8 +21,8 @@ plotTS <- function(plotNum  = 1,
                    png      = .PNG,
                    silent   = .SILENT){
 
-  # If multiple=FALSE, SSplotTImeseries will be used to plot the single model
-  # If multiple=TRUE, SScomparison will be used to plot all models in the current sensitivity group
+  # Not Applicable for iScam yet: If multiple=FALSE, SSplotTImeseries will be used to plot the single model
+  # Not Applicable for iScam yet:If multiple=TRUE, SScomparison will be used to plot all models in the current sensitivity group
   # If retros=TRUE, SScomparison will be used to plot all retrospective models in the current scenario
   # Assumes that 'op' list exists and has been populated correctly.
   # Assumes that 'si' list exists and has been populated correctly.
@@ -68,13 +68,14 @@ plotTS <- function(plotNum  = 1,
   out          <- op[[scenario]]$outputs$mpd
   outSummary   <- op[[scenario]]$outputs$mpdSummary
   figDir       <- op[[scenario]]$names$figDir
+  color        <- op[[scenario]]$inputs$color
   res          <- val$entryResolution
   width        <- val$entryWidth
   height       <- val$entryHeight
   resScreen    <- val$entryResolutionScreen
   widthScreen  <- val$entryWidthScreen
   heightScreen <- val$entryHeightScreen
-  
+
   if(val$legendLoc == "sLegendTopright"){
     legendLoc <- "topright"
   }
@@ -171,21 +172,51 @@ plotTS <- function(plotNum  = 1,
     if(png){
       graphics.off()
       png(filename,res=res,width=width,height=height,units=units)
+    }else{
+      windows(width=widthScreen,height=heightScreen)
     }
-    SSplotTimeseries(out,
-                     plot     = TRUE,
-                     print    = FALSE,
-                     subplot  = plotNum,
-                     pheight  = height,
-                     pwidth   = width,
-                     punits   = units,
-                     res      = res,
-                     verbose  = !silent,
-                     legendLoc= legendLoc)
+    if(plotNum == 1){
+      plotBiomassMPD(out, verbose = !silent, legendLoc = legendLoc, col = color)
+    }
+    if(plotNum == 11){
+      plotRecruitmentMPD(out, verbose = !silent, legendLoc = legendLoc, col = color)
+    }
+
   }
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }
   return(TRUE)
+}
+
+plotBiomassMPD <- function(out,
+                           verbose = FALSE,
+                           legendLoc = "topright",
+                           col = 1){
+	# Spawning stock biomass
+	op	<- par(no.readonly=T)
+  yUpperLimit <- max(out$sbt)
+  Bt <- out$sbt
+  # Should calc the 95% CI and plot with shading...
+  #q <- quantile(out$sbt, probs=c(0.05, 0.5, 0.75))
+  plot(out$yrs, Bt, type="l", col=col,lty=1, lwd=2,ylim=c(0,yUpperLimit),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  points(out$yr[1]-0.8, out$sbo, col=col, pch=1)
+
+	par(op)
+}
+
+plotRecruitmentMPD <- function(out,
+                               verbose = FALSE,
+                               legendLoc = "topright",
+                               col = 1){
+  # make two-panel plot of biomass and recruitment
+	op	<- par(no.readonly=T)
+  sage <- out$sage
+  nyear <- length(out$yr)
+	ryr <- out$yr[(1+sage):nyear]
+  plot(ryr, out$rt, lty=1, col = col, type="o", pch=19,ylim=c(0,1.2*max(out$rt)), xlab="Year",ylab="Recruits", las=1, main="Recruits")
+	abline(h=median(out$rt),col=2,lty=2)
+	abline(h=mean(out$rt),col=3,lty=2)
+  par(op)
 }
