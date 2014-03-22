@@ -22,6 +22,7 @@
 .UTILITIES_SOURCE                <- paste0(.PROJECT_NAME,"-utilities.r")
 .LOAD_SCENARIOS_SOURCE           <- paste0(.PROJECT_NAME,"-load-scenarios.r")
 .FILE_CONTROL_SOURCE             <- paste0(.PROJECT_NAME,"-file-control.r")
+.REP_PARSER_SOURCE               <- paste0(.PROJECT_NAME,"-reptorlist.r")
 .FIGURES_SOURCE                  <- paste0(.PROJECT_NAME,"-figures.r")
 .FIGURES_BIOLOGY_SOURCE          <- paste0(.PROJECT_NAME,"-figures-biology.r")
 .FIGURES_SELEX_SOURCE            <- paste0(.PROJECT_NAME,"-figures-selex.r")

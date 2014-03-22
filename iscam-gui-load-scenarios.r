@@ -273,7 +273,7 @@
   },error=function(err){
     cat(.PROJECT_NAME,"->",currFuncName,"No MPD output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)\n",sep="")
   })
-
+browser()
   # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
   tryCatch({
     #suppressWarnings(
