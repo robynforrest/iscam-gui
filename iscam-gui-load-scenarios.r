@@ -1,10 +1,10 @@
 #**********************************************************************************
-# ss-explore-load-scenarios.r
+# iscam-gui-load-scenarios.r
 # This file contains the code to load multiple ADMB scenarios into an 'op' list.
-# All filenames and foldernames for ss-explore are set here.
+# All filenames and foldernames for iscam-gui are set here.
 #
 # Author            : Chris Grandin
-# Development Date  : August 2013 - 2014
+# Development Date  : August 2013 - Present
 #
 #**********************************************************************************
 
@@ -92,12 +92,12 @@
 
   currFuncName <- getCurrFunc()
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a dired name to load a scenario.\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a dired name to load a scenario.\n")
     return(NULL)
   }
   if(!silent){
     cat(.BANNER)
-    cat(.PROJECT_NAME,"->",currFuncName,"Attempting to load scenario '",dirList[[scenario]],"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Attempting to load scenario '",dirList[[scenario]],"'")
   }
   # Set up empty variables
   tmp <- NULL
@@ -108,6 +108,7 @@
                           starter           = "",
                           data              = "",
                           control           = "",
+                          projection        = "",
                           log               = "",
                           forecast          = "",
                           par               = "",
@@ -118,6 +119,7 @@
                           starter           = NULL,
                           data              = NULL,
                           control           = NULL,
+                          projection        = NULL,
                           forecast          = NULL,
                           par               = NULL,
                           numParams         = NULL,
@@ -130,11 +132,11 @@
   tmp$fileSuccess <- list(starter           = FALSE,
                           data              = FALSE,
                           control           = FALSE,
+                          projection        = FALSE,
                           mpd               = FALSE,
                           mpdForecast       = FALSE,
                           mcmc              = FALSE,
                           log               = FALSE,
-                          forecast          = FALSE,
                           par               = FALSE,
                           sensitivityGroup  = FALSE,
                           lastCommandRun    = FALSE)
@@ -147,22 +149,19 @@
   tmp$names$figDir         <- file.path(dired,.FIGURES_DIR_NAME)
   tmp$names$tableDir       <- file.path(dired,.TABLES_DIR_NAME)
   tmp$names$starter        <- file.path(dired,.STARTER_FILE_NAME)
-  tmp$names$data           <- file.path(dired,.DATA_FILE_NAME)
-  tmp$names$control        <- file.path(dired,.CONTROL_FILE_NAME)
-  tmp$names$forecast       <- file.path(dired,.FORECAST_FILE_NAME)
   tmp$names$par            <- file.path(dired,.PAR_FILE_NAME)
   tmp$names$lastCommandRun <- file.path(dired,.LAST_COMMAND_RUN_FILE_NAME)
-  tmp$names$warnings       <- file.path(dired,.WARNING_FILE_NAME)
   tmp$names$log            <- file.path(dired,.LOG_FILE_NAME)
 
   # Try to load starter file
   tryCatch({
-    starterData        <- SS_readstarter(file = tmp$names$starter, verbose=!silent)
-    tmp$inputs$starter <- starterData
-    tmp$names$data     <- file.path(dired,starterData$datfile)
-    tmp$names$control  <- file.path(dired,starterData$ctlfile)
+    starterData             <- readStarter(file = tmp$names$starter, verbose=!silent)
+    tmp$names$data          <- file.path(dired,starterData[1])
+    tmp$names$control       <- file.path(dired,starterData[2])
+    tmp$names$projection    <- file.path(dired,starterData[3])
+    tmp$fileSuccess$starter <- TRUE
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem reading the starter file: '",tmp$names$starter,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem reading the starter file: '",tmp$names$starter,"'")
     stop()
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
@@ -170,24 +169,36 @@
 
   # Try to load data file.
   tryCatch({
-    tmp$inputs$data      <- SS_readdat(file = tmp$names$data, verbose=!silent)
+    tmp$inputs$data      <- readData(file = tmp$names$data, verbose=!silent)
     tmp$fileSuccess$data <- TRUE
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading data file: '",tmp$names$data,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading data file: '",tmp$names$data,"'")
     stop()
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
   })
 
-  # Try to load forecast file.
+  # Try to load control file.
   tryCatch({
-    tmp$inputs$forecast      <- readLines(tmp$names$forecast)
-    tmp$fileSuccess$forecast <- TRUE
+    tmp$inputs$control       <- readControl(file = tmp$names$control, verbose=!silent)
+    tmp$fileSuccess$control  <- TRUE
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading forecast file: '",tmp$names$forecast,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading control file: '",tmp$names$control,"'")
     # Ignore errors.  At this point nothing is used yet, just reading it in for fun.
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
+  })
+
+  # Try to load projection file.
+  tryCatch({
+    tmp$inputs$projection       <- readProjection(file = tmp$names$projection, verbose=!silent)
+    tmp$fileSuccess$projection  <- TRUE
+  }, warning = function(war){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading projection file: '",tmp$names$projection,"'")
+    # Ignore errors.  At this point nothing is used yet, just reading it in for fun.
+  }, error = function(err){
+    # Do nothing, is is likely not a scenario directory
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading projection file: '",tmp$names$projection,"'")
   })
 
   # Try to load par file.
@@ -216,17 +227,6 @@
     tmp$inputs$numParams   <- ""
     tmp$inputs$objFunValue <- ""
     tmp$inputs$maxGradient <- ""
-  })
-
-  # Try to load control file.
-  tryCatch({
-    tmp$inputs$control      <- SS_readctl(file = tmp$names$control, verbose=!silent)
-    tmp$fileSuccess$control <- TRUE
-  }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading control file: '",tmp$names$control,"'\n",sep="")
-  }, error = function(err){
-    # Ignore errors, because the r4ss SS_readctl function is not fully implemented and could fail.
-    # TODO: Fix r4ss->SS_readctl function to deal with any model structure.
   })
 
   # Try to load the scenario's last log file, .LOG_FILE_NAME
@@ -267,12 +267,7 @@
 
   # Try to load MPD results.
   tryCatch({
-    tmp$outputs$mpd <- SS_output(dir=dired,
-                                 verbose=!silent,
-                                 printstats=F,
-                                 NoCompOK=T,
-                                 covar=F)
-    tmp$outputs$mpdSummary <- SSsummarize(list(tmp$outputs$mpd), verbose=!silent)
+    tmp$outputs$mpd <- reptoRlist(paste0(dired,.REPORT_FILE_NAME))
     tmp$fileSuccess$mpd    <- TRUE
     cat(.PROJECT_NAME,"->",currFuncName,"MPD output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)\n",sep="")
   },error=function(err){
@@ -281,11 +276,11 @@
 
   # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
   tryCatch({
-    suppressWarnings(
-      tmp$outputs$mcmc <- SSgetMCMC(dir=dired,
-                                    verbose=!silent)
-      )
-    tmp$fileSuccess$mcmc <- TRUE
+    #suppressWarnings(
+    #  tmp$outputs$mcmc <- SSgetMCMC(dir=dired,
+    #                                verbose=!silent)
+    #  )
+    #tmp$fileSuccess$mcmc <- TRUE
     cat(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n\n",sep="")
   },error=function(err){
     cat(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n\n",sep="")
@@ -317,7 +312,7 @@
     for(retro in 1:length(tmp$outputs$retros)){
       modelList[[retro+1]] <- tmp$outputs$retros[[retro]]$outputs$mpd
     }
-    tmp$outputs$retrosSummary <- SSsummarize(modelList, verbose=!silent)
+    tmp$outputs$retrosSummary <- paste0(currFunc,"NEED TO IMPLEMENT retro loading, was SSsummarize!")
   }
 
   tmpFdFigures <- file.path(dired,.FIGURES_DIR_NAME)
@@ -448,7 +443,8 @@
       }
     }
     # Summary is the output from all the model's in a sensitivity group
-    tmp[[sensGroup]]$summary <- SSsummarize(modelList, verbose=!silent)
+    #tmp[[sensGroup]]$summary <- SSsummarize(modelList, verbose=!silent)
+    tmp[[sensGroup]]$summary <- paste0(currFuncName,"NEED TO IMPLEMENT!")
     # Names are the model names for the legends in the SScomparison plots
     tmp[[sensGroup]]$names   <- modelNames
     tmp[[sensGroup]]$isMCMC  <- isMCMC
@@ -474,35 +470,34 @@
   filename <- file.path(dired,.LOG_FILE_NAME)
   if(file.exists(filename)){
     logData     <- readLines(filename, warn=FALSE)
-    finishTimes <- logData[grep("Finish time:",logData)]
-    tmp$finishTimes <- gsub("Finish time: ","",finishTimes)
+    finishTimes <- logData[grep("--Finish time:",logData)]
+    tmp$finishTimes <- gsub("--Finish time: ","",finishTimes)
 
-    warningText <- logData[grep("warnings: ",logData)]
-    if(length(warningText) > 1){
+    # The warning text was from SS, we could have it in the log output if we wanted for iScam but don't yet.
+
+    #warningText <- logData[grep("warnings: ",logData)]
+    #if(length(warningText) > 1){
       # Just take the first instance of the warnings text from the logFile.
-      warningText <- warningText[1]
-    }
-    tmp$numWarnings <- gsub(".*: ","",warningText)
-    if(tmp$numWarnings == 0){
-      tmp$numWarnings <- "0"
-    }
-    if(!(grep("write mcmc headers",logData) == grep("mcmc",logData))){
-      if(length(grep("mcmc",logData)) > 0){
-        tmp$isMCMC    <- TRUE
-        tmp$isMPD     <- FALSE
-      }else{
-        tmp$isMCMC    <- FALSE
-        tmp$isMPD     <- TRUE
-      }
+    #  warningText <- warningText[1]
+    #}
+    #tmp$numWarnings <- gsub(".*: ","",warningText)
+    #if(tmp$numWarnings == 0){
+    #  tmp$numWarnings <- "0"
+    #}
+
+    if(length(grep("MCMC",logData)) > 0){
+      tmp$isMCMC    <- TRUE
+      tmp$isMPD     <- FALSE
     }else{
       tmp$isMCMC    <- FALSE
       tmp$isMPD     <- TRUE
     }
 
     tmp$hasMCeval   <- FALSE
-    if(tmp$isMCMC && length(tmp$finishTimes) >= 2){
-      tmp$hasMCeval <- TRUE
-    }
+    # iScam does not have an easy way to check this, yet... So we set it to FALSE for now
+    #if(tmp$isMCMC && length(tmp$finishTimes) >= 2){
+    #  tmp$hasMCeval <- TRUE
+    #}
   }else{
     tmp$finishTimes <- ""
     tmp$numWarnings <- "0"
@@ -619,4 +614,25 @@
                           "cbs",
                           "mdl")
   save(commandLine, file=op[[scenario]]$names$lastCommandRun)
+}
+
+readStarter <- function(file = NULL, verbose = FALSE){
+  # Read the starter file into a vector, which for iscam is just a file with
+  # the data file, control file, and projection file names in that order
+  return(readLines(file))
+}
+
+readData <- function(file = NULL, verbose = FALSE){
+  # Read in the datafile given by 'file'
+  return(readLines(file))
+}
+
+readControl <- function(file = NULL, verbose = FALSE){
+  # Read in the control file given by 'file'
+  return(readLines(file))
+}
+
+readProjection <- function(file = NULL, verbose = FALSE){
+  # Read in the projection file given by 'file'
+  return(readLines(file))
 }

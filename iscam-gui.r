@@ -1,18 +1,18 @@
 #**********************************************************************************
-# ss-explore.r
-# This file contains the code for a front end GUI controller for ss-explore using
+# iscam-gui.r
+# This file contains the code for a front end GUI controller for iscam-gui using
 # Tcl/Tk windows implemented using the R package 'PBSModelling'.  The data
-# structure used is an list, which is a list of lists, see ss-explore-load-scenarios.r for
+# structure used is an list, which is a list of lists, see iscam-gui-load-scenarios.r for
 # details on this structure. This file assumes that a list object called 'op'
 # exists and is of the correct format.
 #
 # Author            : Chris Grandin
-# Development Date  : August 2013 - 2014
+# Development Date  : August 2013 - Present
 # Current version   : 1.0
 #
-# Source this file, then call sse()
+# Source this file, then call iscam()
 #
-# sse(reload=F, silent=TRUE, copyModelExecutables = FALSE)
+# iscam(reload=F, silent=TRUE, copyModelExecutables = FALSE)
 #
 #**********************************************************************************
 
@@ -47,30 +47,12 @@ removeAllExcept <- function(vars  = c("op","sens")){
 removeAllExcept()
 
 require(PBSmodelling)
-require(r4ss)
 
 options(stringsAsFactors = FALSE)
 options(warn = -1)
-source("ss-explore-globals.r")
+source("iscam-gui-globals.r")
 
-# overwrite r4ss versions of these functions with ss-explore version
-# r4ss versions required modifications to work correctly in this framework.
-source(.SS_READ_CTL)
-source(.SS_PLOTS)
-source(.SS_PLOT_COMPARISONS)
-source(.SS_PLOT_RETRORECRUITS)
-source(.SS_PLOT_BIOLOGY)
-source(.SS_PLOT_TIMESERIES)
-source(.SS_PLOT_SELEX)
-source(.SS_GET_MCMC)
-source(.SS_READ_STARTER)
-source(.SS_READ_DAT)
-source(.SS_OUTPUT)
-source(.SS_SUMMARIZE)
-source(.SS_MOUNTAINS)
-source(.SS_TABLE_COMPARISONS)
-
-# ss-explore sources
+# iscam-gui sources
 source(.UTILITIES_SOURCE)
 source(.LOAD_SCENARIOS_SOURCE)
 source(.FILE_CONTROL_SOURCE)
@@ -80,17 +62,17 @@ source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
 
-sse <- function(reloadScenarios      = FALSE,
-                copyModelExecutables = FALSE,
-                silent               = TRUE){
-  # sse()
-  # loads model outputs and launches the main ss-explore GUI.
+iscam <- function(reloadScenarios      = FALSE,
+                  copyModelExecutables = FALSE,
+                  silent               = TRUE){
+  # iscam()
+  # loads model outputs and launches the main iscam-gui GUI.
   # - reloadScenarios TRUE/FALSE - reload the data from all model output files in all scenarios.
   # - copyADMBExecutables TRUE/FALSE copy the admb executable from admb folder to each scenario folder.
   # - silent TRUE/FALSE - show messages on command line
 
   # Create a global variable which tells the program whether or not to be silent
-  # This is the only capitalized, dotted variable not in ss-explore-globals.r
+  # This is the only capitalized, dotted variable not in iscam-gui-globals.r
   .SILENT <<- silent
 
   graphics.off()  # Destroy graphics window if it exists
@@ -153,38 +135,38 @@ sse <- function(reloadScenarios      = FALSE,
 
 .writeAllPlots <- function(silent=.SILENT){
   # write all figures for all scenarios to disk
-  scenarioList <- as.numeric(rownames(viewHeader))
-  for(scenario in scenarioList){
-    assignGlobals(scenario)
-    .writePlots(scenario)
-  }
+  #scenarioList <- as.numeric(rownames(viewHeader))
+  #for(scenario in scenarioList){
+  #  assignGlobals(scenario)
+  #  .writePlots(scenario)
+  #}
 }
 
 .writeAllTables <- function(silent=.SILENT){
   # write all tables for all scenarios to disk
-  scenarioList <- as.numeric(rownames(viewHeader))
-  for(scenario in scenarioList){
-    assignGlobals(scenario)
-    .writeTables()
-  }
+  #scenarioList <- as.numeric(rownames(viewHeader))
+  #for(scenario in scenarioList){
+  #  assignGlobals(scenario)
+  #  .writeTables()
+  #}
 }
 
 .writeRetroPlots <- function(silent=.SILENT){
-  assign("saveon",T,envir=.GlobalEnv)
-  val <- getWinVal()
-  fig.retro(whichPlot="biomass",
-            ylimit=val$biomassYlim,
-            useMaxYlim=val$maxBiomassYlim,
-            scenario=val$entryScenario)
-  fig.retro(whichPlot="depletion",
-            ylimit=val$depletionYlim,
-            useMaxYlim=val$maxDepletionYlim,
-            scenario=val$entryScenario)
-  fig.retro(whichPlot="recruits",
-            ylimit=val$recruitmentYlim,
-            useMaxYlim=val$maxRecruitmentYlim,
-            scenario=val$entryScenario)
-  assign("saveon",FALSE,envir=.GlobalEnv)
+  #assign("saveon",T,envir=.GlobalEnv)
+  #val <- getWinVal()
+  #fig.retro(whichPlot="biomass",
+  #          ylimit=val$biomassYlim,
+  #          useMaxYlim=val$maxBiomassYlim,
+  #          scenario=val$entryScenario)
+  #fig.retro(whichPlot="depletion",
+  #          ylimit=val$depletionYlim,
+  #          useMaxYlim=val$maxDepletionYlim,
+  #          scenario=val$entryScenario)
+  #fig.retro(whichPlot="recruits",
+  #          ylimit=val$recruitmentYlim,
+  #          useMaxYlim=val$maxRecruitmentYlim,
+  #          scenario=val$entryScenario)
+  #assign("saveon",FALSE,envir=.GlobalEnv)
 }
 
 .writeSensPlots <- function(silent=.SILENT){
@@ -242,7 +224,7 @@ sse <- function(reloadScenarios      = FALSE,
            "sTSRecruitmentFractionByArea"           = {plotTS(plotNum=13,png=png,fileText="RecruitmentFractionByArea")},
            "sTSRecruitmentByBirthSeason"            = {plotTS(plotNum=14,png=png,fileText="RecruitmentByBirthSeason")},
            "sTSRecruitmentFractionByBirthSeason"    = {plotTS(plotNum=15,png=png,fileText="RecruitmentFractionByBirthSeason")},
-           # From ss-explore-figures-biology.r
+           # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(plotNum=1,png=png,fileText="BiologyMeanWtAtAge")},
            "sBiologyMaturityAtAge"                  = {plotBiology(plotNum=2,png=png,fileText="BiologyMaturityAtAge")},
            "sBiologyFecundity"                      = {plotBiology(plotNum=3,png=png,fileText="BiologyFecundity")},
@@ -253,7 +235,7 @@ sse <- function(reloadScenarios      = FALSE,
            "sBiologyTVM"                            = {plotBiology(plotNum=8,png=png,fileText="BiologyTVM")},
            "sBiologyTVGrowthPersp"                  = {plotBiology(plotNum=9,png=png,fileText="BiologyTVGrowthPersp")},
            "sBiologyTVGrowthContour"                = {plotBiology(plotNum=10,png=png,fileText="BiologyTVGrowthContour")},
-           # From ss-explore-figures-selectivities.r
+           # From iscam-gui-figures-selectivities.r
            "sSelexLengthBasedByFleet"               = {plotSelex(plotNum=1,png=png,fileText="SelexLengthBasedByFleet")},
            "sSelexAgeBasedByFleet"                  = {plotSelex(plotNum=2,png=png,fileText="SelexAgeBasedByFleet")},
            "sSelexTVAtLengthSurface"                = {plotSelex(plotNum=3,png=png,fileText="SelexTVAtLengthSurface")},
@@ -269,7 +251,7 @@ sse <- function(reloadScenarios      = FALSE,
            "sSelexAtAgeEndYear"                     = {plotSelex(plotNum=14,png=png,fileText="SelexAtAgeEndYear")},
            "sSelexAgeLengthGrowthCurve"             = {plotSelex(plotNum=21,png=png,fileText="SelexAgeLengthGrowthCurve")},
            "sSelexUncertainty"                      = {plotSelex(plotNum=22,png=png,fileText="SelexUncertainty")},
-           # From ss-explore-figures-catch.r
+           # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(plotNum=1,png=png,fileText="CatchLandings")},
            "sCatchLandingsStacked"                  = {plotCatch(plotNum=2,png=png,fileText="CatchLandingsStacked")},
            "sCatchLandingsObsVsExpLandings"         = {plotCatch(plotNum=3,png=png,fileText="CatchLandingsObsVsExpLandings")},
@@ -285,7 +267,7 @@ sse <- function(reloadScenarios      = FALSE,
            "sCatchTotalSeasonsStacked"              = {plotCatch(plotNum=13,png=png,fileText="CatchTotalSeasonsStacked")},
            "sCatchDiscardsSeasons"                  = {plotCatch(plotNum=14,png=png,fileText="CatchDiscardsSeasons")},
            "sCatchDiscardsSeasonsStacked"           = {plotCatch(plotNum=15,png=png,fileText="CatchDiscardsSeasonsStacked")},
-           # From ss-explore-figures.r
+           # From iscam-gui-figures.r
            "sParameterPairs"                        = {fig.estimated.params.pairs(scenario=val$entryScenario)},
            "sVariancePartitions"                    = {fig.variance.partitions(scenario=val$entryScenario)},
            # MCMC diagnostics
@@ -295,7 +277,7 @@ sse <- function(reloadScenarios      = FALSE,
            "sMCMCDensity"                           = {fig.mcmc.density(scenario=val$entryScenario)},
            "sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            "sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
-           # From ss-explore-figures-timeseries.r
+           # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(plotNum=1,multiple=TRUE,png=png,fileText="SensSpawningBiomass")},
            "sSensSBU"                               = {plotTS(plotNum=2,multiple=TRUE,png=png,fileText="SensSpawningBiomassUncertainty")},
            "sSensBRatio"                            = {plotTS(plotNum=3,multiple=TRUE,png=png,fileText="SensBRatio",btarg=val$entryBtarg,blim=val$entryBlim)},
@@ -346,7 +328,7 @@ sse <- function(reloadScenarios      = FALSE,
   }
 
   # This switch statement represents an 'action' for a button or changing a text field.
-  # See ss-explore-gui-specs.r
+  # See iscam-gui-gui-specs.r
   triggerPlot <- FALSE
   switch(act,
          # Change the scenario numnber using three different methods
@@ -497,7 +479,6 @@ sse <- function(reloadScenarios      = FALSE,
              cat("\n")
            }
            sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
-           
          },
          "changeScreenGraphics" = {
          },
@@ -656,7 +637,7 @@ sse <- function(reloadScenarios      = FALSE,
 .updateGUICommandStamp <- function(silent = .SILENT){
   val <- getWinVal()
   scenario <- val$entryScenario
-  command <- .SS_EXE_FILE_NAME
+  command <- .EXE_FILE_NAME
   if(val$executeType == "sMCMC"){
     if(!is.na(val$mcmc)){
       command <- paste(command,"-mcmc",val$mcmc)
@@ -699,7 +680,7 @@ sse <- function(reloadScenarios      = FALSE,
   file.copy("sscam.rep","sscam.backup.rep")
 
   for(retro in 1:retroYears){
-    modelCall <- paste(.SS_EXE_FILE_NAME,"-retro",retro)
+    modelCall <- paste(.EXE_FILE_NAME,"-retro",retro)
     system(modelCall,wait=T,show.output.on.console=showOutput)
     file.copy("sscam.rep",paste("sscam.ret",retro,sep=""),overwrite=T)
   }
@@ -725,7 +706,7 @@ sse <- function(reloadScenarios      = FALSE,
   #  return(NULL)
   #}
   # Sanity checks end..
-  modelCall <- .SS_EXE_FILE_NAME
+  modelCall <- .EXE_FILE_NAME
   for(command in 1:length(commandLine)){
     if(!is.na(commandLine[command])){
       modelCall <- paste(modelCall, " -", names(commandLine[command]), " ", commandLine[command],sep="")
@@ -784,7 +765,7 @@ sse <- function(reloadScenarios      = FALSE,
         shellSuccess <- TRUE
       }
       if(runMCMC){
-        mcevalCall <- paste(.SS_EXE_FILE_NAME,"-mceval",.DOS_APPEND_TO_LOG)
+        mcevalCall <- paste(.EXE_FILE_NAME,"-mceval",.DOS_APPEND_TO_LOG)
         cat(.PROJECT_NAME,"->",getCurrFunc(),"MCeval phase, the command being run is:\n",
             mcevalCall,"\n\n",sep="")
         shell(mcevalCall)

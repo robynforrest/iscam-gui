@@ -1,6 +1,6 @@
 
 #**********************************************************************************
-# ss-explore-file-control.r
+# iscam-gui-file-control.r
 # This file contains:
 # 1. Functions for creating/editing dat, control, and starter files for the stock of your choice.
 # 2. Functions for copying these files to the execution directory
@@ -15,18 +15,18 @@
 # using PBSmodelling commands such as setWinVal() and getWinVal().  Also assumes
 # that the variable fdScenario is in the .GlobalEnv workspace and that it points to the
 # current Scenario.
-# Assumes ss-explore-load-scenarios.r has been sourced. It instantiates the path and file name variables.
+# Assumes iscam-gui-load-scenarios.r has been sourced. It instantiates the path and file name variables.
 #
 # Author            : Chris Grandin
-# Development Date  : September 2013
+# Development Date  : September 2013 - Present
 #
 #**********************************************************************************
 
 .copyExecutableToScenarioDirectory <- function(scenario, silent = .SILENT){
 # Copies the model executable from the execution directory to
 # the given scenario folder
-  src <- .SS_EXE_FILE_NAME_FULL_PATH
-  des <- file.path(op[[scenario]]$names$dir,.SS_EXE_FILE_NAME)
+  src <- .EXE_FILE_NAME_FULL_PATH
+  des <- file.path(op[[scenario]]$names$dir,.EXE_FILE_NAME)
   file.copy(src, des, overwrite = TRUE)
   if(!silent){
     cat("Copied model executable from '",src,"' to '",des,"'\n\n",sep="")

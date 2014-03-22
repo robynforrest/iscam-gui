@@ -104,3 +104,7 @@ getCurrFunc <- function(){
   funcName <- paste(funcName,": ",sep="")
   return(funcName)
 }
+
+cat0 <- function(...){
+  cat(..., "\n", sep="")
+}
