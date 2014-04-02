@@ -20,13 +20,13 @@
     modelLoaded <<- FALSE
   }
   if(reloadScenarios || !modelLoaded){
-    cat(.PROJECT_NAME,"->",getCurrFunc(),"Loading data from model output files.\n",sep="")
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Loading data from model output files.")
     op   <<- .loadScenarios(.SCENARIOS_DIR_NAME)
     sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
 
     modelLoaded <<- T
   }else{
-    cat(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(T) to reload the Scenarios.\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(T) to reload the Scenarios.\n")
   }
   if(copyModelExecutables){
     .copyExecutableToScenariosDirectories()
@@ -44,10 +44,10 @@
   currFuncName <- getCurrFunc()
   if(!silent){
     cat(.BANNER2)
-    cat(.PROJECT_NAME,"->",currFuncName,"Attempting to load all scenarios.\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Attempting to load all scenarios.")
   }
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name to load the scenario from (dired).\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name to load the scenario from (dired).\n")
     return(NULL)
   }
   dirList <- list.dirs(dired,recursive=FALSE)
@@ -78,7 +78,7 @@
   }
 
   if(!silent){
-    cat(.PROJECT_NAME,"->",currFuncName,"Scenarios loaded, global 'op' list object has been populated..\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Scenarios loaded, global 'op' list object has been populated..")
     cat(.BANNER2)
   }
   return(tmpOp)
@@ -207,22 +207,23 @@
     tmp$fileSuccess$par <- TRUE
     convCheck <- tmp$inputs$par[1]
     convCheck <- gsub("[[:alpha:]]+","",convCheck) # remove all letters
-    convCheck <- gsub(" ","",convCheck)            # remove all spaces
     convCheck <- gsub("#","",convCheck)            # remove hash marks
-    convCheck <- gsub("-","e-",convCheck)          # replace "e" in scientific notation that may have been removed in the alpha gsub above
-    convCheck <- strsplit(convCheck,"=")           # remove equals signs
-    convCheck <- convCheck[[1]][-1]                # remove first element which is a null string ""
+    convCheck <- gsub("=","",convCheck)
+    # Note that this might have to be revisited. I don't have an example currently where scientific notation is returned.
+    #convCheck <- gsub("-","e-",convCheck)           # replace "e" in scientific notation that may have been removed in the alpha gsub above
+    convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
+    convCheck <- convCheck[[1]][-1]                 # remove first element which is a null string ""
     tmp$inputs$numParams   <- convCheck[1]
     tmp$inputs$objFunValue <- convCheck[2]
     tmp$inputs$maxGradient <- convCheck[3]
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
     tmp$inputs$numParams   <- ""
     tmp$inputs$objFunValue <- ""
     tmp$inputs$maxGradient <- ""
   }, error = function(err){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
     tmp$inputs$numParams   <- ""
     tmp$inputs$objFunValue <- ""
@@ -234,7 +235,7 @@
     tmp$inputs$log <- .loadLogfile(dired = tmp$names$dir)
     tmp$fileSuccess$log <- tmp$inputs$log$isMPD || tmp$inputs$log$isMCMC
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading log file: '",tmp$names$log,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading log file: '",tmp$names$log,"'")
   }, error = function(err){
     # Ignore errors, since the scenario may not have been run, and therefore no logfile exists.
   })
@@ -244,7 +245,7 @@
     tmp$inputs$lastCommandRun      <- readTable(tmp$names$lastCommandRun)
     tmp$fileSuccess$lastCommandRun <- TRUE
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,"Problem loading last command run file: '",tmp$names$lastCommandRun,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading last command run file: '",tmp$names$lastCommandRun,"'")
   }, error = function(err){
     # Ignore errors, since the scenario may not have been run, and therefore no last command run file exists.
   })
@@ -256,12 +257,12 @@
   tryCatch({
     tmp <- .readScenarioInfoFile(dired = dired, sList = tmp)
   }, warning = function(war){
-    cat(.PROJECT_NAME,"->",currFuncName,": ",.SCENARIO_INFO_FILE_NAME," file not found, or problem loading it. '",fnScenarioInfo,"'\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,": ",.SCENARIO_INFO_FILE_NAME," file not found, or problem loading it. '",fnScenarioInfo,"'")
     # Create the file since it doesn't exist or is corrupted
     tmp$fileSuccess$sensitivityGroup <- FALSE
    }, error = function(err){
     # Create the file since it doesn't exist or is corrupted
-     cat(.PROJECT_NAME,"->",currFuncName,": ",.SCENARIO_INFO_FILE_NAME," file not found, or problem loading it. '",fnScenarioInfo,"'\n",sep="")
+     cat0(.PROJECT_NAME,"->",currFuncName,": ",.SCENARIO_INFO_FILE_NAME," file not found, or problem loading it. '",fnScenarioInfo,"'")
     tmp$fileSuccess$sensitivityGroup <- FALSE
   })
 
@@ -269,9 +270,10 @@
   tryCatch({
     tmp$outputs$mpd <- reptoRlist(file.path(dired,.REPORT_FILE_NAME))
     tmp$fileSuccess$mpd    <- TRUE
-    cat(.PROJECT_NAME,"->",currFuncName,"MPD output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"MPD output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)")
   },error=function(err){
-    cat(.PROJECT_NAME,"->",currFuncName,"No MPD output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"No MPD output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mpd)")
+    cat0(.PROJECT_NAME,"->",currFuncName,"  Error message: ", err$message)
   })
 
   # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
@@ -281,14 +283,14 @@
     #                                verbose=!silent)
     #  )
     #tmp$fileSuccess$mcmc <- TRUE
-    cat(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   },error=function(err){
-    cat(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   })
 
   if(!silent){
-    cat(.PROJECT_NAME,"->",currFuncName,"Finished loading scenario ",tmp$names$scenario,"\n",sep="")
-    cat(.BANNER,"\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Finished loading scenario ",tmp$names$scenario)
+    cat0(.BANNER)
   }
   # Make sure the figures and tables directories exist in the main (non-subdirectories), if not, create them
   dirList <- list.dirs(dired, recursive = FALSE)
@@ -328,11 +330,11 @@
   # Any lines beginning with a hash # will be ignored
   currFuncName <- getCurrFunc()
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired)")
     return(FALSE)
   }
   if(is.null(sList)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a single scenario list to modify.\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a single scenario list to modify.")
     return(FALSE)
   }
   filename <- file.path(dired,.SCENARIO_INFO_FILE_NAME)
@@ -349,7 +351,7 @@
   # scenario is used for non-default writes only.
   currFuncName <- getCurrFunc()
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).")
     return(FALSE)
   }
   val <- getWinVal()
@@ -374,7 +376,7 @@
     if(is.null(scenario) ||
        scenario < 1 ||
        scenario > nrow(val$scenarioHeader)){
-      cat(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number between 1 and ",nrow(val$scenarioHeader),"\n",sep="")
+      cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number between 1 and ",nrow(val$scenarioHeader))
     }
     tmp <- matrix(list(.SENS_TEXT,
                        val$scenarioHeader$Group[scenario],
@@ -389,13 +391,13 @@
     tryCatch({
       write.table(tmp,filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
     },warning = function(war){
-      cat(.PROJECT_NAME,"->",currFuncName,"Problem creating file ",filename,".\n",sep="")
+      cat0(.PROJECT_NAME,"->",currFuncName,"Problem creating file ",filename,".")
       return(FALSE)
     },error = function(err){
-      cat(.PROJECT_NAME,"->",currFuncName,"Problem creating file ",filename,".\n",sep="")
+      cat0(.PROJECT_NAME,"->",currFuncName,"Problem creating file ",filename,".")
       return(FALSE)
     })
-    cat(.PROJECT_NAME,"->",currFuncName,"Created file ",filename,".\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Created file ",filename,".")
   }
   return(TRUE)
 }
@@ -407,10 +409,10 @@
   currFuncName <- getCurrFunc()
   if(!silent){
     cat(.BANNER)
-    cat(.PROJECT_NAME,"->",currFuncName,"Attempting to summarize all sensitivity groups.\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Attempting to summarize all sensitivity groups.")
   }
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).\n")
     return(NULL)
   }
   # Find out how many unique sensitivity groups there are
@@ -450,7 +452,7 @@
     tmp[[sensGroup]]$isMCMC  <- isMCMC
   }
   if(!silent){
-    cat(.PROJECT_NAME,"->",currFuncName,"Sensitivity groups loaded, global 'si' list object has been populated..\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Sensitivity groups loaded, global 'si' list object has been populated..")
     cat(.BANNER)
   }
   return(tmp)
@@ -463,7 +465,7 @@
   # Returns tmp, which is a list of logfile outputs and info about it
 
   if(is.null(dired)){
-    cat(.PROJECT_NAME,"->",getCurrFunc(),"You must supply a dired.\n",sep="")
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"You must supply a dired.")
     return(NULL)
   }
   tmp <- NULL
