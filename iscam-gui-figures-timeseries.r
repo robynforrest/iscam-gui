@@ -1,6 +1,6 @@
 #**********************************************************************************
 # iscam-gui-figures-timeseries.r
-# This file contains the code for plotting time series values SS outputs using the
+# This file contains the code for plotting time series values iscam outputs using the
 # infrastructure provided with iscam-gui.
 #
 # Author            : Chris Grandin
@@ -28,23 +28,16 @@ plotTS <- function(plotNum  = 1,
   # Assumes that 'si' list exists and has been populated correctly.
 
   # If multiple==FALSE then plotNum must be one of:
-  # 1  Total biomass total all areas
-  # 2  Total biomass by area
-  # 3  Total biomass in all areas in spawning season
-  # 4  Summary biomass total all areas
-  # 5  Summary biomass by area
-  # 6  Summary biomass in all areas in spawning season
-  # 7  Spawning biomass total (with or without uncertainty)
-  # 8  Spawning biomass by area
-  # 9  Spawning depletion total (with or without uncertainty)
-  # 10 Spawning depletion by area
-  # 11 Recruitment total (with or without uncertainty)
-  # 12 Recruitment by area
-  # 13 Fraction of recruitment by area
-  # 14 Recruitment by birth season
-  # 15 Fraction of recruitment by birth season
+  # 1 Spawning biomass total (with or without uncertainty)
+  # 2 Spawning biomass by area
+  # 3 Spawning depletion total (with or without uncertainty)
+  # 4 Spawning depletion by area
+  # 5 Recruitment total (with or without uncertainty)
+  # 6 Recruitment by area
+  # 7 Fraction of recruitment by area
 
-  # If multiple==TRUE or retros==TRUEthen plotNum must be one of:
+  # TODO: All multiples
+  # If multiple==TRUE or retros==TRUE then plotNum must be one of:
   # 1  Spawning biomass
   # 2  Spawning biomass with uncertainty
   # 3  Biomass ratio
@@ -65,6 +58,7 @@ plotTS <- function(plotNum  = 1,
   scenario     <- val$entryScenario
   sensGroup    <- val$entrySensitivityGroup
   #retros       <- op[[scenario]]$outputs$retros
+  scenarioName <- op[[scenario]]$names$scenario
   out          <- op[[scenario]]$outputs$mpd
   outSummary   <- op[[scenario]]$outputs$mpdSummary
   figDir       <- op[[scenario]]$names$figDir
@@ -110,64 +104,13 @@ plotTS <- function(plotNum  = 1,
       windows(width=widthScreen,height=heightScreen)
     }
     if(retros){
-      plotDat <- op[[scenario]]$outputs$retrosSummary
-      mcmcCheck <- FALSE
-      modelNames <- NULL
-      modelNames[[1]] <- op[[scenario]]$names$scenario
-      for(retro in 1:length(op[[scenario]]$outputs$retros)){
-        #if(op[[scenario]]$outputs$retros[[retro]]$isMCMC){
-        #  mcmcCheck <- TRUE
-        #}
-        modelNames[[retro+1]] <- op[[scenario]]$outputs$retros[[retro]]$names$scenario
-      }
-
-      if(mcmcCheck){
-        cat(.PROJECT_NAME,"->",currFuncName,"Warning - One or more Retrospectives for scenario ",op[[scenarios]]$names$scenario,
-            " is an MCMC run, but SSplotComparison only works with MLE runs.\n",sep="")
-        return(FALSE)
-      }
     }else{
-      plotDat <- sens[[sensGroup]]$summary
-      mcmcCheck <- sens[[sensGroup]]$isMCMC
-      modelNames <- sens[[sensGroup]]$names
-      if(mcmcCheck){
-        cat(.PROJECT_NAME,"->",currFuncName,"Warning - Sensitivity group ",sensGroup,
-            " contains a Scenario which is an MCMC run, but SSplotComparison only works with MLE runs.\n",sep="")
-        return(FALSE)
-      }
-
     }
-    if(plotNum==99){
-      SSplotRetroRecruits(retroSummary = plotDat,
-                          relative     = FALSE,
-                          endyrvec     = endyrvec,
-                          cohorts      = cohorts,
-                          ylim         = c(-3,3),
-                          legendloc    = legendLoc)
-    }else if(retros){
-      SSplotComparisons(summaryoutput = plotDat,
-                        endyrvec      = endyrvec,
-                        subplots      = c(plotNum),
-                        legendlabels  = modelNames,
-                        minbthresh    = blim,
-                        btarg         = btarg,
-                        verbose       = !silent,
-                        legendloc     = legendLoc)
-    }else{
-      SSplotComparisons(summaryoutput = plotDat,
-                        subplots      = c(plotNum),
-                        legendlabels  = modelNames,
-                        minbthresh    = blim,
-                        btarg         = btarg,
-                        verbose       = !silent,
-                        legendloc     = legendLoc)
-    }
-
   }else{
     if(plotNum < 1 || plotNum > 15){
       return(FALSE)
     }
-    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
+    filenameRaw  <- paste0(scenarioName,"_",fileText,".png")
     filename     <- file.path(figDir,filenameRaw)
     if(png){
       graphics.off()
@@ -176,10 +119,13 @@ plotTS <- function(plotNum  = 1,
       windows(width=widthScreen,height=heightScreen)
     }
     if(plotNum == 1){
-      plotBiomassMPD(out, verbose = !silent, legendLoc = legendLoc, col = color)
+      plotBiomassMPD(out, scenarioName=scenarioName, verbose = !silent, legendLoc = legendLoc, col = color)
     }
-    if(plotNum == 11){
-      plotRecruitmentMPD(out, verbose = !silent, legendLoc = legendLoc, col = color)
+    if(plotNum == 3){
+      plotDepletionMPD(out, scenarioName=scenarioName, verbose = !silent, legendLoc = legendLoc, col = color)
+    }
+    if(plotNum == 5){
+      plotRecruitmentMPD(out, scenarioName=scenarioName, verbose = !silent, legendLoc = legendLoc, col = color)
     }
 
   }
@@ -190,33 +136,55 @@ plotTS <- function(plotNum  = 1,
   return(TRUE)
 }
 
-plotBiomassMPD <- function(out,
-                           verbose = FALSE,
-                           legendLoc = "topright",
-                           col = 1){
-	# Spawning stock biomass
-	op	<- par(no.readonly=T)
-  yUpperLimit <- max(out$sbt)
-  Bt <- out$sbt
-  # Should calc the 95% CI and plot with shading...
-  #q <- quantile(out$sbt, probs=c(0.05, 0.5, 0.75))
-  plot(out$yrs, Bt, type="l", col=col,lty=1, lwd=2,ylim=c(0,yUpperLimit),ylab="Biomass", xlab="Year", main="Biomass", las=1)
-  points(out$yr[1]-0.8, out$sbo, col=col, pch=1)
+plotDepletionMPD <- function(out,
+                             scenarioName,
+                             verbose     = FALSE,
+                             legendLoc   = "topright",
+                             col         = 1){
+	# Depletion plot for an MPD
+  # 'scenarioName' is only used in the legend
+  # col is the color to use in the plot
+	oldpar <- par(no.readonly=T)
+  bt     <- out$sbt / out$sbo
+  yUpper <- max(bt)
+  plot(out$yrs, bt, type="l", col=col,lty=1, lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main="Depletion", las=1)
+  #points(out$yr[1]-0.8, out$sbo, col=col, pch=1)
+  legend(legendLoc, legend=scenarioName, col=col, lty=1, lwd=2)
+	par(oldpar)
+}
 
-	par(op)
+plotBiomassMPD <- function(out,
+                           scenarioName,
+                           verbose     = FALSE,
+                           legendLoc   = "topright",
+                           col         = 1){
+	# Biomass plot for an MPD
+  # 'scenarioName' is only used in the legend
+  # col is the color to use in the plot
+	oldpar <- par(no.readonly=T)
+  bt     <- out$sbt
+  yUpper <- max(bt)
+  plot(out$yrs, bt, type="l", col=col,lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  points(out$yr[1]-0.8, out$sbo, col=col, pch=1)
+  legend(legendLoc, legend=scenarioName, col=col, lty=1, lwd=2)
+	par(oldpar)
 }
 
 plotRecruitmentMPD <- function(out,
+                               scenarioName,
                                verbose = FALSE,
                                legendLoc = "topright",
                                col = 1){
-  # make two-panel plot of biomass and recruitment
-	op	<- par(no.readonly=T)
-  sage <- out$sage
-  nyear <- length(out$yr)
-	ryr <- out$yr[(1+sage):nyear]
+  # Recruitment plot for an MPD
+  # 'scenarioName' is only used in the legend
+  # col is the color to use in the plot
+	oldpar	<- par(no.readonly=T)
+  sage    <- out$sage
+  nyear   <- length(out$yr)
+	ryr     <- out$yr[(1+sage):nyear]
   plot(ryr, out$rt, lty=1, col = col, type="o", pch=19,ylim=c(0,1.2*max(out$rt)), xlab="Year",ylab="Recruits", las=1, main="Recruits")
-	abline(h=median(out$rt),col=2,lty=2)
-	abline(h=mean(out$rt),col=3,lty=2)
-  par(op)
+  legend(legendLoc, legend=scenarioName, col=col, lty=1, lwd=2)
+	#abline(h=median(out$rt),col=2,lty=2)
+	#abline(h=mean(out$rt),col=3,lty=2)
+  par(oldpar)
 }

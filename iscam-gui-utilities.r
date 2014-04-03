@@ -108,3 +108,19 @@ getCurrFunc <- function(){
 cat0 <- function(...){
   cat(..., "\n", sep="")
 }
+
+addpoly <- function(yrvec, lower, upper, col, shadeCol, lty = 3){
+  # add shaded uncertainty polygon around time series data
+  # yrvec is a vector of time series data
+  # lower is the lower line of the polygon
+  # upper is the upper line of the polygon
+  # col is the outline color for the polygon
+  # shadeCol is the shade color for the polygon
+  lower[lower<0] <- 0 # max of value or 0
+  polygon(x = c(yrvec,rev(yrvec)),
+          y = c(lower,rev(upper)),
+          border = col,
+          col = shadeCol)
+  lines(yrvec, lower, lty=lty, col=col)
+  lines(yrvec, upper, lty=lty, col=col)
+}
