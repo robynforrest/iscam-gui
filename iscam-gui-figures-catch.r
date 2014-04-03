@@ -1,22 +1,20 @@
 #**********************************************************************************
-# ss-explore-figures-catch.r
-# This file contains the code for catch values SS outputs using the
-# infrastructure provided with ss-explore.
+# iscam-gui-figures-catch.r
+# This file contains the code for catch values iscam inputs using the
+# infrastructure provided with iscam-gui.
 #
 # Author            : Chris Grandin
-# Development Date  : October 2013
-# Current version   : 1.0
+# Development Date  : October 2013 - Present
 #**********************************************************************************
 
 plotCatch <- function(plotNum  = 1,
                       fileText = "Default",
-                      res      = .RESOLUTION,
-                      width    = .WIDTH,
-                      height   = .HEIGHT,
                       units    = .UNITS,
                       png      = .PNG,
                       silent   = .SILENT){
 
+  # Assumes that 'op' list exists and has been populated correctly.
+  # Assumes that 'si' list exists and has been populated correctly.
   # plotNum must be one of:
   # 1  Landings
   # 2  Landings stacked
@@ -33,6 +31,37 @@ plotCatch <- function(plotNum  = 1,
   # 13 Total catch (if discards present) aggregated across seasons stacked
   # 14 Discards aggregated across seasons
   # 15 Discards aggregated across seasons stacked
+
+  currFuncName <- getCurrFunc()
+  val          <- getWinVal()
+  scenarioName <- op[[scenario]]$names$scenario
+  inp          <- op[[scenario]]$inputs$data
+  browser()
+  outSummary   <- op[[scenario]]$outputs$mpdSummary
+  figDir       <- op[[scenario]]$names$figDir
+  color        <- op[[scenario]]$inputs$color
+  res          <- val$entryResolution
+  width        <- val$entryWidth
+  height       <- val$entryHeight
+  resScreen    <- val$entryResolutionScreen
+  widthScreen  <- val$entryWidthScreen
+  heightScreen <- val$entryHeightScreen
+
+  if(val$legendLoc == "sLegendTopright"){
+    legendLoc <- "topright"
+  }
+  if(val$legendLoc == "sLegendTopleft"){
+    legendLoc <- "topleft"
+  }
+  if(val$legendLoc == "sLegendBotright"){
+    legendLoc <- "bottomright"
+  }
+  if(val$legendLoc == "sLegendBotleft"){
+    legendLoc <- "bottomleft"
+  }
+  if(val$legendLoc == "sLegendNone"){
+    legendLoc <- NULL
+  }
 
   if(plotNum < 1 || plotNum > 15){
     return(FALSE)
@@ -55,20 +84,20 @@ plotCatch <- function(plotNum  = 1,
   }else{
     # plot mpd model runs
   }
-
-  # Generate an r4ss catch plot
-  SSplotCatch(out,
-              plot     = TRUE,
-              print    = FALSE,
-              subplot  = plotNum,
-              pheight  = height,
-              pwidth   = width,
-              punits   = units,
-              res      = res,
-              verbose  = !silent)
+  plotCatches()
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }
   return(TRUE)
+}
+
+plotCatches <- function(inp,
+                            scenarioName,
+                            verbose = FALSE,
+                            legendLoc = "topright",
+                            col = 1){
+  # Catch plot for iscam model
+  
+
 }

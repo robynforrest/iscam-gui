@@ -5,11 +5,9 @@
 #
 # Author            : Chris Grandin
 # Development Date  : October 2013 - Present
-# Current version   : 1.0
 #**********************************************************************************
 
 plotTS <- function(plotNum  = 1,
-                   val      = NULL, # window val argument as you would get from PBSModelling's getWinVal()
                    multiple = FALSE,
                    retros   = FALSE,
                    endyrvec = NULL, # for use with retrospectives

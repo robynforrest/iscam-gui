@@ -5,7 +5,6 @@
 #
 # Author            : Chris Grandin
 # Development Date  : August 2013 - Present
-#
 #**********************************************************************************
 
 .loadData <- function(reloadScenarios      = TRUE,
@@ -177,6 +176,7 @@
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
   })
+  tmp$inputs$data <- dattoRlist(tmp$inputs$data)
 
   # Try to load control file.
   tryCatch({
