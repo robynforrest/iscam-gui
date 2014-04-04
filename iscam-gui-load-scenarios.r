@@ -176,18 +176,21 @@
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
   })
-  tmp$inputs$data <- dattoRlist(tmp$inputs$data)
 
   # Try to load control file.
   tryCatch({
-    tmp$inputs$control       <- readControl(file = tmp$names$control, verbose=!silent)
-    tmp$fileSuccess$control  <- TRUE
+    #tmp$inputs$control       <- readControl(file = tmp$names$control, verbose=!silent)
+    #tmp$fileSuccess$control  <- TRUE
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading control file: '",tmp$names$control,"'")
     # Ignore errors.  At this point nothing is used yet, just reading it in for fun.
   }, error = function(err){
     # Do nothing, is is likely not a scenario directory
   })
+  tmp$inputs$control <- readControl(file    = tmp$names$control,
+                                    ngears  = tmp$inputs$data$ngear,
+                                    nagears = tmp$inputs$data$nagears,
+                                    verbose =!silent)
 
   # Try to load projection file.
   tryCatch({
@@ -625,13 +628,218 @@ readStarter <- function(file = NULL, verbose = FALSE){
 }
 
 readData <- function(file = NULL, verbose = FALSE){
-  # Read in the datafile given by 'file'
-  return(readLines(file))
+  # Read in the iscam datafile given by 'file'
+  # Parses the file into its constituent parts
+  # And returns a list of the contents
+
+  data <- readLines(file)
+
+  # Get the element numbers which start with #.
+  dat <- grep("^#.*",data)
+  # remove the lines that start with #.
+  dat <- data[-dat]
+
+  # remove comments which come at the end of a line
+  dat <- gsub("#.*","",dat)
+
+  # remove preceeding and trailing whitespace, but not between whitespace
+  dat <- gsub("^ +","",dat)
+  dat <- gsub(" +$","",dat)
+
+  # Now we have a nice bunch of string elements which are the inputs for iscam.
+  # Here we parse them into a list structure
+  # This is dependent on the current format of the DAT file and needs to
+  # be updated whenever the DAT file changes format
+  tmp <- list()
+  ind <- 0
+  tmp$narea  <- as.numeric(dat[ind <- ind + 1])
+  tmp$ngroup <- as.numeric(dat[ind <- ind + 1])
+  tmp$nsex   <- as.numeric(dat[ind <- ind + 1])
+  tmp$syr    <- as.numeric(dat[ind <- ind + 1])
+  tmp$nyr    <- as.numeric(dat[ind <- ind + 1])
+  tmp$sage   <- as.numeric(dat[ind <- ind + 1])
+  tmp$nage   <- as.numeric(dat[ind <- ind + 1])
+  tmp$ngear  <- as.numeric(dat[ind <- ind + 1])
+  # Gear allocation
+  tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  # Age-schedule and population parameters
+  tmp$linf   <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$k      <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$to     <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$lwscal <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$lwpow  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$age50  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$sd50   <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$usemat <- as.numeric(dat[ind <- ind + 1])
+  tmp$matvec <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  # Catch data
+  tmp$nctobs <- as.numeric(dat[ind <- ind + 1])
+  tmp$catch  <- matrix(NA, nrow = tmp$nctobs, ncol = 7)
+  for(row in 1:tmp$nctobs){
+    tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  }
+  colnames(tmp$catch) <- c("year","gear","area","group","sex","type","value")
+  # Abundance indices are a ragged object and are stored as a list of matrices
+  tmp$nit     <- as.numeric(dat[ind <- ind + 1])
+  tmp$nitnobs <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmpsurvtype <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  #nrows <- sum(tmp$nitnobs)
+  tmp$indices <- list()
+  for(index in 1:tmp$nit){
+    nrows <- tmp$nitnobs[index]
+    ncols <- 8
+    tmp$indices[[index]] <- matrix(NA, nrow = nrows, ncol = ncols)
+    for(row in 1:nrows){
+      tmp$indices[[index]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    }
+    colnames(tmp$indices[[index]]) <- c("iyr","it","gear","area","group","sex","wt","timing")
+  }
+  # Age composition data are a ragged object and are stored as a list of matrices
+  tmp$nagears     <- as.numeric(dat[ind <- ind + 1])
+  tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  # one list element for each gear (tmp$nagears)
+  tmp$agecomps    <- list()
+  for(gear in 1:tmp$nagears){
+    nrows <- tmp$nagearsvec[gear]
+    ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header columns
+    tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
+    for(row in 1:nrows){
+      tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    }
+    colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+  }
+  # Empirical weight-at-age data
+  tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
+  tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])
+  tmp$waa <- NULL
+  if(tmp$nwtobs > 0){
+    # Parse the weight-at-age data
+    nrows       <- tmp$nwtobs
+    ncols       <- tmp$nage - tmp$sage + 6
+    tmp$indices <- matrix(NA, nrow = nrows, ncol = ncols)
+    for(row in 1:nrows){
+      tmp$waa[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    }
+    colnames(tmp$indices) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
+  }
+  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+  return(tmp)
 }
 
-readControl <- function(file = NULL, verbose = FALSE){
-  # Read in the control file given by 'file'
-  return(readLines(file))
+readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FALSE){
+  # Read in the iscam control file given by 'file'
+  # Parses the file into its constituent parts
+  # And returns a list of the contents
+  # ngears is the total number of gears in the datafile
+  # magears in the number of gears with age composition information in the datafile
+
+  currFuncName <- getCurrFunc()
+  if(is.null(ngears)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply the total number of gears (ngears). Returning NULL.")
+    return(NULL)
+  }
+  if(is.null(nagears)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply the number of gears with age composition (nagears). Returning NULL.")
+    return(NULL)
+  }
+
+  data <- readLines(file)
+
+  # Get the element numbers which start with #.
+  dat <- grep("^#.*",data)
+  # remove the lines that start with #.
+  dat <- data[-dat]
+
+  # Save the parameter names, since they are comments and will be deleted in
+  # subsequent steps
+  # To get the npar, remove any comments and preceeding and trailing whitespace for it
+  dat1 <- gsub("#.*","",dat[1])
+  dat1 <- gsub("^ +","",dat1)
+  dat1 <- gsub(" +$","",dat1)
+  npar <- as.numeric(dat1)
+  paramNames <- vector()
+  pattern <- "^.*# *([[:alnum:]]+_*[[:alnum:]]*) +.*"
+  for(paramName in 1:npar){
+    # Each parameter line in dat which starts at index 2,
+    # retrieve the parameter name for that line
+    paramNames[paramName] <- sub(pattern,"\\1",dat[paramName+1])
+  }
+
+  # Now that parameter names are stored, parse the file.
+  # remove comments which come at the end of a line
+  dat <- gsub("#.*","",dat)
+
+  # remove preceeding and trailing whitespace, but not between whitespace
+  dat <- gsub("^ +","",dat)
+  dat <- gsub(" +$","",dat)
+
+  # Now we have a nice bunch of string elements which are the inputs for iscam.
+  # Here we parse them into a list structure
+  # This is dependent on the current format of the DAT file and needs to
+  # be updated whenever the DAT file changes format
+  tmp <- list()
+  ind <- 0
+  tmp$npar <- as.numeric(dat[ind <- ind + 1])
+  tmp$param <- matrix(NA, nrow = tmp$npar, ncol = 7)
+  for(param in 1:tmp$npar){
+    tmp$param[param,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  }
+  colnames(tmp$param) <- c("ival","lb","ub","phz","prior","p1","p2")
+  rownames(tmp$param) <- paramNames # Retreived at the beginning of this function
+
+  # Age and size composition control parameters and likelihood types
+  nrows <- 8
+  ncols <- nagears
+  tmp$as <- matrix(NA, nrow = nrows, ncol = ncols)
+  for(row in 1:nrows){
+    tmp$as[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  }
+  # Rownames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$as) <- c("gearind","likelihoodtype","minprop","comprenorm","logagetau2phase",
+                        "phi1phase","phi2phase","degfreephase")
+
+  ind <- ind + 1 # Ignore the int check value
+
+  # Selectivity parameters for all gears
+  nrows <- 10
+  ncols <- ngears
+  tmp$sel <- matrix(NA, nrow = nrows, ncol = ncols)
+  for(row in 1:nrows){
+    tmp$sel[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  }
+  # Rownames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$sel) <- c("iseltype","agelen50log","std50log","nagenodes","nyearnodes",
+                         "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
+
+  # Start year for time blocks, one for each gear
+  tmp$syeartimeblock <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+
+  # Priors for survey Q, one column for each survey
+  tmp$nits <- as.numeric(dat[ind <- ind + 1])
+  nrows <- 3
+  ncols <- tmp$nits
+  tmp$survq <- matrix(NA, nrow = nrows, ncol = ncols)
+  for(row in 1:nrows){
+    tmp$survq[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  }
+  # Rownames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$survq) <- c("priortype","priormeanlog","priorsd")
+
+  nrows <- 15
+  tmp$misc <- matrix(NA, nrow = nrows, ncol = 1)
+  for(row in 1:nrows){
+    tmp$misc[row,1] <- as.numeric(dat[ind <- ind + 1])
+  }
+  # Rowames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$misc) <- c("verbose","rectype","sdobscatchfirstphase","sdobscatchlastphase",
+                          "unfishedfirstyear","minpropage","meanF","sdmeanFfirstphase",
+                          "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
+                          "fracZpriorspawn","agecompliketype","IFDdist")
+  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+  return(tmp)
 }
 
 readProjection <- function(file = NULL, verbose = FALSE){
