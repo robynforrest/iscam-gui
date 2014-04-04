@@ -374,7 +374,7 @@ iscam <- function(reloadScenarios      = FALSE,
          "editCurrScenarioLogfile" = {
            .editFile(scenario = val$entryScenario, type=4)
          },
-         "editForecastFile" = {
+         "editProjectionFile" = {
            .editFile(scenario = val$entryScenario, type=5)
          },
          "editWarningfile" = {

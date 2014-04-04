@@ -10,11 +10,11 @@ grid 3 1 padx=10 pady=10 sticky=W
                button name=nextScenario     function=.subView action="nextScenario"        width=7  text="--->"
           button name=reloadScenario     function=.subView action="reloadScenario"      width=27 text="Reload Scenario"    fg="blue"
           grid 1 5
-               button name=editStarterFile  function=.subView action="editStarterFile"     width=20 text="Edit Starter File"  fg="blue"
-               button name=editControlFile  function=.subView action="editControlFile"     width=20 text="Edit Control File"  fg="blue"
-               button name=editDataFile     function=.subView action="editDataFile"        width=20 text="Edit Data File"     fg="blue"
-               button name=editFore1astFile function=.subView action="editForecastFile"    width=20 text="Edit Forecast File" fg="blue"
-               button name=editParFile      function=.subView action="editParFile"         width=20 text="Edit Par file"      fg="blue"
+               button name=editStarterFile  function=.subView action="editStarterFile"     width=20 text="Edit Starter File"    fg="blue"
+               button name=editControlFile  function=.subView action="editControlFile"     width=20 text="Edit Control File"    fg="blue"
+               button name=editDataFile     function=.subView action="editDataFile"        width=20 text="Edit Data File"       fg="blue"
+               button name=editProjectFile  function=.subView action="editProjectionFile"  width=20 text="Edit Projection File" fg="blue"
+               button name=editParFile      function=.subView action="editParFile"         width=20 text="Edit Par file"        fg="blue"
      grid 1 1 sticky=N
      notebook name=nbPage tabs="RunModel Figures1 Figures2 SaveFigures Parameters MCMC SENS RETRO RV" font="8"
 

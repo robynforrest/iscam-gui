@@ -109,7 +109,6 @@
                           control           = "",
                           projection        = "",
                           log               = "",
-                          forecast          = "",
                           par               = "",
                           warnings          = "",
                           sensitivityGroup  = "",
@@ -119,8 +118,6 @@
                           data              = NULL,
                           control           = NULL,
                           projection        = NULL,
-                          forecast          = NULL,
-                          par               = NULL,
                           numParams         = NULL,
                           objFunVal         = NULL,
                           maxGradient       = NULL,
@@ -141,7 +138,7 @@
                           lastCommandRun    = FALSE)
   tmp$outputs     <- list(mpd               = NULL,
                           mcmc              = NULL,
-                          mpdSummary        = NULL,
+                          par               = NULL,
                           retro             = NULL) # The retrospective plotting code looks at this.
   tmp$names$scenario       <- basename(dired)
   tmp$names$dir            <- dired
@@ -160,9 +157,12 @@
     tmp$names$projection    <- file.path(dired,starterData[3])
     tmp$fileSuccess$starter <- TRUE
   }, warning = function(war){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem reading the starter file: '",tmp$names$starter,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading the starter file: '",tmp$names$starter,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     stop()
   }, error = function(err){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading the starter file: '",tmp$names$starter,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,err$message)
     # Do nothing, is is likely not a scenario directory
   })
 
@@ -171,62 +171,57 @@
     tmp$inputs$data      <- readData(file = tmp$names$data, verbose=!silent)
     tmp$fileSuccess$data <- TRUE
   }, warning = function(war){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading data file: '",tmp$names$data,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading data file: '",tmp$names$data,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     stop()
   }, error = function(err){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading data file: '",tmp$names$data,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     # Do nothing, is is likely not a scenario directory
   })
 
   # Try to load control file.
   tryCatch({
-    #tmp$inputs$control       <- readControl(file = tmp$names$control, verbose=!silent)
-    #tmp$fileSuccess$control  <- TRUE
+    tmp$inputs$control <- readControl(file    = tmp$names$control,
+                                      ngears  = tmp$inputs$data$ngear,
+                                      nagears = tmp$inputs$data$nagears,
+                                      verbose =!silent)
+    tmp$fileSuccess$control  <- TRUE
   }, warning = function(war){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading control file: '",tmp$names$control,"'")
-    # Ignore errors.  At this point nothing is used yet, just reading it in for fun.
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading control file: '",tmp$names$control,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
+    stop()
   }, error = function(err){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading control file: '",tmp$names$control,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,err$message)
     # Do nothing, is is likely not a scenario directory
   })
-  tmp$inputs$control <- readControl(file    = tmp$names$control,
-                                    ngears  = tmp$inputs$data$ngear,
-                                    nagears = tmp$inputs$data$nagears,
-                                    verbose =!silent)
 
   # Try to load projection file.
   tryCatch({
     tmp$inputs$projection       <- readProjection(file = tmp$names$projection, verbose=!silent)
     tmp$fileSuccess$projection  <- TRUE
   }, warning = function(war){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading projection file: '",tmp$names$projection,"'")
-    # Ignore errors.  At this point nothing is used yet, just reading it in for fun.
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading projection file: '",tmp$names$projection,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
+    stop()
   }, error = function(err){
-    # Do nothing, is is likely not a scenario directory
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading projection file: '",tmp$names$projection,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading projection file: '",tmp$names$projection,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,err$message)
   })
 
   # Try to load par file.
   tryCatch({
-    tmp$inputs$par      <- readLines(tmp$names$par)
+    tmp$outputs$par     <- readPar(tmp$names$par)
     tmp$fileSuccess$par <- TRUE
-    convCheck <- tmp$inputs$par[1]
-    convCheck <- gsub("[[:alpha:]]+","",convCheck) # remove all letters
-    convCheck <- gsub("#","",convCheck)            # remove hash marks
-    convCheck <- gsub("=","",convCheck)
-    # Note that this might have to be revisited. I don't have an example currently where scientific notation is returned.
-    #convCheck <- gsub("-","e-",convCheck)           # replace "e" in scientific notation that may have been removed in the alpha gsub above
-    convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
-    convCheck <- convCheck[[1]][-1]                 # remove first element which is a null string ""
-    tmp$inputs$numParams   <- convCheck[1]
-    tmp$inputs$objFunValue <- convCheck[2]
-    tmp$inputs$maxGradient <- convCheck[3]
   }, warning = function(war){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
     tmp$inputs$numParams   <- ""
     tmp$inputs$objFunValue <- ""
     tmp$inputs$maxGradient <- ""
   }, error = function(err){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Problem loading par file: '",tmp$names$par,"'")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
     tmp$inputs$numParams   <- ""
     tmp$inputs$objFunValue <- ""
@@ -514,7 +509,7 @@
 }
 
 .setupCommandLineFromGUI <- function(silent = .SILENT){
-  # store the SS command line values from the GUI into the op data structure.
+  # store the command line values from the GUI into the op data structure.
   val <- getWinVal()
   scenario <- val$entryScenario
   op[[scenario]]$inputs$lastCommandLine$maxfn   <<- val$maxfn
@@ -624,7 +619,7 @@
 readStarter <- function(file = NULL, verbose = FALSE){
   # Read the starter file into a vector, which for iscam is just a file with
   # the data file, control file, and projection file names in that order
-  return(readLines(file))
+  return(readLines(file, warn=FALSE))
 }
 
 readData <- function(file = NULL, verbose = FALSE){
@@ -632,7 +627,13 @@ readData <- function(file = NULL, verbose = FALSE){
   # Parses the file into its constituent parts
   # And returns a list of the contents
 
-  data <- readLines(file)
+  data <- readLines(file, warn=FALSE)
+
+  # Remove any empty lines
+  data <- data[data != ""]
+
+  # remove preceeding whitespace if it exists
+  data <- gsub("^[[:blank:]]+","",data)
 
   # Get the element numbers which start with #.
   dat <- grep("^#.*",data)
@@ -642,9 +643,9 @@ readData <- function(file = NULL, verbose = FALSE){
   # remove comments which come at the end of a line
   dat <- gsub("#.*","",dat)
 
-  # remove preceeding and trailing whitespace, but not between whitespace
-  dat <- gsub("^ +","",dat)
-  dat <- gsub(" +$","",dat)
+  # remove preceeding and trailing whitespace
+  dat <- gsub("^[[:blank:]]+","",dat)
+  dat <- gsub("[[:blank:]]+$","",dat)
 
   # Now we have a nice bunch of string elements which are the inputs for iscam.
   # Here we parse them into a list structure
@@ -661,28 +662,28 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$nage   <- as.numeric(dat[ind <- ind + 1])
   tmp$ngear  <- as.numeric(dat[ind <- ind + 1])
   # Gear allocation
-  tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   # Age-schedule and population parameters
-  tmp$linf   <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$k      <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$to     <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$lwscal <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$lwpow  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$age50  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$sd50   <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$linf   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$k      <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$to     <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$lwscal <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$lwpow  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$age50  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$sd50   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$usemat <- as.numeric(dat[ind <- ind + 1])
-  tmp$matvec <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$matvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   # Catch data
   tmp$nctobs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch  <- matrix(NA, nrow = tmp$nctobs, ncol = 7)
   for(row in 1:tmp$nctobs){
-    tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   colnames(tmp$catch) <- c("year","gear","area","group","sex","type","value")
   # Abundance indices are a ragged object and are stored as a list of matrices
   tmp$nit     <- as.numeric(dat[ind <- ind + 1])
-  tmp$nitnobs <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmpsurvtype <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$nitnobs <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmpsurvtype <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   #nrows <- sum(tmp$nitnobs)
   tmp$indices <- list()
   for(index in 1:tmp$nit){
@@ -690,16 +691,16 @@ readData <- function(file = NULL, verbose = FALSE){
     ncols <- 8
     tmp$indices[[index]] <- matrix(NA, nrow = nrows, ncol = ncols)
     for(row in 1:nrows){
-      tmp$indices[[index]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+      tmp$indices[[index]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
     }
     colnames(tmp$indices[[index]]) <- c("iyr","it","gear","area","group","sex","wt","timing")
   }
   # Age composition data are a ragged object and are stored as a list of matrices
   tmp$nagears     <- as.numeric(dat[ind <- ind + 1])
-  tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
-  tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   # one list element for each gear (tmp$nagears)
   tmp$agecomps    <- list()
   for(gear in 1:tmp$nagears){
@@ -707,7 +708,7 @@ readData <- function(file = NULL, verbose = FALSE){
     ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header columns
     tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
     for(row in 1:nrows){
-      tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+      tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
     }
     colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
   }
@@ -721,7 +722,7 @@ readData <- function(file = NULL, verbose = FALSE){
     ncols       <- tmp$nage - tmp$sage + 6
     tmp$indices <- matrix(NA, nrow = nrows, ncol = ncols)
     for(row in 1:nrows){
-      tmp$waa[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+      tmp$waa[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
     }
     colnames(tmp$indices) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
   }
@@ -746,7 +747,13 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
     return(NULL)
   }
 
-  data <- readLines(file)
+  data <- readLines(file, warn=FALSE)
+
+  # Remove any empty lines
+  data <- data[data != ""]
+
+  # remove preceeding whitespace if it exists
+  data <- gsub("^[[:blank:]]+","",data)
 
   # Get the element numbers which start with #.
   dat <- grep("^#.*",data)
@@ -757,11 +764,12 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   # subsequent steps
   # To get the npar, remove any comments and preceeding and trailing whitespace for it
   dat1 <- gsub("#.*","",dat[1])
-  dat1 <- gsub("^ +","",dat1)
-  dat1 <- gsub(" +$","",dat1)
+  dat1 <- gsub("^[[:blank:]]+","",dat1)
+  dat1 <- gsub("[[:blank:]]+$","",dat1)
   npar <- as.numeric(dat1)
   paramNames <- vector()
-  pattern <- "^.*# *([[:alnum:]]+_*[[:alnum:]]*) +.*"
+  # Lazy matching with # so that the first instance matches, not any other
+  pattern <- "^.*#[[:blank:]]*([[:alnum:]]+_*[[:alnum:]]*) +.*"
   for(paramName in 1:npar){
     # Each parameter line in dat which starts at index 2,
     # retrieve the parameter name for that line
@@ -773,8 +781,8 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   dat <- gsub("#.*","",dat)
 
   # remove preceeding and trailing whitespace, but not between whitespace
-  dat <- gsub("^ +","",dat)
-  dat <- gsub(" +$","",dat)
+  dat <- gsub("^[[:blank:]]+","",dat)
+  dat <- gsub("[[:blank:]]+$","",dat)
 
   # Now we have a nice bunch of string elements which are the inputs for iscam.
   # Here we parse them into a list structure
@@ -785,7 +793,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   tmp$npar <- as.numeric(dat[ind <- ind + 1])
   tmp$param <- matrix(NA, nrow = tmp$npar, ncol = 7)
   for(param in 1:tmp$npar){
-    tmp$param[param,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    tmp$param[param,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   colnames(tmp$param) <- c("ival","lb","ub","phz","prior","p1","p2")
   rownames(tmp$param) <- paramNames # Retreived at the beginning of this function
@@ -795,7 +803,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   ncols <- nagears
   tmp$as <- matrix(NA, nrow = nrows, ncol = ncols)
   for(row in 1:nrows){
-    tmp$as[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    tmp$as[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   # Rownames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$as) <- c("gearind","likelihoodtype","minprop","comprenorm","logagetau2phase",
@@ -808,14 +816,14 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   ncols <- ngears
   tmp$sel <- matrix(NA, nrow = nrows, ncol = ncols)
   for(row in 1:nrows){
-    tmp$sel[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    tmp$sel[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   # Rownames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$sel) <- c("iseltype","agelen50log","std50log","nagenodes","nyearnodes",
                          "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
 
   # Start year for time blocks, one for each gear
-  tmp$syeartimeblock <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+  tmp$syeartimeblock <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
   # Priors for survey Q, one column for each survey
   tmp$nits <- as.numeric(dat[ind <- ind + 1])
@@ -823,7 +831,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   ncols <- tmp$nits
   tmp$survq <- matrix(NA, nrow = nrows, ncol = ncols)
   for(row in 1:nrows){
-    tmp$survq[row,] <- as.numeric(strsplit(dat[ind <- ind + 1]," +")[[1]])
+    tmp$survq[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   # Rownames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$survq) <- c("priortype","priormeanlog","priorsd")
@@ -844,5 +852,116 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
 
 readProjection <- function(file = NULL, verbose = FALSE){
   # Read in the projection file given by 'file'
-  return(readLines(file))
+  # Parses the file into its constituent parts
+  # And returns a list of the contents
+
+  data <- readLines(file, warn=FALSE)
+
+  # Remove any empty lines
+  data <- data[data != ""]
+
+  # remove preceeding whitespace if it exists
+  data <- gsub("^[[:blank:]]+","",data)
+
+  # Get the element numbers which start with #.
+  dat <- grep("^#.*",data)
+  # remove the lines that start with #.
+  dat <- data[-dat]
+
+  # remove comments which come at the end of a line
+  dat <- gsub("#.*","",dat)
+
+  # remove preceeding and trailing whitespace
+  dat <- gsub("^[[:blank:]]+","",dat)
+  dat <- gsub("[[:blank:]]+$","",dat)
+
+  # Now we have a nice bunch of string elements which are the inputs for iscam.
+  # Here we parse them into a list structure
+  # This is dependent on the current format of the DAT file and needs to
+  # be updated whenever the DAT file changes format
+  tmp <- list()
+  ind <- 0
+
+  # Get the TAC values
+  tmp$ntac  <- as.numeric(dat[ind <- ind + 1])
+  tmp$tacvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+
+  # Get the control options vector
+  tmp$ncntrloptions <- as.numeric(dat[ind <- ind + 1])
+  nrows <- tmp$ncntrloptions
+  ncols <- 1
+  tmp$cntrloptions  <- matrix (NA, nrow = nrows, ncol = ncols)
+  for(row in 1:nrows){
+    tmp$cntrloptions[row,1] <- as.numeric(dat[ind <- ind + 1])
+  }
+  # Rownames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$cntrloptions) <- c("syrmeanm","nyrmeanm",
+                                  "syrmeanfecwtageproj","nyrmeanfecwtageproj",
+                                  "syrmeanrecproj","nyrmeanrecproj")
+  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+  return(tmp)
+}
+
+readPar <- function(file = NULL, verbose = FALSE){
+  # Read in the parameter estimates file given by 'file'
+  # Parses the file into its constituent parts
+  # And returns a list of the contents
+
+  data <- readLines(file, warn=FALSE)
+  tmp <- list()
+  ind <- 0
+
+  # Remove preceeding #
+  convCheck <- gsub("^#[[:blank:]]*","",data[1])
+  # Remove all letters
+  convCheck <- gsub("[[:alpha:]]+","",convCheck)
+  # Remove the equals signs
+  convCheck <- gsub("=","",convCheck)
+  # Remove all preceeding and trailing whitespace
+  convCheck <- gsub("^[[:blank:]]+","",convCheck)
+  convCheck <- gsub("[[:blank:]]+$","",convCheck)
+  # Get the values, round is used to force non-scientific notation
+  convCheck <- as.numeric(strsplit(convCheck,"[[:blank:]]+")[[1]])
+
+  # Note that this might have to be revisited. I don't have an example currently where scientific notation is returned.
+  #convCheck <- gsub("-","e-",convCheck) # replace "e" in scientific notation that may have been removed in the alpha gsub above    convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
+  # The following values are saved for appending to the tmp list later
+  numParams   <- convCheck[1]
+  objFunValue <- as.numeric(sprintf("%1.3f",convCheck[2]))
+  maxGradient <- as.numeric(sprintf("%1.9f",convCheck[3]))
+
+  # Remove the first line from the par data since we already parsed it and saved the values
+  data <- data[-1]
+
+  # At this point, every odd line is a comment and every even line is the value.
+  # Parse the names from the odd lines (oddData) and parse the
+  # values from the even lines (evenData)
+  oddElem <- seq(1,length(data),2)
+  evenElem <- seq(2,length(data),2)
+  oddData <- data[oddElem]
+  evenData <- data[evenElem]
+
+  # remove preceeding and trailing whitespace if it exists from both names and values
+  names <- gsub("^[[:blank:]]+","",oddData)
+  names <- gsub("[[:blank:]]+$","",names)
+  values <- gsub("^[[:blank:]]+","",evenData)
+  values <- gsub("[[:blank:]]+$","",values)
+
+  # Remove the preceeding # and whitespace and the trailing : from the names
+  pattern <- "^#[[:blank:]]*(.*)[[:blank:]]*:"
+  names <- sub(pattern,"\\1",names)
+
+  # Remove any square brackets from the names
+  names <- gsub("\\[|\\]","",names)
+
+  dataLength <- length(names)
+  for(item in 1:(dataLength)){
+    tmp[[item]] <- as.numeric(strsplit(values[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  }
+
+  names(tmp) <- names
+  tmp$numParams <- numParams
+  tmp$objFunValue <- objFunValue
+  tmp$maxGradient <- maxGradient
+  return(tmp)
 }

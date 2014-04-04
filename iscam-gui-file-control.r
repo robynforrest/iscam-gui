@@ -92,7 +92,7 @@
     }
   }
   if(type==5){
-    editCall <- paste(.EDITOR,op[[scenario]]$names$forecast)
+    editCall <- paste(.EDITOR,op[[scenario]]$names$projection)
     shell(editCall, wait=F)
   }
   if(type==6){
