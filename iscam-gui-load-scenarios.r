@@ -720,7 +720,7 @@ readData <- function(file = NULL, verbose = FALSE){
     # Parse the weight-at-age data
     nrows       <- tmp$nwtobs
     ncols       <- tmp$nage - tmp$sage + 6
-    tmp$indices <- matrix(NA, nrow = nrows, ncol = ncols)
+    tmp$waa <- matrix(NA, nrow = nrows, ncol = ncols)
     for(row in 1:nrows){
       tmp$waa[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
     }
@@ -823,7 +823,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
                          "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
 
   # Start year for time blocks, one for each gear
-  tmp$syeartimeblock <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$syrtimeblock <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
   # Priors for survey Q, one column for each survey
   tmp$nits <- as.numeric(dat[ind <- ind + 1])

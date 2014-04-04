@@ -92,7 +92,6 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
               $control          - Name of the control file
               $projection       - Name of the projection file
               $log              - Name of command line output from model run file
-              $forecast         - Name of the forecast file
               $par              - Name of the PAR file
               $warnings         - Name of the warning file
               $sensitivityGroup - Name of the sensitivity group file
@@ -102,11 +101,56 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
               $color            - Color for plotting. Read in from the Scenario info file.
               $order            - Order for plotting, 1 is highest. If multiple values are the same, sort by name.
               $starter          - Starter file contents
-              $data             - Data file contents
-              $control          - Control file contents
-              $projection       - Projection file contents
-              $forecast         - Forecacst file contents
-              $par              - Parameter file contents
+              $data             - Data file contents (iscam model DAT file)
+                $narea          - Number of areas
+                $ngroup         - Number of groups
+                $nsex           - Number of sexes
+                $syr            - First year of data
+                $nyr            - Last year of data
+                $sage           - Youngest age
+                $nage           - Oldest age or plus group
+                $ngear          - Total number of gears (includes commercial fisheries and surveys)
+                $alloc          - Allocation for each gear (0 = no allocation, 1=allocation)
+                $linf           - Asymptotic length (Spies and Turlock)
+                $k              - Brody growth coefficient from AFSC
+                $to             - Theoretical age at zero length from AFSC
+                $lwscal         - Scalar in length-weight allometry, Spies and Turlock (g and cm)
+                $lwpow          - Power parameter in length-weight allometry, Spies and Turnock
+                $age50          - age at 50% maturity (approx with log(3.0)/k) from AFSC
+                $sd50           - std at 50% maturity (CV ~ 0.1)
+                $usemat         - Use maturity vector (0=don't use, 1=use)
+                $matvec         - Maturity vector. If usemat=0, then this should be a single 0, not a vector
+                $nctobs         - Number of catch observations
+                $catch          - matrix of catch input into model
+                $nit            - Number of abundance indices
+                $nitnobs        - Vector of number of index observations for each nit
+                $indices        - A list of matrices of length nit of the index observations
+                $nagears        - Number of gears with age composition data
+                $nagearsvec     - Vector of number of age comp observations for each gear in nagears
+                $nagearssage    - Vector of youngest ages for each gear in nagears
+                $nagearsnage    - Vector of oldest ages (or plus groups) for each gear in nagears
+                $eff            - Effictive sample size for each gear in nagears
+                $agecomps       - List of matrices of length nagears of the age comps
+                $nwttab         - Number of weight-at-age tables
+                $nwtobs         - Number of rows of weight-at-age data. Use 0 if there aren't any to follow
+                $waa            - Matrix of the weight-at-age data. NULL if nwtobs = 0
+                $eof            - End of file marker, must be 999 if the file was read in correctly
+              $control          - Control file contents (iscam model CTL file)
+                $npar           - Number of parameters
+                $param          - Matrix of input parameter values, phases, and priors
+                $as             - Matrix of age/size composition, 1 column for each of nagears
+                $sel            - Matrix of selectivity parameters, one column for each ngear ($data$ngear)
+                $syrtimeblock   - Vector of start years for each time block, 1 for each ngear
+                $nits           - Number of surveys (must be the same as $data$nit)
+                $survq          - Matrix of priors for survey q, one column for each nits
+                $misc           - Matrix of 1 column of Miscellaneous controls used in the model
+                $eof            - End of file marker, must be 999 if the file was read in correctly
+              $projection       - Projection file contents (iscam model PFC file)
+                $ntac           - Length of catch vector used for projections (catch streams)
+                $tacvec         - Vector of the catch streams to project, length ntac
+                $ncntrloptions  - Number of control options to follow
+                $cntrloptions   - Matrix of 1 column of the control options. M, Fec, and Rec are here.
+                $eof            - End of file marker, must be 999 if the file was read in correctly
               $numParams        - The number of parameters, extracted from the first line of PAR file.
               $objFunValue      - The objective function value, extracted from the first line of PAR file.
               $maxGradient      - The maximum gradient, extracted from the first line of PAR file.
@@ -149,12 +193,38 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
             $outputs
               $mpd              - Data Frame containing the ouput of the mpd model run
               $mcmc             - Data frame containgin the output of the mcmc model run
-              $mpdSummary       - Output from the SSsummarize() function from r4ss.
+              $par              - Parameter file contents (iscam model PAR file)
+                $theta1         - log_ro parameter estimate
+                $theta2         - steepness parameter estimate
+                $theta3         - log_m parameter estimate
+                $theta4         - log_avgrec parameter estimate
+                $theta5         - log_recinit parameter estimate
+                $theta6         - rho parameter estimate
+                $theta7         - vartheta parameter estimate
+                $sel_par1       - Vector of selectivity parameters, 1 for each nit
+                $sel_par2       - Vector of selectivity parameters, 1 for each nit
+                $sel_par3       - Vector of selectivity parameters, 1 for each nit
+                $log_ft_pars    - Vector of fishing mortality parameters, one for each year
+                $init_log_rec_devs - Vector of recruitment devs for non-virgin (fished) B0
+                $log_rec_devs   - Vector of estimated recruitment deviations, 1 for each year
+                $log_m_nodes    - Vector of estimated nodes for natural mortality
+                $log_age_tau21  - Parameter 1 for age
+                $log_age_tau22  - Parameter 2 for age
+                $phi11          - Parameter 1 for nit 1 for phi
+                $phi12          - Parameter 1 for nit 2 for phi
+                $phi21          - Parameter 2 for nit 1 for phi
+                $phi22          - Parameter 2 for nit 2 for phi
+                $log_degrees_of_freedom1 - For nit 1
+                $log_degrees_of_freedom2 - For nit 2
+                $gamma_r        - Single gamma parameter
+                $numParams      - The number of parameters in the model
+                $objFunValue    - Objective function value returned by the run
+                $maxGradient    - Maximum gradient from the run. This should be a very small number.
               $retros           - List of Retrospective data (with filenames as $name) - REP file contents. If NULL, no retros.
     sens[[N]] - each Sensitivity Group number N contains the following
-            $names              - A vector of names of the Scenarios that are currently in Sensitivity Group N
+            $names              - A vector of names of the Scenarios that are currently in sensitivity group N
             $summary            - The list returned by SSsummarize() function run on all Scenarios names in $names
-            $isMCMC             - If any of the models in the Sensitivity group are mcmc runs, this will be TRUE, otherwise FALSE
+            $isMCMC             - If any of the models in the sensitivity group are mcmc runs, this will be TRUE, otherwise FALSE
 
 ## Cloning the repository
 
