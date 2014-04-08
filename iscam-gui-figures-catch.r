@@ -14,30 +14,17 @@ plotCatch <- function(plotNum  = 1,
                       silent   = .SILENT){
 
   # Assumes that 'op' list exists and has been populated correctly.
-  # Assumes that 'si' list exists and has been populated correctly.
   # plotNum must be one of:
   # 1  Landings
-  # 2  Landings stacked
-  # 3  Observed and expected landings
-  # 4  Total catch (includinng discards)
-  # 5  Total catch (including discards) stacked
-  # 6  Discards
-  # 7  Discards stacked
-  # 8  Discard fraction
-  # 9  Harvest rate
-  # 10 Landings aggregated across seasons
-  # 11 Landings aggregated across seasons stacked
-  # 12 Total catch (if discards present) aggregated across seasons
-  # 13 Total catch (if discards present) aggregated across seasons stacked
-  # 14 Discards aggregated across seasons
-  # 15 Discards aggregated across seasons stacked
+  # 2  SPR status, or the spawning potential ratio:
+  #    (1-spr)/(1-spr.at.msy)
 
   currFuncName <- getCurrFunc()
   val          <- getWinVal()
+  scenario     <- val$entryScenario
   scenarioName <- op[[scenario]]$names$scenario
   inp          <- op[[scenario]]$inputs$data
-  browser()
-  outSummary   <- op[[scenario]]$outputs$mpdSummary
+  inputs       <- op[[scenario]]$inputs
   figDir       <- op[[scenario]]$names$figDir
   color        <- op[[scenario]]$inputs$color
   res          <- val$entryResolution
@@ -84,7 +71,13 @@ plotCatch <- function(plotNum  = 1,
   }else{
     # plot mpd model runs
   }
-  plotCatches()
+  if(plotNum == 1){
+    plotCatches(inp = inputs, scenarioName, legendLoc = legendLoc, col = color)
+  }
+  if(plotNum == 2){
+    plotSPR(inp = inputs, scenarioName, legendLoc = legendLoc, col = color)
+  }
+
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
@@ -93,11 +86,21 @@ plotCatch <- function(plotNum  = 1,
 }
 
 plotCatches <- function(inp,
-                            scenarioName,
-                            verbose = FALSE,
-                            legendLoc = "topright",
-                            col = 1){
+                        scenarioName,
+                        verbose = FALSE,
+                        legendLoc = "topright",
+                        col = 1){
   # Catch plot for iscam model
-  
+  catch <- inp$data$catch
+  years <- catch[,"year"]
+  value <- catch[,"value"]
+	barplot(value, names.arg=years, xlab="Year", ylab="Landings", las=1, col = col)
+}
+
+plotSPR <-  function(inp,
+                        scenarioName,
+                        verbose = FALSE,
+                        legendLoc = "topright",
+                        col = 1){
 
 }

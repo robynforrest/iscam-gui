@@ -62,6 +62,7 @@ source(.FIGURES_BIOLOGY_SOURCE)
 source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
+source(.FIGURES_SUMMARIZE_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
                   copyModelExecutables = FALSE,
@@ -469,8 +470,8 @@ iscam <- function(reloadScenarios      = FALSE,
              .createScenarioInfoFile(dired = op[[row]]$names$dir,
                                      scenario = row,
                                      default = FALSE)
-             op[[val$entryScenario]]$inputs$color <<- val$scenarioHeader$Color
-             op[[val$entryScenario]]$inputs$order <<- val$scenarioHeader$Order
+             op[[val$entryScenario]]$inputs$color <<- val$scenarioHeader$Color[[val$entryScenario]]
+             op[[val$entryScenario]]$inputs$order <<- val$scenarioHeader$Order[[val$entryScenario]]
              cat("\n")
            }
            sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
@@ -720,21 +721,20 @@ iscam <- function(reloadScenarios      = FALSE,
   # If runMCMC = TRUE, then use a second system call to run mceval.
   # Returns TRUE if the model was run, FALSE otherwise
 
-  val             <- getWinVal()
-  shellSuccess    <- FALSE
+  val          <- getWinVal()
+  shellSuccess <- FALSE
 
   if(.deleteMPDOutputs(scenario)){
     # Make sure the current values in the GUI for the command line are saved
     # in the scenario 'op' list.
     .setupCommandLineFromGUI()
-    #####
     modelArgsGood <- TRUE
     .copyExecutableToScenarioDirectory(scenario = scenario)
 
-    rscriptsDir   <- getwd()           # Save the rscripts full path directory so we can get back to it
-    setwd(op[[scenario]]$names$dir)  # change to this scenario's directory
+    rscriptsDir   <- getwd()        # Save the rscripts full path directory so we can get back to it
+    setwd(op[[scenario]]$names$dir) # change to this scenario's directory
 
-    # Build command line here...
+    # Build command line here
     modelCall <- .buildModelCall(scenario)
 
     if(is.null(modelCall)){

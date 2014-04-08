@@ -162,7 +162,7 @@ plotBiomassMPD <- function(out,
 	oldpar <- par(no.readonly=T)
   bt     <- out$sbt
   yUpper <- max(bt)
-  plot(out$yrs, bt, type="l", col=col,lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  plot(out$yrs, bt, type="l", col=col, lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
   points(out$yr[1]-0.8, out$sbo, col=col, pch=1)
   legend(legendLoc, legend=scenarioName, col=col, lty=1, lwd=2)
 	par(oldpar)

@@ -110,6 +110,9 @@
                           projection        = "",
                           log               = "",
                           par               = "",
+                          mcmc              = "",
+                          mcmcsbt           = "",
+                          mcmcrt            = "",
                           warnings          = "",
                           sensitivityGroup  = "",
                           lastCommandRun    = "")
@@ -132,6 +135,8 @@
                           mpd               = FALSE,
                           mpdForecast       = FALSE,
                           mcmc              = FALSE,
+                          mcmcsbt           = FALSE,
+                          mcmcrt            = FALSE,
                           log               = FALSE,
                           par               = FALSE,
                           sensitivityGroup  = FALSE,
@@ -276,11 +281,8 @@
 
   # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
   tryCatch({
-    #suppressWarnings(
-    #  tmp$outputs$mcmc <- SSgetMCMC(dir=dired,
-    #                                verbose=!silent)
-    #  )
-    #tmp$fileSuccess$mcmc <- TRUE
+    tmp$outputs$mcmc <- readMCMC(dired = dired, verbose=!silent)
+    tmp$fileSuccess$mcmc <- TRUE
     cat0(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   },error=function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
@@ -425,7 +427,8 @@
   tmp <- rep(vector("list",length(uniqueSensGroup)))
   for(sensGroup in 1:length(uniqueSensGroup)){
     # Get all models in the given sensitivity group
-    modelList  <- NULL
+    modelListMPD  <- NULL
+    modelListMCMC <- NULL
     modelNames <- NULL
     iterator   <- 0
     # If any models are an MCMC run, set a variable saying the whole sensitivity group
@@ -435,7 +438,8 @@
       if(op[[scenario]]$inputs$sensitivityGroup == uniqueSensGroup[sensGroup]){
         # Put the mpd output objects into the list
         iterator <- iterator + 1
-        modelList[[iterator]]  <- op[[scenario]]$outputs$mpd
+        modelListMPD[[iterator]]  <- op[[scenario]]$outputs$mpd
+        modelListMCMC[[iterator]] <- op[[scenario]]$outputs$mcmc
         modelNames[[iterator]] <- op[[scenario]]$names$scenario
         if(op[[scenario]]$inputs$log$isMCMC){
           isMCMC <- TRUE
@@ -443,8 +447,9 @@
       }
     }
     # Summary is the output from all the model's in a sensitivity group
-    #tmp[[sensGroup]]$summary <- SSsummarize(modelList, verbose=!silent)
-    tmp[[sensGroup]]$summary <- paste0(currFuncName,"NEED TO IMPLEMENT!")
+    #tmp[[sensGroup]]$summaryMPD <- summarize(modelListMPD, verbose=!silent)
+    #tmp[[sensGroup]]$summaryMCMC <- summarize(modelListMPD, verbose=!silent)
+    #tmp[[sensGroup]]$summary <- paste0(currFuncName,"NEED TO IMPLEMENT!")
     # Names are the model names for the legends in the SScomparison plots
     tmp[[sensGroup]]$names   <- modelNames
     tmp[[sensGroup]]$isMCMC  <- isMCMC
@@ -485,19 +490,17 @@
     #  tmp$numWarnings <- "0"
     #}
 
-    if(length(grep("MCMC",logData)) > 0){
+    if(length(grep("mcmc",logData)) > 0){
       tmp$isMCMC    <- TRUE
       tmp$isMPD     <- FALSE
     }else{
       tmp$isMCMC    <- FALSE
       tmp$isMPD     <- TRUE
     }
-
     tmp$hasMCeval   <- FALSE
-    # iScam does not have an easy way to check this, yet... So we set it to FALSE for now
-    #if(tmp$isMCMC && length(tmp$finishTimes) >= 2){
-    #  tmp$hasMCeval <- TRUE
-    #}
+    if(length(grep("mceval",logData)) > 0){
+      tmp$hasMCeval   <- TRUE
+    }
   }else{
     tmp$finishTimes <- ""
     tmp$numWarnings <- "0"
@@ -963,5 +966,65 @@ readPar <- function(file = NULL, verbose = FALSE){
   tmp$numParams <- numParams
   tmp$objFunValue <- objFunValue
   tmp$maxGradient <- maxGradient
+  return(tmp)
+}
+
+readMCMC <- function(dired = NULL, verbose = TRUE){
+  # Read in the MCMC results from an iscam model run found in the directory dired.
+  # Returns a list of the mcmc outputs, or NULL if there was a problem or
+  # There are no MCMC outputs
+
+  if(is.null(dired)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired). Returning NULL.")
+    return(NULL)
+  }
+  mcmcfn    <- file.path(dired,.MCMC_FILE_NAME)
+  mcmcsbtfn <- file.path(dired,.MCMC_BIOMASS_FILE_NAME)
+  mcmcrtfn  <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
+
+  tmp        <- list()
+  tmp$params <- read.csv(mcmcfn)
+  sbt        <- read.csv(mcmcsbtfn)
+  tmp$sbt    <- extractGroupMatrices(sbt, prefix = "sbt")
+  rt         <- read.csv(mcmcrtfn)
+  tmp$rt     <- extractGroupMatrices(rt, prefix = "rt")
+  return(tmp)
+}
+
+extractGroupMatrices <- function(data = NULL, prefix = NULL){
+  # Extract the data frame given (data) by unflattening into t alist of matrices
+  # by group. The group number is located in the names of the columns of the
+  # data frame in this format: "prefix[groupnum]_year" where [groupnum] is one
+  # or more digits representing the group number and prefix is the string
+  # given as an argument to the function.
+  # Returns a list of matrices, one element per group.
+
+  currFuncName <- getCurrFunc()
+  if(is.null(data) || is.null(prefix)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must give two arguments (data & prefix). Returning NULL.")
+    return(NULL)
+  }
+  tmp <- list()
+
+  names <- names(data)
+  pattern <- paste0(prefix,"([[:digit:]]+)_[[:digit:]]+")
+  groups  <- sub(pattern,"\\1",names)
+  uniqueGroups <- unique(as.numeric(groups))
+  tmp <- vector("list", length = length(uniqueGroups))
+  # This code assumes that the groups are numbered sequentially from 1,2,3...N
+  for(group in 1:length(uniqueGroups)){
+    # Get all the column names (groupNames) for this group by making a specific pattern for it
+    groupPattern <- paste0(prefix,group,"_[[:digit:]]+")
+    groupNames   <- names[grep(groupPattern, names)]
+    # Remove the group number in the name, as it is not needed anymore
+    pattern      <- paste0(prefix,"[[:digit:]]+_([[:digit:]]+)")
+    groupNames   <- sub(pattern,"\\1",groupNames)
+
+    # Now, the data must be extracted
+    # Get the column numbers that this group are included in
+    dat <- data[,grep(groupPattern, names)]
+    colnames(dat) <- groupNames
+    tmp[[group]]  <- dat
+  }
   return(tmp)
 }

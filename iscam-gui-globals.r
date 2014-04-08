@@ -28,6 +28,7 @@
 .FIGURES_SELEX_SOURCE            <- paste0(.PROJECT_NAME,"-figures-selex.r")
 .FIGURES_TIMESERIES_SOURCE       <- paste0(.PROJECT_NAME,"-figures-timeseries.r")
 .FIGURES_CATCH_SOURCE            <- paste0(.PROJECT_NAME,"-figures-catch.r")
+.FIGURES_SUMMARIZE_SOURCE        <- paste0(.PROJECT_NAME,"-summarize-groups.r")
 
 # GUI definition files (see PBSModelling package)
 .MAIN_GUI_DEF_FILE               <- paste0(.PROJECT_NAME,"-gui-specs.txt")
@@ -44,6 +45,11 @@
 
 # Sensitivity file name (for grouping sensitivities together on plots)
 .SCENARIO_INFO_FILE_NAME         <- "ScenarioInfo.txt"
+
+# MCMC file names
+.MCMC_FILE_NAME                  <- "iscam_mcmc.csv"
+.MCMC_BIOMASS_FILE_NAME          <- "iscam_sbt_mcmc.csv"
+.MCMC_RECRUITMENT_FILE_NAME      <- "iscam_rt_mcmc.csv"
 
 # GUI Header labels
 .SCENARIO_LIST_LABEL             <- "Scenario List"
@@ -64,7 +70,7 @@
 .DOS_PIPE_TO_LOG                 <- paste(.DOS_PIPE_STDOUT, .LOG_FILE_NAME, .DOS_PIPE_STDERR)
 .DOS_APPEND_TO_LOG               <- paste(.DOS_APPEND_STDOUT, .LOG_FILE_NAME, .DOS_APPEND_STDERR)
 
-# SS output file lists
+# Output file lists, used for cleaning of the directories
 .MPD_OUTPUT_FILES                <- c(.LAST_COMMAND_RUN_FILE_NAME,
                                       .REPORT_FILE_NAME,
                                       .PAR_FILE_NAME,
@@ -117,5 +123,5 @@
 .BANNER                          <- "-----------------------------------------------------------------------------------\n"
 .BANNER2                         <- "===================================================================================\n"
 
-# Sneaky, keep a global for if the plotting is currently on or not
+# Sneaky little variable, keep a global for if the plotting is currently on or not
 .PLOT_IS_LIVE                    <- TRUE
