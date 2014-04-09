@@ -71,10 +71,10 @@ Thanks to the following people involved in the development of this software:
   - **sens** - This is a list of *Sensitivity Group*, one for each unique *Sensitivity Group*.  names(sens) will return NULL
 since the groups are nameless.
 
-The following depicts the **op** and **sens** object structure. Indentations reflect sub-object structure.
+The following depicts the **op** and **sens** object structures. Indentations reflect sub-object structure.
 See source file iscam-gui-load-scenarios.r to see how these lists are populated or to add new elements.
 
-    op[[N]] - each scenario number N contains the following
+    op[[N]] - Each unique scenario number N contains the following
       op[[N]]$names - Full path names for the files and directories used in iscam-gui
         op[[N]]$names$scenario         - Name of scenario
         op[[N]]$names$dir              - Name of scenario directory
@@ -91,7 +91,7 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
       op[[N]]$inputs - All inputs into iscam and iscam-gui
         op[[N]]$inputs$sensitivityGroup - Sensitivity group number (scenarios with the same number will be plotted together)
         op[[N]]$inputs$color            - Color for plotting. Read in from the Scenario info file.
-        op[[N]]$inputs$order            - Order for plotting, 1 is highest. If multiple values are the same, sort by name.
+        op[[N]]$inputs$order            - Order for plotting, 1 is plotted first. If multiple values are the same, it will sort by name.
         op[[N]]$inputs$starter          - Starter file contents
         op[[N]]$inputs$data - Data file contents (iscam model DAT file)
           op[[N]]$inputs$data$narea       - Number of areas
@@ -214,10 +214,8 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
         op[[N]]$outputs$par$objFunValue             - Objective function value returned by the run
         op[[N]]$outputs$par$maxGradient             - Maximum gradient from the run. This should be a very small number.
         op[[N]]$outputs$par$retros                  - List of Retrospective data (with filenames as $name) - REP file contents. If NULL, no retros.
-    sens[[M]] - each Sensitivity Group number M contains the following
-      sens[[M]]$names   - A vector of names of the Scenarios that are currently in sensitivity group M
-      sens[[M]]$summary - The list returned by SSsummarize() function run on all Scenarios names in $names
-      sens[[M]]$isMCMC  - If any of the models in the sensitivity group are mcmc runs, this will be TRUE, otherwise FALSE
+    sens[[M]] - each unique sensitivity group number M contains the following
+      sens[[M]][1] - A vector of the indicies within the op list of the Scenarios that are currently in sensitivity group M
 
 ---
 

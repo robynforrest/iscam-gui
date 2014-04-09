@@ -41,20 +41,21 @@
   }
 }
 
-.deleteMPDOutputs <- function(scenario, silent = .SILENT){
+.deleteOutputs <- function(scenario, silent = .SILENT){
   # delete all MPD files output by SS3.  Keep MCMC output files if they exist.
   # TODO: Need to add retrospective RET* files to deletion list if they exist.
-  mpdOutputsFullPath <- file.path(op[[scenario]]$names$dir, .MPD_OUTPUT_FILES)
-  if(!any(file.exists(mpdOutputsFullPath))){
-      cat(.PROJECT_NAME,"->.deleteMPDOutputs: The model in '",op[[scenario]]$names$dir,
-          "' has not been run (no output files exist).\n",sep="")
+  currFuncName <- getCurrFunc()
+  outputsFullPath <- file.path(op[[scenario]]$names$dir, .OUTPUT_FILES)
+  if(!any(file.exists(outputsFullPath))){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model in '",op[[scenario]]$names$dir,
+          "' has not been run (no output files exist).")
     return(TRUE)
-  }else if(any(file.exists(mpdOutputsFullPath)) &&
-     getYes(paste("Warning, you are about to delete all outputs for the '",op[[scenario]]$names$scenario,
-                  "' scenario.  Continue?",sep=""),title="Delete Files?",icon="question")){
-    unlink(mpdOutputsFullPath)
+  }else if(any(file.exists(outputsFullPath)) &&
+     getYes(paste0("Warning, you are about to delete all outputs for the '",op[[scenario]]$names$scenario,
+                  "' scenario. Continue?"),title="Delete Files?",icon="question")){
+    unlink(outputsFullPath)
     if(!silent){
-      cat(.PROJECT_NAME,"->.deleteMPDOutputs: Deleted MPD outputs from '",op[[scenario]]$names$dir,"'.\n",sep="")
+      cat0(.PROJECT_NAME,"->",currFuncName,"Deleted MPD outputs from '",op[[scenario]]$names$dir,"'")
     }
     return(TRUE)
   }

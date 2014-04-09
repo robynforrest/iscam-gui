@@ -70,33 +70,34 @@
 .DOS_PIPE_TO_LOG                 <- paste(.DOS_PIPE_STDOUT, .LOG_FILE_NAME, .DOS_PIPE_STDERR)
 .DOS_APPEND_TO_LOG               <- paste(.DOS_APPEND_STDOUT, .LOG_FILE_NAME, .DOS_APPEND_STDERR)
 
-# Output file lists, used for cleaning of the directories
-.MPD_OUTPUT_FILES                <- c(.LAST_COMMAND_RUN_FILE_NAME,
-                                      .REPORT_FILE_NAME,
-                                      .PAR_FILE_NAME,
-                                      .LOG_FILE_NAME,
-                                      paste0(.EXE_BASE_NAME,".b*"),
-                                      paste0(.EXE_BASE_NAME,".p*"),    # matches .par file
-                                      paste0(.EXE_BASE_NAME,".r*"),    # matches .rep file
-                                      paste0(.EXE_BASE_NAME,".log"),
-                                      "*.cov",
-                                      "*.cor",
-                                      "*.dep",
-                                      "*.eva",
-                                      "*.hes",
-                                      "*.par",
-                                      "*.std",
-                                      "variance",
-                                      "CumReport.sso",
-                                      "echoinput.sso",
-                                      "eigv.rpt",
-                                      "fmin.log",
-                                      # MCMC ouputs only
-                                      paste0(.EXE_BASE_NAME,".ecm"),
-                                      paste0(.EXE_BASE_NAME,".hst"),
-                                      paste0(.EXE_BASE_NAME,".mc*"),
-                                      # Executable
-                                      .EXE_FILE_NAME)
+# Output file list, used for cleaning of the directories
+.OUTPUT_FILES                <- c(.LAST_COMMAND_RUN_FILE_NAME,
+                                  .REPORT_FILE_NAME,
+                                  .PAR_FILE_NAME,
+                                  .LOG_FILE_NAME,
+                                  paste0(.EXE_BASE_NAME,".b*"),
+                                  paste0(.EXE_BASE_NAME,".p*"),    # matches .par file
+                                  paste0(.EXE_BASE_NAME,".r*"),    # matches .rep file
+                                  paste0(.EXE_BASE_NAME,".log"),
+                                  "*.cov",
+                                  "*.cor",
+                                  "*.dep",
+                                  "*.eva",
+                                  "*.hes",
+                                  "*.par",
+                                  "*.std",
+                                  "variance",
+                                  "eigv.rpt",
+                                  "fmin.log",
+                                  # MCMC ouputs
+                                  paste0(.EXE_BASE_NAME,".ecm"),
+                                  paste0(.EXE_BASE_NAME,".hst"),
+                                  paste0(.EXE_BASE_NAME,".mc*"),
+                                  .MCMC_FILE_NAME,
+                                  .MCMC_BIOMASS_FILE_NAME,
+                                  .MCMC_RECRUITMENT_FILE_NAME,
+                                  # Executable
+                                  .EXE_FILE_NAME)
 
 # Figure types
 .PNG                             <- FALSE

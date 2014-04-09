@@ -21,11 +21,10 @@
   if(reloadScenarios || !modelLoaded){
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Loading data from model output files.")
     op   <<- .loadScenarios(.SCENARIOS_DIR_NAME)
-    sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
-
-    modelLoaded <<- T
+    sens <<- .loadSensitivityGroups(op = op)
+    modelLoaded <<- TRUE
   }else{
-    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(T) to reload the Scenarios.\n")
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(TRUE) to reload the Scenarios.\n")
   }
   if(copyModelExecutables){
     .copyExecutableToScenariosDirectories()
@@ -222,15 +221,15 @@
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
-    tmp$inputs$numParams   <- ""
-    tmp$inputs$objFunValue <- ""
-    tmp$inputs$maxGradient <- ""
+    tmp$outputs$par$numParams   <- ""
+    tmp$outputs$par$objFunValue <- ""
+    tmp$outputs$par$maxGradient <- ""
   }, error = function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading par file: '",tmp$names$par,"'")
     # The GUI should be loaded without a par file being present.
-    tmp$inputs$numParams   <- ""
-    tmp$inputs$objFunValue <- ""
-    tmp$inputs$maxGradient <- ""
+    tmp$outputs$par$numParams   <- ""
+    tmp$outputs$par$objFunValue <- ""
+    tmp$outputs$par$maxGradient <- ""
   })
 
   # Try to load the scenario's last log file, .LOG_FILE_NAME
@@ -402,18 +401,15 @@
   return(TRUE)
 }
 
-.loadSensitivityGroups <- function(op, dired = NULL, silent = .SILENT){
-  # Returns list of sensitivity groups output from SSsummarize
+.loadSensitivityGroups <- function(op, silent = .SILENT){
+  # Returns vector of numbers which relate to the models in the 'op' list,
+  # so that plotting code can later access the output and plot them together
   # found in the 'dired' directory.
 
   currFuncName <- getCurrFunc()
   if(!silent){
     cat(.BANNER)
     cat0(.PROJECT_NAME,"->",currFuncName,"Attempting to summarize all sensitivity groups.")
-  }
-  if(is.null(dired)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired).\n")
-    return(NULL)
   }
   # Find out how many unique sensitivity groups there are
   uniqueSensGroup <- NULL
@@ -424,38 +420,18 @@
   }
   uniqueSensGroup <- sort(uniqueSensGroup)
   # Create the sensitivity list that will be returned
-  tmp <- rep(vector("list",length(uniqueSensGroup)))
+  tmp <- vector("list", length = length(uniqueSensGroup))
   for(sensGroup in 1:length(uniqueSensGroup)){
-    # Get all models in the given sensitivity group
-    modelListMPD  <- NULL
-    modelListMCMC <- NULL
-    modelNames <- NULL
     iterator   <- 0
-    # If any models are an MCMC run, set a variable saying the whole sensitivity group
-    # is mcmc, which means it will not be able to be plotted using SSplotComparisons later.
-    isMCMC <- FALSE
     for(scenario in 1:length(op)){
       if(op[[scenario]]$inputs$sensitivityGroup == uniqueSensGroup[sensGroup]){
-        # Put the mpd output objects into the list
         iterator <- iterator + 1
-        modelListMPD[[iterator]]  <- op[[scenario]]$outputs$mpd
-        modelListMCMC[[iterator]] <- op[[scenario]]$outputs$mcmc
-        modelNames[[iterator]] <- op[[scenario]]$names$scenario
-        if(op[[scenario]]$inputs$log$isMCMC){
-          isMCMC <- TRUE
-        }
+        tmp[[sensGroup]][iterator] <- op[[scenario]]$inputs$sensitivityGroup
       }
     }
-    # Summary is the output from all the model's in a sensitivity group
-    #tmp[[sensGroup]]$summaryMPD <- summarize(modelListMPD, verbose=!silent)
-    #tmp[[sensGroup]]$summaryMCMC <- summarize(modelListMPD, verbose=!silent)
-    #tmp[[sensGroup]]$summary <- paste0(currFuncName,"NEED TO IMPLEMENT!")
-    # Names are the model names for the legends in the SScomparison plots
-    tmp[[sensGroup]]$names   <- modelNames
-    tmp[[sensGroup]]$isMCMC  <- isMCMC
   }
   if(!silent){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Sensitivity groups loaded, global 'si' list object has been populated..")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Sensitivity groups loaded, global 'sens' list object has been populated..")
     cat(.BANNER)
   }
   return(tmp)

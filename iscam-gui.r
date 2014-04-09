@@ -18,8 +18,7 @@
 
 # TODO:
 # Fix retrospective plotting and model running, need an mcmc buttton as weel for retros
-# Apply changeSens to the color and order changes so the scenario inof file is written
-# Implement the color and order changes by sorting the op list, etc
+# Implement the order changes by sorting the op list, etc
 # Fix the sensitivity changnig so that it can't go past limits
 # Change the radios to check boxes for plotting, with all checked appearing in a table, i.e. mfrow, mfcol
 #  also there should be a radio button for "all side-by-side", "all top-bottom", or "as square as possible" etc
@@ -83,7 +82,7 @@ iscam <- function(reloadScenarios      = FALSE,
             copyModelExecutables = copyModelExecutables)
 
   if(!exists("sens")){
-    sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
+    sens <<- .loadSensitivityGroups(op = op)
   }
   return(.GUIsetup("mainGui"))
 }
@@ -111,7 +110,7 @@ iscam <- function(reloadScenarios      = FALSE,
     winList <- c(entryScenario=1)
     try(setWinVal(winList), silent=silent)
 
-    # Grey out currently unimplemented stuff
+    # TODO: Grey out currently unimplemented stuff
     #setWidgetState("","disabled")
 
     .updateGUIStamps(silent = silent)
@@ -446,13 +445,13 @@ iscam <- function(reloadScenarios      = FALSE,
              val <- getWinVal()
              scenario <- val$entryScenario
              op[[scenario]] <<- .loadScenario(scenario, dired=op[[scenario]]$names$dir)
-             sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
+             sens <<- .loadSensitivityGroups(op = op)
              .updateGUIStamps()
              alarm() # Sound an alarm to notify user that run is finished
            }
          },
          "cleanDirectory" = {
-           if(.deleteMPDOutputs(val$entryScenario)){
+           if(.deleteOutputs(val$entryScenario)){
              .removeConvergenceValues()
              .updateGUIStamps()
            }
@@ -470,11 +469,12 @@ iscam <- function(reloadScenarios      = FALSE,
              .createScenarioInfoFile(dired = op[[row]]$names$dir,
                                      scenario = row,
                                      default = FALSE)
-             op[[val$entryScenario]]$inputs$color <<- val$scenarioHeader$Color[[val$entryScenario]]
-             op[[val$entryScenario]]$inputs$order <<- val$scenarioHeader$Order[[val$entryScenario]]
+             op[[row]]$inputs$color <<- val$scenarioHeader$Color[[row]]
+             op[[row]]$inputs$order <<- val$scenarioHeader$Order[[row]]
+             op[[row]]$inputs$sensitivityGroup <<- val$scenarioHeader$Group[[row]]
              cat("\n")
            }
-           sens <<- .loadSensitivityGroups(op = op, dired = .SCENARIOS_DIR_NAME)
+           sens <<- .loadSensitivityGroups(op = op)
          },
          "changeScreenGraphics" = {
          },
@@ -575,9 +575,9 @@ iscam <- function(reloadScenarios      = FALSE,
   # Set the GUI textboxes with the par convergence values
   val                <- getWinVal()
   scenario           <- val$entryScenario
-  winList <- c(numParams   = op[[scenario]]$inputs$numParams,
-               objFunValue = op[[scenario]]$inputs$objFunValue,
-               maxGradient = op[[scenario]]$inputs$maxGradient)
+  winList <- c(numParams   = op[[scenario]]$outputs$par$numParams,
+               objFunValue = op[[scenario]]$outputs$par$objFunValue,
+               maxGradient = op[[scenario]]$outputs$par$maxGradient)
   try(setWinVal(winList), silent=silent)
 }
 
@@ -620,14 +620,14 @@ iscam <- function(reloadScenarios      = FALSE,
 
 .removeConvergenceValues <- function(silent = .SILENT){
   # Set the convergence values to an empty string.  This is typically done
-  # when the deleteMPD function is called so that the .updateGUI
+  # when the deleteOutputs function is called so that the .updateGUI
   # function has null strings with which to update the convergence
   # values in the GUI.
   val <- getWinVal()
   scenario <- val$entryScenario
-  op[[scenario]]$inputs$numParams   <<- NA
-  op[[scenario]]$inputs$objFunValue <<- NA
-  op[[scenario]]$inputs$maxGradient <<- NA
+  op[[scenario]]$outputs$par$numParams   <<- NA
+  op[[scenario]]$outputs$par$objFunValue <<- NA
+  op[[scenario]]$outputs$par$maxGradient <<- NA
 }
 
 .updateGUICommandStamp <- function(silent = .SILENT){
@@ -724,7 +724,7 @@ iscam <- function(reloadScenarios      = FALSE,
   val          <- getWinVal()
   shellSuccess <- FALSE
 
-  if(.deleteMPDOutputs(scenario)){
+  if(.deleteOutputs(scenario)){
     # Make sure the current values in the GUI for the command line are saved
     # in the scenario 'op' list.
     .setupCommandLineFromGUI()
