@@ -420,13 +420,13 @@
   }
   uniqueSensGroup <- sort(uniqueSensGroup)
   # Create the sensitivity list that will be returned
-  tmp <- vector("list", length = length(uniqueSensGroup))
+  tmp <- vector("list", length = max(uniqueSensGroup))
   for(sensGroup in 1:length(uniqueSensGroup)){
     iterator   <- 0
     for(scenario in 1:length(op)){
       if(op[[scenario]]$inputs$sensitivityGroup == uniqueSensGroup[sensGroup]){
         iterator <- iterator + 1
-        tmp[[sensGroup]][iterator] <- op[[scenario]]$inputs$sensitivityGroup
+        tmp[[uniqueSensGroup[sensGroup]]][iterator] <- scenario
       }
     }
   }

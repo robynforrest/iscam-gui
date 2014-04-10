@@ -213,7 +213,7 @@ grid 3 1 padx=10 pady=10 sticky=W
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Sensitivity Comparisons     --#
 #--------------------------------------------------------------------#
-     grid 16 5 byrow=T sticky=N relief=raised
+     grid 11 5 byrow=T sticky=N relief=raised
           #1
           label text="Sensitivity Groups"     font=bold sticky=W
           null
@@ -239,72 +239,42 @@ grid 3 1 padx=10 pady=10 sticky=W
           null
           null
           #5
-          radio name=viewPlotType value=sSensSBU            text="Spawning biomass with uncertainty" function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
-          #6
           radio name=viewPlotType value=sSensBRatio         text="Depletion"                         function=.subView mode=character sticky=W
           label text="B target" sticky=W
           entry name=entryBtarg function=.subView action="changeBtarg" width=5  padx=10 entryfont="14" value=0.4 sticky=W
           null
           null
-          #7
-          radio name=viewPlotType value=sSensBRatioU        text="Depletion with uncertainty"        function=.subView mode=character sticky=W
-          label text="B limit" sticky=W
-          entry name=entryBlim  function=.subView action="changeBlim" width=5  padx=10 entryfont="14" value=0.1 sticky=W
-          null
-          null
-          #8
+          #6
           radio name=viewPlotType value=sSensSPRRatio       text="SPR ratio"                         function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #9
-          radio name=viewPlotType value=sSensSPRRatioU      text="SPR ratio with uncertainty"        function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
-          #10
+          #7
           radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #11
-          radio name=viewPlotType value=sSensRecruitU       text="Recruitment with uncertainty"      function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
-          #12
+          #8
           radio name=viewPlotType value=sSensRecruitDev     text="Recruitment deviations"            function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #13
-          radio name=viewPlotType value=sSensRecruitDevU    text="Recruitment devs with uncertainty" function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
-          #14
+          #9
           radio name=viewPlotType value=sSensIndex          text="Index fits"                        function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #15
+          #10
           radio name=viewPlotType value=sSensIndexLog       text="Index fits on log scale"           function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #16
+          #11
           radio name=viewPlotType value=sSensDensity        text="Densities"                         function=.subView mode=character sticky=W
           null
           null
@@ -373,8 +343,15 @@ grid 3 1 padx=10 pady=10 sticky=W
           radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
 
   grid 3 1
-    grid 2 1
-      grid 1 7
+    grid 1 1
+      grid 3 7
+        check name=plotMCMC checked=T text="Plot MCMC" function=.subView action="changePlotMCMC" font=bold
+        null
+        null
+        null
+        null
+        label text="Confidence %" font=bold sticky=W
+        entry name=entryConfidence width=5 padx=5 value=95 entryfont="14" function=.subView action="changeConfidence" entryfont="14" sticky=W
         label text="Screen graphics:" font=bold sticky=W
         null
         null
@@ -382,7 +359,6 @@ grid 3 1 padx=10 pady=10 sticky=W
         entry name=entryWidthScreen width=5 padx=5 value=10 function=.subView action="changeScreenGraphics" entryfont="14" sticky=W
         label text="Height" font=bold sticky=W
         entry name=entryHeightScreen width=5 padx=5 value=7 function=.subView action="changeScreenGraphics" entryfont="14" sticky=W
-      grid 1 7
         label text="Figure output PNG:" font=bold sticky=W
         label text="Resolution" font=bold sticky=W
         entry name=entryResolution width=5 padx=5 value=300 entryfont="14" sticky=W

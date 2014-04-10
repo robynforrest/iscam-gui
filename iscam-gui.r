@@ -61,7 +61,6 @@ source(.FIGURES_BIOLOGY_SOURCE)
 source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
-source(.FIGURES_SUMMARIZE_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
                   copyModelExecutables = FALSE,
@@ -84,6 +83,7 @@ iscam <- function(reloadScenarios      = FALSE,
   if(!exists("sens")){
     sens <<- .loadSensitivityGroups(op = op)
   }
+  dir.create(.SENS_FIGURES_DIR_NAME, showWarnings=FALSE)
   return(.GUIsetup("mainGui"))
 }
 
@@ -204,62 +204,59 @@ iscam <- function(reloadScenarios      = FALSE,
   graphics.off()
   .PLOT_IS_LIVE <<- FALSE
 
-  val   <- getWinVal()
-  pType <- val$viewPlotType
+  val      <- getWinVal()
+  plotMCMC <- val$plotMCMC
+  ci       <- val$entryConfidence  # Confidence interval
+  pType    <- val$viewPlotType
   if(.checkEntries()){
 
     switch(pType,
            # From iscam-gui-figures-timeseries.r
-           "sTSSpawningBiomassAllAreas"             = {plotTS(plotNum=1,png=png,fileText="SpawningBiomassAllAreas")},
-           "sTSSpawningBiomassByArea"               = {plotTS(plotNum=2,png=png,fileText="SpawningBiomassByArea")},
-           "sTSSpawningDepletionAllAreas"           = {plotTS(plotNum=3,png=png,fileText="SpawningDepletionAllAreas")},
-           "sTSSpawningDepletionByArea"             = {plotTS(plotNum=4,png=png,fileText="SpawningDepletionByArea")},
-           "sTSRecruitmentAllAreas"                 = {plotTS(plotNum=5,png=png,fileText="RecruitmentAllAreas")},
-           "sTSRecruitmentByArea"                   = {plotTS(plotNum=6,png=png,fileText="RecruitmentByArea")},
-           "sTSRecruitmentFractionByArea"           = {plotTS(plotNum=7,png=png,fileText="RecruitmentFractionByArea")},
+           "sTSSpawningBiomassAllAreas"             = {plotTS(1,png,"SpawningBiomassAllAreas",plotMCMC,ci)},
+           "sTSSpawningBiomassByArea"               = {plotTS(2,png,"SpawningBiomassByArea",plotMCMC,ci)},
+           "sTSSpawningDepletionAllAreas"           = {plotTS(3,png,"SpawningDepletionAllAreas",plotMCMC,ci)},
+           "sTSSpawningDepletionByArea"             = {plotTS(4,png,"SpawningDepletionByArea",plotMCMC,ci)},
+           "sTSRecruitmentAllAreas"                 = {plotTS(5,png,"RecruitmentAllAreas",plotMCMC,ci)},
+           "sTSRecruitmentByArea"                   = {plotTS(6,png,"RecruitmentByArea",plotMCMC,ci)},
+           "sTSRecruitmentFractionByArea"           = {plotTS(7,png,"RecruitmentFractionByArea",plotMCMC,ci)},
            # From iscam-gui-figures-biology.r
-           "sBiologyMeanWtAtAge"                    = {plotBiology(plotNum=1,png=png,fileText="BiologyMeanWtAtAge")},
-           "sBiologyMaturityAtAge"                  = {plotBiology(plotNum=2,png=png,fileText="BiologyMaturityAtAge")},
-           "sBiologyFecundity"                      = {plotBiology(plotNum=3,png=png,fileText="BiologyFecundity")},
-           "sBiologyFecundityWeight"                = {plotBiology(plotNum=4,png=png,fileText="BiologyFecundityWeight")},
-           "sBiologyFecundityLength"                = {plotBiology(plotNum=5,png=png,fileText="BiologyFecundityLength")},
-           "sBiologySpawnOutputLength"              = {plotBiology(plotNum=6,png=png,fileText="BiologySpawnOutputLength")},
-           "sBiologyExpectedGrowth"                 = {plotBiology(plotNum=7,png=png,fileText="BiologyExpectedGrowth")},
-           "sBiologyTVM"                            = {plotBiology(plotNum=8,png=png,fileText="BiologyTVM")},
-           "sBiologyTVGrowthPersp"                  = {plotBiology(plotNum=9,png=png,fileText="BiologyTVGrowthPersp")},
-           "sBiologyTVGrowthContour"                = {plotBiology(plotNum=10,png=png,fileText="BiologyTVGrowthContour")},
+           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci)},
+           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci)},
+           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci)},
+           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci)},
+           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci)},
+           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci)},
+           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci)},
+           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci)},
+           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci)},
+           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci)},
            # From iscam-gui-figures-selectivities.r
-           "sSelexLengthBasedByFleet"               = {plotSelex(plotNum=1,png=png,fileText="SelexLengthBasedByFleet")},
-           "sSelexAgeBasedByFleet"                  = {plotSelex(plotNum=2,png=png,fileText="SelexAgeBasedByFleet")},
-           "sSelexTVAtLengthSurface"                = {plotSelex(plotNum=3,png=png,fileText="SelexTVAtLengthSurface")},
-           "sSelexTVAtLengthContour"                = {plotSelex(plotNum=4,png=png,fileText="SelexTVAtLengthContour")},
-           "sSelexTVAtLenthRetentionSurface"        = {plotSelex(plotNum=5,png=png,fileText="SelexTVAtLenthRetentionSurface")},
-           "sSelexTVAtLengthRetentionContour"       = {plotSelex(plotNum=6,png=png,fileText="SelexTVAtLengthRetentionContour")},
-           "sSelexTVDiscardMortalitySurface"        = {plotSelex(plotNum=7,png=png,fileText="SelexTVDiscardMortalitySurface")},
-           "sSelexTVDiscardMortalityContour"        = {plotSelex(plotNum=8,png=png,fileText="SelexTVDiscardMortalityContour")},
-           "sSelexRetentionDiscardMortalityEndYear" = {plotSelex(plotNum=9,png=png,fileText="SelexRetentionDiscardMortalityEndYear")},
-           "sSelexTVAtAgeSurface"                   = {plotSelex(plotNum=11,png=png,fileText="SelexTVAtAgeSurface")},
-           "sSelexTVAtAgeContour"                   = {plotSelex(plotNum=12,png=png,fileText="SelexTVAtAgeContour")},
-           "sSelexTVAtAgeEndYear"                   = {plotSelex(plotNum=13,png=png,fileText="SelexTVAtAgeEndYear")},
-           "sSelexAtAgeEndYear"                     = {plotSelex(plotNum=14,png=png,fileText="SelexAtAgeEndYear")},
-           "sSelexAgeLengthGrowthCurve"             = {plotSelex(plotNum=21,png=png,fileText="SelexAgeLengthGrowthCurve")},
-           "sSelexUncertainty"                      = {plotSelex(plotNum=22,png=png,fileText="SelexUncertainty")},
+           "sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci)},
+           "sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci)},
+           "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci)},
+           "sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci)},
+           "sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci)},
+           "sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci)},
+           "sSelexTVDiscardMortalitySurface"        = {plotSelex(7,png,"SelexTVDiscardMortalitySurface",plotMCMC,ci)},
+           "sSelexTVDiscardMortalityContour"        = {plotSelex(8,png,"SelexTVDiscardMortalityContour",plotMCMC,ci)},
+           "sSelexRetentionDiscardMortalityEndYear" = {plotSelex(9,png,"SelexRetentionDiscardMortalityEndYear",plotMCMC,ci)},
+           "sSelexTVAtAgeSurface"                   = {plotSelex(11,png,"SelexUncertainty",plotMCMC,ci)},
            # From iscam-gui-figures-catch.r
-           "sCatchLandings"                         = {plotCatch(plotNum=1,png=png,fileText="CatchLandings")},
-           "sCatchLandingsStacked"                  = {plotCatch(plotNum=2,png=png,fileText="CatchLandingsStacked")},
-           "sCatchLandingsObsVsExpLandings"         = {plotCatch(plotNum=3,png=png,fileText="CatchLandingsObsVsExpLandings")},
-           "sCatchTotal"                            = {plotCatch(plotNum=4,png=png,fileText="CatchTotal")},
-           "sCatchTotalStacked"                     = {plotCatch(plotNum=5,png=png,fileText="CatchTotalStacked")},
-           "sCatchDiscards"                         = {plotCatch(plotNum=6,png=png,fileText="CatchDiscards")},
-           "sCatchDiscardsStacked"                  = {plotCatch(plotNum=7,png=png,fileText="CatchDiscardsStacked")},
-           "sCatchDiscardFraction"                  = {plotCatch(plotNum=8,png=png,fileText="CatchDiscardFraction")},
-           "sCatchHarvestRate"                      = {plotCatch(plotNum=9,png=png,fileText="CatchHarvestRate")},
-           "sCatchLandingsSeasons"                  = {plotCatch(plotNum=10,png=png,fileText="CatchLandingsSeasons")},
-           "sCatchLandingsSeasonsStacked"           = {plotCatch(plotNum=11,png=png,fileText="CatchLandingsSeasonsStacked")},
-           "sCatchTotalSeasons"                     = {plotCatch(plotNum=12,png=png,fileText="CatchTotalSeasons")},
-           "sCatchTotalSeasonsStacked"              = {plotCatch(plotNum=13,png=png,fileText="CatchTotalSeasonsStacked")},
-           "sCatchDiscardsSeasons"                  = {plotCatch(plotNum=14,png=png,fileText="CatchDiscardsSeasons")},
-           "sCatchDiscardsSeasonsStacked"           = {plotCatch(plotNum=15,png=png,fileText="CatchDiscardsSeasonsStacked")},
+           "sCatchLandings"                         = {plotCatch(1,png,"CatchLandings",plotMCMC,ci)},
+           "sCatchLandingsStacked"                  = {plotCatch(2,png,"CatchLandingsStacked",plotMCMC,ci)},
+           "sCatchLandingsObsVsExpLandings"         = {plotCatch(3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci)},
+           "sCatchTotal"                            = {plotCatch(4,png,"CatchTotal",plotMCMC,ci)},
+           "sCatchTotalStacked"                     = {plotCatch(5,png,"CatchTotalStacked",plotMCMC,ci)},
+           "sCatchDiscards"                         = {plotCatch(6,png,"CatchDiscards",plotMCMC,ci)},
+           "sCatchDiscardsStacked"                  = {plotCatch(7,png,"CatchDiscardsStacked",plotMCMC,ci)},
+           "sCatchDiscardFraction"                  = {plotCatch(8,png,"CatchDiscardFraction",plotMCMC,ci)},
+           "sCatchHarvestRate"                      = {plotCatch(9,png,"CatchHarvestRate",plotMCMC,ci)},
+           "sCatchLandingsSeasons"                  = {plotCatch(10,png,"CatchLandingsSeasons",plotMCMC,ci)},
+           "sCatchLandingsSeasonsStacked"           = {plotCatch(11,png,"CatchLandingsSeasonsStacked",plotMCMC,ci)},
+           "sCatchTotalSeasons"                     = {plotCatch(12,png,"CatchTotalSeasons",plotMCMC,ci)},
+           "sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci)},
+           "sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci)},
+           "sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci)},
            # From iscam-gui-figures.r
            "sParameterPairs"                        = {fig.estimated.params.pairs(scenario=val$entryScenario)},
            "sVariancePartitions"                    = {fig.variance.partitions(scenario=val$entryScenario)},
@@ -271,19 +268,19 @@ iscam <- function(reloadScenarios      = FALSE,
            "sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            "sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
-           "sSensSB"                                = {plotTS(plotNum=1,multiple=TRUE,png=png,fileText="SensSpawningBiomass")},
-           "sSensSBU"                               = {plotTS(plotNum=2,multiple=TRUE,png=png,fileText="SensSpawningBiomassUncertainty")},
-           "sSensBRatio"                            = {plotTS(plotNum=3,multiple=TRUE,png=png,fileText="SensBRatio",btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensBRatioU"                           = {plotTS(plotNum=4,multiple=TRUE,png=png,fileText="SensBratioUncertainty",btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensSPRRatio"                          = {plotTS(plotNum=5,multiple=TRUE,png=png,fileText="SensSPRRatio",btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensSPRRatioU"                         = {plotTS(plotNum=6,multiple=TRUE,png=png,fileText="SensSPRRatioUncertainty",btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensRecruit"                           = {plotTS(plotNum=7,multiple=TRUE,png=png,fileText="SensRecruit")},
-           "sSensRecruitU"                          = {plotTS(plotNum=8,multiple=TRUE,png=png,fileText="SensRecruitUncertainty")},
-           "sSensRecruitDev"                        = {plotTS(plotNum=9,multiple=TRUE,png=png,fileText="SensRecruitmentDev")},
-           "sSensRecruitDevU"                       = {plotTS(plotNum=10,multiple=TRUE,png=png,fileText="SensRecruitmentDevUncertainty")},
-           "sSensIndex"                             = {plotTS(plotNum=11,multiple=TRUE,png=png,fileText="SensIndex")},
-           "sSensIndexLog"                          = {plotTS(plotNum=12,multiple=TRUE,png=png,fileText="SensIndexLog")},
-           "sSensDensity"                           = {plotTS(plotNum=13,multiple=TRUE,png=png,fileText="SensDensity")},
+           "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
+           "sSensSBU"                               = {plotTS(2,png,"SpawningBiomassUncertainty",plotMCMC,ci,TRUE)},
+           "sSensBRatio"                            = {plotTS(3,png,"BRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensBRatioU"                           = {plotTS(4,png,"BratioUncertainty",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensSPRRatio"                          = {plotTS(5,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensSPRRatioU"                         = {plotTS(6,png,"SPRRatioUncertainty",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensRecruit"                           = {plotTS(7,png,"Recruit",plotMCMC,ci,TRUE)},
+           "sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
+           "sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
+           "sSensRecruitDevU"                       = {plotTS(10,png,"RecruitmentDevUncertainty",plotMCMC,ci,TRUE)},
+           "sSensIndex"                             = {plotTS(11,png,"Index",plotMCMC,ci,TRUE)},
+           "sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
+           "sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(plotNum=1,retros=TRUE,endyrvec=val$entryEndyr:val$entryStartyr,
                                                               png=png,fileText="RetroSpawningBiomass")},
@@ -294,11 +291,11 @@ iscam <- function(reloadScenarios      = FALSE,
                                                               cohorts = val$entryFirstCohort:val$entryLastCohort,
                                                               png=png,fileText="RetroSquid")},
            # Plot runtime values returned from ADMB
-           "sObjFuncVal"                            = {plotRuntimeStats(1,fileText="ObjectiveFunctionValue")},
-           "sMaxGrad"                               = {plotRuntimeStats(2,fileText="MaximumGradient")},
-           "sFuncEvals"                             = {plotRuntimeStats(3,fileText="FunctionEvaluations")},
-           "sHangCodes"                             = {plotRuntimeStats(4,fileText="HangCodes")},
-           "sExitCodes"                             = {plotRuntimeStats(5,fileText="ExitCodes")},
+           "sObjFuncVal"                            = {plotRuntimeStats(1,png,"ObjectiveFunctionValue")},
+           "sMaxGrad"                               = {plotRuntimeStats(2,png,"MaximumGradient")},
+           "sFuncEvals"                             = {plotRuntimeStats(3,png,"FunctionEvaluations")},
+           "sHangCodes"                             = {plotRuntimeStats(4,png,"HangCodes")},
+           "sExitCodes"                             = {plotRuntimeStats(5,png,"ExitCodes")},
            {
              # Default
            }
@@ -477,6 +474,8 @@ iscam <- function(reloadScenarios      = FALSE,
            sens <<- .loadSensitivityGroups(op = op)
          },
          "changeScreenGraphics" = {
+         },
+         "changeConfidence" = {
          },
          "runRetros" = {
            .runRetros()
