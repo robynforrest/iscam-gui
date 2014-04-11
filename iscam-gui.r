@@ -50,6 +50,14 @@ require(PBSmodelling)
 options(stringsAsFactors = FALSE)
 options(warn = -1)
 source("iscam-gui-globals.r")
+if(.OS == "Linux" || .OS == "Darwin"){
+  # This stops PBSmodelling from complaining and erroring out in Linux
+  #require("Tktable")
+  # This changes the windows() function call for Linux to X11()
+  windows <- function(...) X11(...)
+  # This changes the windows() function call for Linux to system()
+  shell   <- function(...) system(...)
+}
 
 # iscam-gui sources
 source(.UTILITIES_SOURCE)
@@ -702,9 +710,12 @@ iscam <- function(reloadScenarios      = FALSE,
   #}
   # Sanity checks end..
   modelCall <- .EXE_FILE_NAME
+  if(.OS == "Linux" || .OS == "Darwin"){
+    modelCall <- paste0("./",modelCall)
+  }
   for(command in 1:length(commandLine)){
     if(!is.na(commandLine[command])){
-      modelCall <- paste(modelCall, " -", names(commandLine[command]), " ", commandLine[command],sep="")
+      modelCall <- paste0(modelCall, " -", names(commandLine[command]), " ", commandLine[command])
     }
   }
   modelCall <- paste(modelCall, .DOS_PIPE_TO_LOG)
@@ -760,6 +771,9 @@ iscam <- function(reloadScenarios      = FALSE,
       }
       if(runMCMC){
         mcevalCall <- paste(.EXE_FILE_NAME,"-mceval",.DOS_APPEND_TO_LOG)
+        if(.OS == "Linux" || .OS == "Darwin"){
+          mcevalCall <- paste0("./", mcevalCall)
+        }
         cat(.PROJECT_NAME,"->",getCurrFunc(),"MCeval phase, the command being run is:\n",
             mcevalCall,"\n\n",sep="")
         shell(mcevalCall)

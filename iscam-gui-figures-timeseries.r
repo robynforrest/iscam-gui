@@ -72,17 +72,33 @@ plotTS <- function(plotNum  = 1,
   }else{
     models <- scenario # For the non-multiple case
   }
-  out    <- vector("list", length = length(models))
-  colors <- vector("list", length = length(models))
-  names  <- vector("list", length = length(models))
-  for(model in 1:length(models)){
-    if(plotMCMC){
-      out[[model]] <- op[[models[model]]]$outputs$mcmc
-    }else{
-      out[[model]] <- op[[models[model]]]$outputs$mpd
+
+  if(plotMCMC){
+    # Remove models which do not have MCMC outputs
+    hasMCMC <- vector("numeric", length = length(models))
+    for(model in 1:length(models)){
+      hasMCMC[[model]] <- !is.null(op[[models[model]]]$outputs$mcmc)
     }
-    colors[[model]] <- op[[models[model]]]$inputs$color
-    names[[model]] <- op[[models[model]]]$names$scenario
+    out <- colors <- names <- vector("list", len <- sum(hasMCMC))
+    nonmodels <- models[hasMCMC == 0]
+    models <- models[hasMCMC == 1]
+    if(length(nonmodels) > 0){
+      for(model in 1:length(nonmodels)){
+        cat0(.PROJECT_NAME,"->",currFuncName,"Model name ",op[[nonmodels[model]]]$names$scenario," has not been run in MCMC mode and is not plotted.")
+      }
+    }
+    for(model in 1:len){
+      out[[model]]    <- op[[models[model]]]$outputs$mcmc
+      colors[[model]] <- op[[models[model]]]$inputs$color
+      names[[model]]  <- op[[models[model]]]$names$scenario
+    }
+  }else{
+    out <- colors <- names <- vector("list", len <- length(models))
+    for(model in 1:len){
+      out[[model]] <- op[[models[model]]]$outputs$mpd
+      colors[[model]] <- op[[models[model]]]$inputs$color
+      names[[model]] <- op[[models[model]]]$names$scenario
+    }
   }
 
   figDir       <- op[[scenario]]$names$figDir

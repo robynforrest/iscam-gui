@@ -4,12 +4,22 @@
 # All the veriables declared here are hidden in the environment.
 #*******************************************************************************
 
+# Which operating system are you currently running?
+.OS                              <- Sys.info()["sysname"]
+
 # Project name
 .PROJECT_NAME                    <- "iscam-gui"
 .MAIN_FUNCTION_CALL              <- "iscam"
 
 # Editor
 .EDITOR                          <- file.path("C:","Progra~1","emacs-22.1","bin","runemacs.exe")
+if(.OS == "Linux"){
+  .EDITOR <- file.path("","usr","bin","emacs")
+}
+if(.OS == "Darwin"){
+  # Set editor path for MAC
+  .EDITOR <- file.path("","usr","bin","emacs")
+}
 
 # Directory names
 .DATAFILE_DIR_NAME               <- paste0(.PROJECT_NAME,"-datafile-gui")
@@ -34,7 +44,11 @@
 
 # iScam executable location
 .EXE_BASE_NAME                   <- "iscam"
-.EXE_FILE_NAME                   <- paste0(.EXE_BASE_NAME,".exe")
+if(.OS == "Linux"){
+  .EXE_FILE_NAME                   <- .EXE_BASE_NAME
+}else{
+  .EXE_FILE_NAME                   <- paste0(.EXE_BASE_NAME,".exe")
+}
 .EXE_FILE_NAME_FULL_PATH         <- file.path("..","iSCAM","src","admb-code",.EXE_FILE_NAME)
 
 .LAST_COMMAND_RUN_FILE_NAME      <- "lastCommandRun.rdata"  # Contains a list of the command line switches used in a run.
