@@ -75,30 +75,18 @@ plotTS <- function(plotNum  = 1,
 
   if(plotMCMC){
     # Remove models which do not have MCMC outputs
-    hasMCMC <- vector("numeric", length = length(models))
-    for(model in 1:length(models)){
-      hasMCMC[[model]] <- !is.null(op[[models[model]]]$outputs$mcmc)
-    }
-    out <- colors <- names <- vector("list", len <- sum(hasMCMC))
-    nonmodels <- models[hasMCMC == 0]
-    models <- models[hasMCMC == 1]
-    if(length(nonmodels) > 0){
-      for(model in 1:length(nonmodels)){
-        cat0(.PROJECT_NAME,"->",currFuncName,"Model name ",op[[nonmodels[model]]]$names$scenario," has not been run in MCMC mode and is not plotted.")
-      }
-    }
-    for(model in 1:len){
-      out[[model]]    <- op[[models[model]]]$outputs$mcmc
-      colors[[model]] <- op[[models[model]]]$inputs$color
-      names[[model]]  <- op[[models[model]]]$names$scenario
-    }
+    type <- "mcmc"
+    validModels <- getValidModelsList(models, type)
   }else{
-    out <- colors <- names <- vector("list", len <- length(models))
-    for(model in 1:len){
-      out[[model]] <- op[[models[model]]]$outputs$mpd
-      colors[[model]] <- op[[models[model]]]$inputs$color
-      names[[model]] <- op[[models[model]]]$names$scenario
-    }
+    type <- "mpd"
+    validModels <- getValidModelsList(models, type)
+  }
+  out    <- validModels[[1]]
+  colors <- validModels[[2]]
+  names  <- validModels[[3]]
+  if(is.null(validModels)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The model ",names[[1]]," has no ",type," output associated with it so no plot will be drawn.")
+    return(NULL)
   }
 
   figDir       <- op[[scenario]]$names$figDir
@@ -208,15 +196,17 @@ plotBiomassMPD <- function(out       = NULL,
     return(NULL)
   }
 	oldpar <- par(no.readonly=T)
-  yUpper <- max(out[[1]]$sbt, out[[1]]$sbo)
+  yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
   for(model in 1:length(out)){
-    yUpper <- max(yUpper, out[[model]]$sbt, out[[model]]$sbo)
+    yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
   }
-  plot(out[[1]]$yrs, out[[1]]$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
-  points(out[[1]]$yr[1]-0.8, out[[1]]$sbo, col=colors[[1]], pch=1)
-  for(line in 2:length(out)){
-    lines(out[[line]]$yrs, out[[line]]$sbt, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
-    points(out[[line]]$yr[1]-0.8, out[[line]]$sbo, col=colors[[line]], pch=1)
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      lines(out[[line]]$mpd$yrs, out[[line]]$mpd$sbt, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
+      points(out[[line]]$mpd$yr[1]-0.8, out[[line]]$mpd$sbo, col=colors[[line]], pch=1)
+    }
   }
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
@@ -261,14 +251,14 @@ plotBiomassMCMC <- function(out       = NULL,
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    quants[[model]] <- getQuants(out[[model]]$sbt[[1]], ci)
+    quants[[model]] <- getQuants(out[[model]]$mcmc$sbt[[1]], ci)
   }
   yUpper <- max(quants[[1]])
   for(model in 1:length(out)){
     yUpper <- max(yUpper, quants[[model]])
   }
 
-  yrs <- as.numeric(names(out[[1]]$sbt[[1]]))
+  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
 
   drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass", xlab="Year", main="Biomass", las=1)
   if(length(out) > 1){
@@ -357,4 +347,33 @@ drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
   polyYears <- c(yrs, rev(yrs))
   polyCI    <- c(lower, rev(upper))
   polygon(polyYears, polyCI, col = shade)
+}
+
+getValidModelsList <- function(models, type = "mpd"){
+  # return a list of data, colors, and names for the given set of models,
+  # for type mcmc or mpd (must be lower case).
+  # Only models which have been run in the given mode will be returned.
+  currFuncName <- getCurrFunc()
+  hasType <- vector("numeric", length = length(models))
+  for(model in 1:length(models)){
+    hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+  }
+  out <- colors <- names <- vector("list", len <- sum(hasType))
+  nonmodels <- models[hasType == 0]
+  models <- models[hasType == 1]
+  if(length(nonmodels) > 0){
+    for(model in 1:length(nonmodels)){
+      cat0(.PROJECT_NAME,"->",currFuncName,"Model name ",op[[nonmodels[model]]]$names$scenario," has not been run in ",type," mode and cannot be plotted.")
+    }
+  }
+  for(model in 1:len){
+    out[[model]]    <- op[[models[model]]]$outputs[type]
+    colors[[model]] <- op[[models[model]]]$inputs$color
+    names[[model]]  <- op[[models[model]]]$names$scenario
+  }
+  if(length(out) == 1 && is.null(out[[1]][[1]])){
+    return(NULL)
+  }
+  ret <- list(out,colors,names)
+  return(ret)
 }

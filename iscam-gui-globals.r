@@ -80,8 +80,14 @@ if(.OS == "Linux"){
 .DOS_PIPE_STDERR                 <- "2>&1"
 .DOS_APPEND_STDOUT               <- "1>>"
 .DOS_APPEND_STDERR               <- "2>>&1"
-.DOS_PIPE_TO_LOG                 <- paste(.DOS_PIPE_STDOUT, .LOG_FILE_NAME, .DOS_PIPE_STDERR)
-.DOS_APPEND_TO_LOG               <- paste(.DOS_APPEND_STDOUT, .LOG_FILE_NAME, .DOS_APPEND_STDERR)
+.LINUX_APPEND_STDERR             <- "2>&1" # Linux requires this slightly different version for appending stderr
+if(.OS == "Linux" || .OS == "Darwin"){
+  .DOS_PIPE_TO_LOG                 <- paste(.DOS_PIPE_STDOUT, .LOG_FILE_NAME, .DOS_PIPE_STDERR)
+  .DOS_APPEND_TO_LOG               <- paste(.DOS_APPEND_STDOUT, .LOG_FILE_NAME, .LINUX_APPEND_STDERR)
+}else{
+  .DOS_PIPE_TO_LOG                 <- paste(.DOS_PIPE_STDOUT, .LOG_FILE_NAME, .DOS_PIPE_STDERR)
+  .DOS_APPEND_TO_LOG               <- paste(.DOS_APPEND_STDOUT, .LOG_FILE_NAME, .DOS_APPEND_STDERR)
+}
 
 # Output file list, used for cleaning of the directories
 .OUTPUT_FILES                <- c(.LAST_COMMAND_RUN_FILE_NAME,
@@ -98,10 +104,12 @@ if(.OS == "Linux"){
                                   "*.eva",
                                   "*.hes",
                                   "*.par",
+                                  "*.re*",
                                   "*.std",
                                   "variance",
                                   "eigv.rpt",
                                   "fmin.log",
+                                  "sims",
                                   # MCMC ouputs
                                   paste0(.EXE_BASE_NAME,".ecm"),
                                   paste0(.EXE_BASE_NAME,".hst"),
