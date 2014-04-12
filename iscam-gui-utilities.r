@@ -168,7 +168,7 @@ drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
 }
 
 getValidModelsList <- function(models, type = "mpd"){
-  # Return a list of data, colors, and names for the given set of models,
+  # Return a list of data, colors, names, and inputs for the given set of models,
   # for type mcmc or mpd (must be lower case).
   # Only models which have been run in the given mode will be returned.
 
@@ -177,7 +177,7 @@ getValidModelsList <- function(models, type = "mpd"){
   for(model in 1:length(models)){
     hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
   }
-  out <- colors <- names <- vector("list", len <- sum(hasType))
+  inputs <- out <- colors <- names <- vector("list", len <- sum(hasType))
   nonmodels <- models[hasType == 0]
   models <- models[hasType == 1]
   if(length(nonmodels) > 0){
@@ -189,10 +189,11 @@ getValidModelsList <- function(models, type = "mpd"){
     out[[model]]    <- op[[models[model]]]$outputs[type]
     colors[[model]] <- op[[models[model]]]$inputs$color
     names[[model]]  <- op[[models[model]]]$names$scenario
+    inputs[[model]] <- op[[models[model]]]$inputs$data
   }
   if(length(out) == 1 && is.null(out[[1]][[1]])){
     return(NULL)
   }
-  ret <- list(out,colors,names)
+  ret <- list(out,colors,names,inputs)
   return(ret)
 }

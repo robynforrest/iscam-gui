@@ -101,7 +101,7 @@ grid 3 1 padx=10 pady=10 sticky=W
                radio name=viewPlotType value=sTSSpawningDepletionByArea          text="Spawning depletion by area" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment all areas" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSRecruitmentByArea                text="Recruitment by area" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sTSRecruitmentFractionByArea        text="Recruitment fraction by area" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSIndex                            text="Index fits" function=.subView sticky=W mode=character
           grid 16 1 sticky=N relief=raised
                label text="Catch" font=bold sticky=N
                radio name=viewPlotType value=sCatchLandings                 text="Landings" function=.subView sticky=W mode=character
@@ -245,13 +245,13 @@ grid 3 1 padx=10 pady=10 sticky=W
           null
           null
           #6
-          radio name=viewPlotType value=sSensSPRRatio       text="SPR ratio"                         function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
           null
           null
           null
           null
           #7
-          radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensSPRRatio       text="SPR ratio"                         function=.subView mode=character sticky=W
           null
           null
           null
@@ -344,28 +344,35 @@ grid 3 1 padx=10 pady=10 sticky=W
 
   grid 3 1
     grid 1 1
-      grid 3 7
-        check name=plotMCMC checked=T text="Plot MCMC" function=.subView action="changePlotMCMC" font=bold
+      grid 4 7
         null
         null
         null
         null
-        label text="Confidence %" font=bold sticky=W
+        null
+        label text="Index to plot" font=bold sticky=E
+        entry name=entryIndex width=5 padx=5 value=2 function=.subView action="changeIndex" entryfont="14" sticky=W
+        check name=plotMCMC checked=F text="Plot MCMC" function=.subView action="changePlotMCMC" font=bold sticky=E
+        null
+        null
+        null
+        null
+        label text="Confidence %" font=bold sticky=E
         entry name=entryConfidence width=5 padx=5 value=95 entryfont="14" function=.subView action="changeConfidence" entryfont="14" sticky=W
-        label text="Screen graphics:" font=bold sticky=W
+        label text="Screen graphics:" font=bold sticky=E
         null
         null
-        label text="Width" font=bold sticky=W
-        entry name=entryWidthScreen width=5 padx=5 value=10 function=.subView action="changeScreenGraphics" entryfont="14" sticky=W
-        label text="Height" font=bold sticky=W
-        entry name=entryHeightScreen width=5 padx=5 value=7 function=.subView action="changeScreenGraphics" entryfont="14" sticky=W
-        label text="Figure output PNG:" font=bold sticky=W
-        label text="Resolution" font=bold sticky=W
-        entry name=entryResolution width=5 padx=5 value=300 entryfont="14" sticky=W
-        label text="Width" font=bold sticky=W
-        entry name=entryWidth width=5 padx=5 value=6.5 entryfont="14" sticky=W
-        label text="Height" font=bold sticky=W
-        entry name=entryHeight width=5 padx=5 value=3.25 entryfont="14" sticky=W
+        label text="Width" font=bold sticky=E
+        entry name=entryWidthScreen width=5 padx=5 value=10 function=.subView action="changeScreenGraphics" entryfont="14" sticky=E
+        label text="Height" font=bold sticky=E
+        entry name=entryHeightScreen width=5 padx=5 value=7 function=.subView action="changeScreenGraphics" entryfont="14" sticky=E
+        label text="Figure output PNG:" font=bold sticky=E
+        label text="Resolution" font=bold sticky=E
+        entry name=entryResolution width=5 padx=5 value=300 entryfont="14" sticky=E
+        label text="Width" font=bold sticky=E
+        entry name=entryWidth width=5 padx=5 value=6.5 entryfont="14" sticky=E
+        label text="Height" font=bold sticky=E
+        entry name=entryHeight width=5 padx=5 value=3.25 entryfont="14" sticky=E
    grid 1 6
       label text="Legend location" font=bold sticky=W
       radio name=legendLoc value=sLegendTopright text="Top right" function=.subView mode=character sticky=W

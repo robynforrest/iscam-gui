@@ -217,7 +217,7 @@ iscam <- function(reloadScenarios      = FALSE,
   ci       <- val$entryConfidence  # Confidence interval
   pType    <- val$viewPlotType
   if(.checkEntries()){
-
+    
     switch(pType,
            # From iscam-gui-figures-timeseries.r
            "sTSSpawningBiomassAllAreas"             = {plotTS(1,png,"SpawningBiomassAllAreas",plotMCMC,ci)},
@@ -226,7 +226,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSSpawningDepletionByArea"             = {plotTS(4,png,"SpawningDepletionByArea",plotMCMC,ci)},
            "sTSRecruitmentAllAreas"                 = {plotTS(5,png,"RecruitmentAllAreas",plotMCMC,ci)},
            "sTSRecruitmentByArea"                   = {plotTS(6,png,"RecruitmentByArea",plotMCMC,ci)},
-           "sTSRecruitmentFractionByArea"           = {plotTS(7,png,"RecruitmentFractionByArea",plotMCMC,ci)},
+           "sTSIndex"                               = {plotTS(7,png,"Index",plotMCMC,ci)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci)},
@@ -277,16 +277,12 @@ iscam <- function(reloadScenarios      = FALSE,
            "sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
-           "sSensSBU"                               = {plotTS(2,png,"SpawningBiomassUncertainty",plotMCMC,ci,TRUE)},
-           "sSensBRatio"                            = {plotTS(3,png,"BRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensBRatioU"                           = {plotTS(4,png,"BratioUncertainty",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensSPRRatio"                          = {plotTS(5,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensSPRRatioU"                         = {plotTS(6,png,"SPRRatioUncertainty",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensRecruit"                           = {plotTS(7,png,"Recruit",plotMCMC,ci,TRUE)},
+           "sSensBRatio"                            = {plotTS(3,png,"Depletion",plotMCMC,ci,TRUE)},
+           "sSensRecruit"                           = {plotTS(5,png,"Recruitment",plotMCMC,ci,TRUE)},
+           "sSensIndex"                             = {plotTS(7,png,"Index",plotMCMC,ci,TRUE)},
+           "sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            "sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            "sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
-           "sSensRecruitDevU"                       = {plotTS(10,png,"RecruitmentDevUncertainty",plotMCMC,ci,TRUE)},
-           "sSensIndex"                             = {plotTS(11,png,"Index",plotMCMC,ci,TRUE)},
            "sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
            "sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
