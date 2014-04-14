@@ -316,7 +316,7 @@ iscam <- function(reloadScenarios      = FALSE,
   # scenarioList is a list of the scenario names (i.e. folder names)
   scenarioList <- as.numeric(rownames(viewHeader))
   # Could sort this but there's no need we are just looking at max and min below
-  sensList <- unique(as.numeric(scenarioHeader$Group))
+  sensList <- unique(as.numeric(val$scenarioHeader$Group))
   if(length(act)>1){
     act <- act[1]
   }
