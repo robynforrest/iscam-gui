@@ -173,7 +173,7 @@
   # Try to load data file.
   tryCatch({
     tmp$inputs$data      <- readData(file = tmp$names$data, verbose=!silent)
-    tmp$fileSuccess$data <- TRUE
+    tmp$fileSuccess$data <- TRUE 
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading data file: '",tmp$names$data,"'")
     cat0(.PROJECT_NAME,"->",currFuncName,war$message)
@@ -680,21 +680,25 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$agecomps    <- NULL
   # one list element for each gear (tmp$nagears)
-  tmp$agecomps    <- list()
-  for(gear in 1:tmp$nagears){
-    nrows <- tmp$nagearsvec[gear]
-    ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header columns
-    tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
-    for(row in 1:nrows){
-      tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-    }
-    colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+  if (tmp$nagearsvec > 0) {   #but, only if age composition data exist (i.e., 1 or more rows or data)
+     tmp$agecomps    <- list()
+     for(gear in 1:tmp$nagears){
+       nrows <- tmp$nagearsvec[gear]
+       ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header               columns
+       tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
+       for(row in 1:nrows){
+         tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+       }
+       colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+     }
   }
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
   tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])
   tmp$waa <- NULL
+
   if(tmp$nwtobs > 0){
     # Parse the weight-at-age data
     nrows       <- tmp$nwtobs
@@ -825,7 +829,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
                           "unfishedfirstyear","minpropage","meanF","sdmeanFfirstphase",
                           "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
                           "fracZpriorspawn","agecompliketype","IFDdist")
-  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+  tmp$eof <- as.numeric(dat[ind <- ind + 1])  
   return(tmp)
 }
 
