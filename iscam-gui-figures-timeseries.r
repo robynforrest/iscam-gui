@@ -70,7 +70,11 @@ plotTS <- function(plotNum  = 1,
   names  <- validModels[[3]]
   inputs <- validModels[[4]]
   if(is.null(validModels)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"The model ",names[[1]]," has no ",type," output associated with it.\n")
+    if(is.null(names)){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no ",type," output associated with it.\n")
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",names[[1]]," has no ",type," output associated with it.\n")
+    }
     return(NULL)
   }
 

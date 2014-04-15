@@ -556,19 +556,19 @@ iscam <- function(reloadScenarios      = FALSE,
                  mpdTimestamp    = op[[scenario]]$inputs$log$finishTimes[1],
                  mcmcTimestamp   = "",
                  mcevalTimestamp = "",
-                 warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                 warningsText    = op[[scenario]]$inputs$log$hessianWarning)
   }else if(loadLogFileSuccess){
     winList <- c(val$winList,
                  mpdTimestamp    = "",
                  mcmcTimestamp   = op[[scenario]]$inputs$log$finishTimes[1],
                  mcevalTimestamp = "MCEval not run",
-                 warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                 warningsText    = op[[scenario]]$inputs$log$hessianWarning)
     if(op[[scenario]]$inputs$log$hasMCeval){
       winList <- c(winList,
                    mpdTimestamp    = "",
                    mcmcTimestamp   = op[[scenario]]$inputs$log$finishTimes[1],
                    mcevalTimestamp = op[[scenario]]$inputs$log$finishTimes[2],
-                   warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                   warningsText    = op[[scenario]]$inputs$log$hessianWarning)
     }
   }
   try(setWinVal(winList), silent=silent)

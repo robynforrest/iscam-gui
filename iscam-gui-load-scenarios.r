@@ -466,6 +466,14 @@
     #  tmp$numWarnings <- "0"
     #}
 
+    # The '2' in the following is because the sentence appears twice in the output.
+    hessWarn <- logData[grep("Hessian does not appear to be positive definite",logData)][2]
+    if(!is.na(hessWarn)){
+      tmp$hessianWarning <- "Non-positive-definite Hessian"
+    }else{
+      tmp$hessianWarning <- ""
+    }
+
     if(length(grep("mcmc",logData)) > 0){
       tmp$isMCMC    <- TRUE
       tmp$isMPD     <- FALSE
@@ -478,11 +486,11 @@
       tmp$hasMCeval   <- TRUE
     }
   }else{
-    tmp$finishTimes <- ""
-    tmp$numWarnings <- "0"
-    tmp$isMPD       <- FALSE
-    tmp$isMCMC      <- FALSE
-    tmp$hasMCeval   <- FALSE
+    tmp$finishTimes  <- ""
+    tmp$warningsText <- ""
+    tmp$isMPD        <- FALSE
+    tmp$isMCMC       <- FALSE
+    tmp$hasMCeval    <- FALSE
   }
   return(tmp)
 }
