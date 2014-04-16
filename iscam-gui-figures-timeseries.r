@@ -44,7 +44,7 @@ plotTS <- function(plotNum  = 1,
   scenario     <- val$entryScenario
   sensGroup    <- val$entrySensitivityGroup
   index        <- val$entryIndex
-  browser()
+
   #retros       <- op[[scenario]]$outputs$retros
   scenarioName <- op[[scenario]]$names$scenario
   if(multiple){
