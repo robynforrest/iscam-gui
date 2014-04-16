@@ -25,8 +25,8 @@ dist/
 *.tmp
 *.rpt
 *.bar
-*.rep
-*.par
+#*.rep
+#*.par
 *.std
 *.eva
 *.mcmc
@@ -55,7 +55,7 @@ dist/
 
 # R stuff
 *.Rhistory
-*.Rdata
+#*.Rdata
 
 # Compiled Object files
 *.slo
@@ -86,7 +86,7 @@ dist/
 
 # Logs and databases #
 ######################
-*.log
+#*.log
 *.sql
 *.sqlite
 
