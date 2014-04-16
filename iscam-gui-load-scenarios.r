@@ -183,7 +183,6 @@
     cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     # Do nothing, is is likely not a scenario directory
   })
-
   # Try to load control file.
   tryCatch({
     tmp$inputs$control <- readControl(file    = tmp$names$control,
@@ -690,17 +689,17 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$agecomps    <- NULL
   # one list element for each gear (tmp$nagears)
-  if (tmp$nagearsvec > 0) {   #but, only if age composition data exist (i.e., 1 or more rows or data)
-     tmp$agecomps    <- list()
-     for(gear in 1:tmp$nagears){
-       nrows <- tmp$nagearsvec[gear]
-       ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header               columns
-       tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
-       for(row in 1:nrows){
-         tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-       }
-       colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+  if(tmp$nagearsvec[1] > 0){ # Check to see if there are age comp data
+   tmp$agecomps <- list()
+   for(gear in 1:tmp$nagears){
+     nrows <- tmp$nagearsvec[gear]
+     ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header columns
+     tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
+     for(row in 1:nrows){
+       tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
      }
+     colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+   }
   }
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
@@ -980,7 +979,7 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
 }
 
 extractGroupMatrices <- function(data = NULL, prefix = NULL){
-  # Extract the data frame given (data) by unflattening into t alist of matrices
+  # Extract the data frame given (data) by unflattening into a list of matrices
   # by group. The group number is located in the names of the columns of the
   # data frame in this format: "prefix[groupnum]_year" where [groupnum] is one
   # or more digits representing the group number and prefix is the string

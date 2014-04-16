@@ -1,3 +1,0 @@
-1 # sensitivity group
-24 # R colour for plotting
-1 # plotting order (where 1 = highest)
