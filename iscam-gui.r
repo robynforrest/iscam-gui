@@ -25,7 +25,7 @@
 # Add the ability to copy any one of the scenarios, at which time the gui will have to reload (how?)
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
-
+  
 removeAllExcept <- function(vars  = c("op","sens")){
   # removeAllExcept()
   # Removes everything in the workspace except for what is in the vars list.
@@ -48,7 +48,7 @@ removeAllExcept()
 require(PBSmodelling)
 
 options(stringsAsFactors = FALSE)
-options(warn = -1)
+options(warn = -1)          
 source("iscam-gui-globals.r")
 if(.OS == "Linux" || .OS == "Darwin"){
   # This stops PBSmodelling from complaining and erroring out in Linux
