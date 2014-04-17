@@ -106,6 +106,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
                                   "*.par",
                                   "*.re*",
                                   "*.std",
+                                  "*.psv",
                                   "variance",
                                   "eigv.rpt",
                                   "fmin.log",
