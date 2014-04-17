@@ -42,8 +42,7 @@
 }
 
 .deleteOutputs <- function(scenario, silent = .SILENT){
-  # delete all MPD files output by SS3.  Keep MCMC output files if they exist.
-  # TODO: Need to add retrospective RET* files to deletion list if they exist.
+  # delete all files output by iSCAM.
   currFuncName <- getCurrFunc()
   outputsFullPath <- file.path(op[[scenario]]$names$dir, .OUTPUT_FILES)
   if(!any(file.exists(outputsFullPath))){

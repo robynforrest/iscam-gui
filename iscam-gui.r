@@ -25,7 +25,7 @@
 # Add the ability to copy any one of the scenarios, at which time the gui will have to reload (how?)
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
-  
+
 removeAllExcept <- function(vars  = c("op","sens")){
   # removeAllExcept()
   # Removes everything in the workspace except for what is in the vars list.
@@ -48,7 +48,7 @@ removeAllExcept()
 require(PBSmodelling)
 
 options(stringsAsFactors = FALSE)
-options(warn = -1)          
+options(warn = -1)
 source("iscam-gui-globals.r")
 if(.OS == "Linux" || .OS == "Darwin"){
   # This stops PBSmodelling from complaining and erroring out in Linux
@@ -660,7 +660,7 @@ iscam <- function(reloadScenarios      = FALSE,
   }
 }
 
-.runRetros <- function(scenario=val$entryScenario, silent = .SILENT){
+.runRetros <- function(scenario = val$entryScenario, silent = .SILENT){
   # Steps:
   # 1. Save the current REP file by copying using file.copy
   # 2. Run the scenario using a system call for MLE retro, 1 for each retro year.
@@ -670,27 +670,73 @@ iscam <- function(reloadScenarios      = FALSE,
   val <- getWinVal()
   retroYears <- val$entryRetro
   showOutput <- val$showRetroOutput
+  srcDir <- op[[scenario]]$names$dir
+  currFuncName <- getCurrFunc()
+  overwrite <- getYes(paste0("Warning, any retrospectives previously run for the '",op[[scenario]]$names$scenario,
+                             "' scenario will be deleted if they exist. Continue?"),title="Proceed?",icon="question")
+  if(!overwrite){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Aborting retrospective run.\n")
+    return(NULL)
+  }
+  for(retro in 1:retroYears){
+    # Copy the current model's directory 'retroYears' times, with
+    #  each new directory being the number of years subtracted
+    destDir <- file.path(srcDir,paste0("retro",retro))
+    files <- dir(srcDir)
+    for(ind in 1:length(.OUTPUT_FILES)){
+      # Remove any output files from the copy source so as not to mess up the retro directory
+      pattern <- .OUTPUT_FILES[ind]
+      # Replace * wildcard with an alphnumeric wildcard
+      pattern <- sub("\\*","[[:alnum:]]+",pattern)
+      gr <- grep(pattern, files)
+      if(length(gr) > 0){
+        files <- files[-gr]
+      }
+    }
+    # Remove Figures and Tables directories
+    gr <- grep(.FIGURES_DIR_NAME,files)
+    if(length(gr) > 0){
+      files <- files[-gr]
+    }
+    gr <- grep(.TABLES_DIR_NAME,files)
+    if(length(gr) > 0){
+      files <- files[-gr]
+    }
+
+    # Add scenarioInfo file if it is not still there
+    gr <- grep(.SCENARIO_INFO_FILE_NAME, files)
+    if(length(gr) == 0){
+      gr <- grep(.SCENARIO_INFO_FILE_NAME, dir(srcDir))
+      if(length(gr) > 0){
+        # The ScenarioInfo file is in the srcDir, but not in our file list, so add it
+        files <- c(files,.SCENARIO_INFO_FILE_NAME)
+      }
+    }
+    srcFiles  <- file.path(srcDir,files)
+    destFiles <- file.path(destDir,files)
+    dir.create(destDir, showWarnings=FALSE)
+    file.copy(srcFiles, destFiles, overwrite=TRUE, recursive=TRUE)
+  }
 
   # Save the rscripts directory so we can get back to it
   rscriptsDir <- getwd()
+
   # change to this scenario's directory
-  setwd(op[[scenario]][[1]])
-  # Save the REP file from the main non-retro run by copying to a backup file
-  file.copy("sscam.rep","sscam.backup.rep")
+  setwd(op[[scenario]]$names$dir)
 
   for(retro in 1:retroYears){
-    modelCall <- paste(.EXE_FILE_NAME,"-retro",retro)
-    system(modelCall,wait=T,show.output.on.console=showOutput)
-    file.copy("sscam.rep",paste("sscam.ret",retro,sep=""),overwrite=T)
+    modelCall <- .EXE_FILE_NAME
+    if(.OS == "Linux" || .OS == "Darwin"){
+      modelCall <- paste0("./",modelCall)
+    }
+    modelCall <- paste(modelCall,"-retro",retro)
+    modelCall <- paste(modelCall, .DOS_PIPE_TO_LOG)
+
+    cat0(.PROJECT_NAME,"->",currFuncName,"Running retrospective\nScenario: ",
+         op[[scenario]]$names$scenario,"\nRetroyear: ",retro,"\n")
+    shell(modelCall)
   }
-
-  # Reinstantiate the REP file from the main non-retro run
-  file.copy("sscam.backup.rep","sscam.rep",overwrite=T)
-
   setwd(rscriptsDir)
-  # Needs fixing...
-  .loadScenario(scenario)
-  assignGlobals(scenario)
 }
 
 .buildModelCall <- function(scenario, silent = .SILENT){
