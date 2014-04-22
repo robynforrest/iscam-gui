@@ -410,13 +410,13 @@ plotRecruitmentMPD <- function(out       = NULL,
     rt     <- out[[1]]$mpd$rt
     yUpper <- max(yUpper, rt)
   }
-  plot(ryr, rt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
-      lines(ryr, rt, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
+      lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
   if(!is.null(legendLoc)){
@@ -472,10 +472,15 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
 
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+  plot(yrs, quants[[1]][2,], type="p", pch=20, ylim=c(0,yUpper), xlab="Year", ylab="Recruitment", las=1)
+  arrows(yrs, quants[[1]][1,],
+         yrs, quants[[1]][3,], code=3, angle=90, length=0.01)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+      # Plot the uncertainty
+      points(yrs, quants[[1]][2,])
+      arrows(yrs, quants[[line]][1,],
+             yrs, quants[[line]][3,], code=3, angle=90, length=0.01)
     }
   }
   if(!is.null(legendLoc)){
