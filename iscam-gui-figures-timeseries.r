@@ -12,8 +12,8 @@ plotTS <- function(plotNum    = 1,
                    fileText   = "Default",
                    plotMCMC   = FALSE,
                    ci         = NULL, # confidence interval in %
-                   recrOffset = 0.1,
                    multiple   = FALSE,
+                   recrOffset = 0.1,
                    retros     = FALSE,
                    btarg      = 0.4,  # Biomass target line for depletion plots
                    blim       = 0.25, # Biomass limit line for depletion plots
@@ -39,6 +39,8 @@ plotTS <- function(plotNum    = 1,
   # 5 Recruitment total (with or without uncertainty)
   # 6 Recruitment by area
   # 7 Index fits
+  # 8 SPR ratio
+  # 9 Fishing mortality
 
   currFuncName <- getCurrFunc()
   val          <- getWinVal()
@@ -103,10 +105,10 @@ plotTS <- function(plotNum    = 1,
   if(val$legendLoc == "sLegendNone"){
     legendLoc <- NULL
   }
+  if(plotNum < 1 || plotNum > 9){
+    return(FALSE)
+  }
   if(multiple || retros){
-    if(plotNum < 1 || plotNum > 13 && plotNum != 99){
-      return(FALSE)
-    }
     if(retros){
       filenameRaw  <- paste0("Retrospective_",op[[scenario]]$names$scenario,"_",fileText,".png")
       filename     <- file.path(op[[scenario]]$names$dir,.FIGURES_DIR_NAME,filenameRaw)
@@ -115,9 +117,6 @@ plotTS <- function(plotNum    = 1,
       filename     <- file.path(.SENS_FIGURES_DIR_NAME,filenameRaw)
     }
   }else{
-    if(plotNum < 1 || plotNum > 15){
-      return(FALSE)
-    }
     filenameRaw  <- paste0(scenarioName,"_",fileText,".png")
     filename     <- file.path(figDir,filenameRaw)
   }
@@ -153,6 +152,20 @@ plotTS <- function(plotNum    = 1,
       plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
     }else{
       plotIndexMPD(out, colors, names, inputs, index = index, verbose = !silent, legendLoc = legendLoc)
+    }
+  }
+  if(plotNum == 8){
+    if(plotMCMC){
+      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
+    }else{
+      #plotSPRMPD(out, colors, names, inputs, index = index, verbose = !silent, legendLoc = legendLoc)
+    }
+  }
+  if(plotNum == 9){
+    if(plotMCMC){
+      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
+    }else{
+      plotFMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
     }
   }
 
@@ -626,6 +639,118 @@ plotIndexMCMC <- function(out       = NULL,
   }
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
+  par(oldpar)
+}
+
+plotFMPD <- function(out       = NULL,
+                     colors    = NULL,
+                     names     = NULL,
+                     pch       = 1,
+                     verbose   = FALSE,
+                     legendLoc = "topright"){
+  # Fishing mortality plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  oldpar <- par(no.readonly=T)
+  nsex   <- out[[1]]$mpd$nsex
+  yrs    <- out[[1]]$mpd$yr
+  nyear  <- length(yrs)
+  ngear  <- out[[1]]$mpd$ngear
+
+  # This is the mean F with the # of rows being the number of gears, and that is multiplied
+  # by the number of sexes. So for a 3-gear, 2 sex model, there will be 6 rows in f with main grouping
+  # by gear, i.e. two, three-row groupings.
+  f      <- out[[1]]$mpd$ft
+  yUpper <- max(f)
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, out[[model]]$mpd$ft)
+  }
+  legendNames <- NULL
+  legendLines <- NULL
+  legendCols  <- NULL
+  for(sex in 1:nsex){
+    for(gear in 1:ngear){
+      meanF <- f[((sex-1) * ngear + gear),]
+      if(all(meanF == 0)){
+        cat0(.PROJECT_NAME,"->",currFuncName,"All meanF's for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+      }else{
+        if(sex == 1 && gear == 1){
+          # First one, so use plot command
+          plot(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=1,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
+        }else{
+          lines(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=1)
+        }
+        if(sex == 1){
+          legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Female"))
+        }else{
+          legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Male"))
+        }
+        legendLines <- c(legendLines, (sex-1) * ngear + gear)
+        legendCols  <- c(legendCols, colors[[1]])
+      }
+    }
+  }
+
+  # If sex==2 then every even row of F will be females and every odd row will be males
+  ## if(nsex == 2){
+  ##   # Split the matrix into odd and even matrices
+  ##   rowNums  <- seq(1,nrow(f))
+  ##   oddRows  <- !!(rowNums %% 2)
+  ##   evenRows <- !(rowNums %% 2)
+  ##   fMale    <- f[oddRows,]
+  ##   fFemale  <- f[evenRows,]
+  ##   plot(yrs, fMale, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="F", xlab="Year", main="Fishing Mortality", las=1)
+  ##   points(yrs, fFemale, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2)
+  ## }else{
+  ##   plot(yrs, f, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="F", xlab="Year", main="Fishing Mortality", las=1)
+  ## }
+
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      nsex   <- out[[line]]$mpd$nsex
+      yrs    <- out[[line]]$mpd$yr
+      nyear  <- length(yrs)
+      ngear  <- out[[line]]$mpd$ngear
+      for(sex in 1:nsex){
+        for(gear in 1:ngear){
+          meanF <- f[((sex-1) * ngear + gear),]
+          if(all(meanF == 0)){
+            cat0(.PROJECT_NAME,"->",currFuncName,"All meanF's for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+          }else{
+            lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=1)
+            if(sex == 1){
+              legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Female"))
+            }else{
+              legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Male"))
+            }
+            legendLines <- c(legendLines, (sex-1) * ngear + gear)
+            legendCols  <- c(legendCols, colors[[line]])
+          }
+        }
+      }
+    }
+  }
+  if(!is.null(legendLoc)){
+    legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=1)
   }
   par(oldpar)
 }
