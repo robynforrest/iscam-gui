@@ -384,6 +384,9 @@ iscam <- function(reloadScenarios      = FALSE,
          "editParFile" = {
            .editFile(scenario = val$entryScenario, type=7)
          },
+         "editReportFile" = {
+           .editFile(scenario = val$entryScenario, type=8)
+         },
          # These are from the 'RunModel' tab
          "refreshLogfileTimestamps" = {
            .updateGUIStamps()

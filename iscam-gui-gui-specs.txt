@@ -5,18 +5,17 @@ grid 3 1 padx=10 pady=5 sticky=W
           object name=scenarioHeader rowshow=5 function=.subView action="changeSensStatus" entrybg="wheat" width="40 5 5 5" font="12" padx=10 pady=10 edit=T
           #label text="Scenario" font="12"
           grid 1 4 sticky=N padx=30
-               label text="Scenario: " font=bold
-	       button name=prevScenario     function=.subView action="prevScenario"        width=7  text="<---"
-               entry name=entryScenario     function=.subView action="changeEntryScenario" width=5  padx=10 entryfont="12" entrybg="wheat"
-               button name=nextScenario     function=.subView action="nextScenario"        width=7  text="--->"
-          #button name=reloadScenario     function=.subView action="reloadScenario"      width=27 text="Reload Scenario"    fg="blue"
-          grid 1 6
-	       button name=reloadScenario     function=.subView action="reloadScenario"    width=15 text="Reload Scenario"    fg="blue"               
-	       button name=editStarterFile  function=.subView action="editStarterFile"     width=12 text="Edit Str. File"    fg="blue"
-               button name=editControlFile  function=.subView action="editControlFile"     width=12 text="Edit Ctl. File"    fg="blue"
-               button name=editDataFile     function=.subView action="editDataFile"        width=12 text="Edit Data File"       fg="blue"
-               button name=editProjectFile  function=.subView action="editProjectionFile"  width=12 text="Edit Proj. File" fg="blue"
-               button name=editParFile      function=.subView action="editParFile"         width=12 text="Edit Par file"        fg="blue"
+            label text="Scenario: " font=bold
+	          button name=prevScenario     function=.subView action="prevScenario"        width=7  text="<---"
+            entry name=entryScenario     function=.subView action="changeEntryScenario" width=5  padx=10 entryfont="12" entrybg="wheat"
+            button name=nextScenario     function=.subView action="nextScenario"        width=7  text="--->"
+          grid 1 5
+	         #button name=editStarterFile function=.subView action="editStarterFile"     width=12 text="Edit Str. File"  fg="blue"
+           button name=editControlFile  function=.subView action="editControlFile"     width=12 text="Control"         fg="blue"
+           button name=editDataFile     function=.subView action="editDataFile"        width=12 text="Data"            fg="blue"
+           button name=editProjectFile  function=.subView action="editProjectionFile"  width=12 text="Projection"      fg="blue"
+           button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
+           button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
      notebook name=nbPage tabs="RunModel Figures1 Figures2 SaveFigures Parameters MCMC SENS RETRO RV" font="8"
 
@@ -68,27 +67,30 @@ grid 3 1 padx=10 pady=5 sticky=W
                     #check name=loadCovar   checked=T   text="Load covar" function=.subView action="loadCovar"
                #label text=""
                grid 1 4
-                    button name=runCurrScenario               function=.subView action="runCurrScenario"              width=15 text="Run Scenario"       fg="white" bg="green"
-                    button name=editCurrScenarioLogfile       function=.subView action="editCurrScenarioLogfile"      width=15 text="View Log File"      fg="blue"
-                    button name=editWarningfile               function=.subView action="editWarningfile"              width=15 text="View Warning File"  fg="blue"
-                    button name=cleanDirectory                function=.subView action="cleanDirectory"               width=15 text="Clean directory"    fg="blue"
+                    button name=runCurrScenario         function=.subView action="runCurrScenario"         width=15 text="Run Scenario"      fg="blue"
+                    button name=reloadScenario          function=.subView action="reloadScenario"          width=15 text="Reload Scenario"   fg="blue"
+                    button name=editCurrScenarioLogfile function=.subView action="editCurrScenarioLogfile" width=15 text="Logfile"           fg="blue"
+                    #button name=editWarningfile        function=.subView action="editWarningfile"         width=15 text="View Warning File" fg="blue"
+                                        button name=cleanDirectory          function=.subView action="cleanDirectory"          width=15 text="Clean directory"   fg="blue"
                grid 1 1
                     #label text=""
-                    grid 7 2 relief=raised
-                         label text="MPD"                      font="bold 10" sticky=NE
-                         entry name=mpdTimestamp               width=25 entryfont="10" edit=F
-                         label text="MCMC"                     font="bold 10" sticky=NE
-                         entry name=mcmcTimestamp              width=25 entryfont="10" edit=F
-                         label text="MCeval"                   font="bold 10" sticky=NE
-                         entry name=mcevalTimestamp            width=25 entryfont="10" edit=F
-                         label text="Warnings"                 font="bold 10" sticky=NE
-                         entry name=warningsText               width=25 entryfont="10" edit=F
-                         label text="Number of Parameters"     font="bold 10" sticky=NE
-                         entry name=numParams                  width=25 entryfont="10" edit=F
-                         label text="Objective function value" font="bold 10" sticky=NE
-                         entry name=objFunValue                width=25 entryfont="10" edit=F
-                         label text="Maximum gradient"         font="bold 10" sticky=NE
-                         entry name=maxGradient                width=25 entryfont="10" edit=F
+                    grid 4 4 relief=raised
+                         label text="MPD"           font="bold 10" sticky=NE
+                         entry name=mpdTimestamp    width=25 entryfont="10" edit=F
+                         label text="# Params"      font="bold 10" sticky=NE
+                         entry name=numParams       width=25 entryfont="10" edit=F
+                         label text="MCMC"          font="bold 10" sticky=NE
+                         entry name=mcmcTimestamp   width=25 entryfont="10" edit=F
+                         label text="Objfun val"    font="bold 10" sticky=NE
+                         entry name=objFunValue     width=25 entryfont="10" edit=F
+                         label text="MCeval"        font="bold 10" sticky=NE
+                         entry name=mcevalTimestamp width=25 entryfont="10" edit=F
+                         label text="Max gradient"  font="bold 10" sticky=NE
+                         entry name=maxGradient     width=25 entryfont="10" edit=F
+                         label text="Warnings"      font="bold 10" sticky=NE
+                         entry name=warningsText    width=25 entryfont="10" edit=F
+                         null
+                         null
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Figures1                    --#
@@ -104,20 +106,20 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment all areas" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSRecruitmentByArea                text="Recruitment by area" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSIndex                            text="Index fits" function=.subView sticky=W mode=character
-          grid 13 1 sticky=N relief=raised
+          grid 3 1 sticky=N relief=raised
                label text="Catch" font=bold sticky=N
                radio name=viewPlotType value=sCatchLandings                 text="Landings" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sCatchLandingsStacked          text="Landings stacked" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsObsVsExpLandings text="Observed vs. expected landinngs" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchDiscards                 text="Discards" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchDiscardsStacked          text="Discards stacked" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchDiscardFraction          text="Discard fraction" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchHarvestRate              text="Harvest rate" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsSeasons          text="Landings aggregated across seasons" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsSeasonsStacked   text="Landings aggregated across sesons stacked" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchTotalSeasons             text="Total catch (if discards present) aggregated across seasons" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchLandingsObsVsExpLandings text="Observed vs. expected landinngs" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchDiscards                 text="Discards" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchDiscardsStacked          text="Discards stacked" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchDiscardFraction          text="Discard fraction" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchHarvestRate              text="Harvest rate" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchLandingsSeasons          text="Landings aggregated across seasons" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchLandingsSeasonsStacked   text="Landings aggregated across sesons stacked" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sCatchTotalSeasons             text="Total catch (if discards present) aggregated across seasons" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotalSeasonsStacked      text="Total catch (if discards present) aggregated across seasons stacked" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscardsSeasons          text="Discards aggregated across seasons" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscardsSeasonsStacked   text="Discards aggregated across seasons stacked" function=.subView sticky=W mode=character
@@ -127,32 +129,32 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 2 sticky=N pady=10
-          grid 11 1 sticky=N relief=raised
+          grid 3 1 sticky=N relief=raised
                label text="Biology" font=bold sticky=N
                radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyFecundity           text="Fecundity" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyFecundityWeight     text="Fecundity as a function of weight" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyFecundityLength     text="Fecundity as a function of length" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologySpawnOutputLength   text="Spawning output at length" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyExpectedGrowth      text="End year expected growth" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyTVM                 text="Time-varying natural mortality" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyTVGrowthPersp       text="Perspective of time-varying growth" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sBiologyTVGrowthContour     text="Contour of time-varying growth" function=.subView sticky=W mode=character
-          grid 13 1 sticky=N relief=raised
+               #radio name=viewPlotType value=sBiologyFecundity           text="Fecundity" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyFecundityWeight     text="Fecundity as a function of weight" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyFecundityLength     text="Fecundity as a function of length" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologySpawnOutputLength   text="Spawning output at length" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyExpectedGrowth      text="End year expected growth" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyTVM                 text="Time-varying natural mortality" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyTVGrowthPersp       text="Perspective of time-varying growth" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sBiologyTVGrowthContour     text="Contour of time-varying growth" function=.subView sticky=W mode=character
+          grid 2 1 sticky=N relief=raised
                label text="Selectivity" font=bold sticky=N
-               radio name=viewPlotType value=sSelexLengthBasedByFleet text="Length based in end year by fleet" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexLengthBasedByFleet text="Length based in end year by fleet" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sSelexAgeBasedByFleet text="Age based in end year by fleet" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtLengthSurface text="Time-varying length surface" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtLengthContour text="Time-varying length contour" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtLengthRetentionSurface text="Time-varying at-length retention surface" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtLengthRetentionContour text="Time-varying at-length retention contour" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVDiscardMortalitySurface text="Time-varying discard mortality surface" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVDiscardMortalityContour text="Time-varying discard mortality contour" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexRetentionDiscardMortalityEndYear text="Selectivity, retention, and discard mortality at length" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtAgeSurface text="Time-varying at-age surface" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtAgeContour text="Time-varying at-age contour" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sSelexTVAtAgeEndYear text="Time-varying at-age in end year" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtLengthSurface text="Time-varying length surface" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtLengthContour text="Time-varying length contour" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtLengthRetentionSurface text="Time-varying at-length retention surface" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtLengthRetentionContour text="Time-varying at-length retention contour" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVDiscardMortalitySurface text="Time-varying discard mortality surface" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVDiscardMortalityContour text="Time-varying discard mortality contour" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexRetentionDiscardMortalityEndYear text="Selectivity, retention, and discard mortality at length" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtAgeSurface text="Time-varying at-age surface" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtAgeContour text="Time-varying at-age contour" function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sSelexTVAtAgeEndYear text="Time-varying at-age in end year" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexAtAgeContour text="at-age in end year" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexAgeLengthGrowthCurve text="at-age and length contour overlaid growth curve" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexUncertainty text="Uncertainty if requested at end of control file" function=.subView sticky=W mode=character

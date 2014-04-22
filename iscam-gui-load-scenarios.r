@@ -109,6 +109,7 @@
                           projection        = "",
                           log               = "",
                           par               = "",
+                          report            = "",
                           mcmc              = "",
                           mcmcsbt           = "",
                           mcmcrt            = "",
@@ -138,9 +139,10 @@
                           mcmcrt            = FALSE,
                           log               = FALSE,
                           par               = FALSE,
+                          report            = FALSE,
                           sensitivityGroup  = FALSE,
                           lastCommandRun    = FALSE)
-  tmp$outputs     <- list(mpd               = NULL,
+  tmp$outputs     <- list(mpd               = NULL, # Report file is loaded in here
                           mcmc              = NULL,
                           par               = NULL,
                           retro             = NULL) # The retrospective plotting code looks at this.
@@ -150,6 +152,7 @@
   tmp$names$tableDir       <- file.path(dired,.TABLES_DIR_NAME)
   tmp$names$starter        <- file.path(dired,.STARTER_FILE_NAME)
   tmp$names$par            <- file.path(dired,.PAR_FILE_NAME)
+  tmp$names$report         <- file.path(dired,.REPORT_FILE_NAME)
   tmp$names$lastCommandRun <- file.path(dired,.LAST_COMMAND_RUN_FILE_NAME)
   tmp$names$log            <- file.path(dired,.LOG_FILE_NAME)
 
