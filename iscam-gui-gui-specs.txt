@@ -250,8 +250,8 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           #6
           radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
-          null
-          null
+          label text="Bar offset" sticky=W
+          entry name=entryRecrOffset function=.subView action="changeRecrOffset" width=5  padx=10 entryfont="14" value=0.1 sticky=W
           null
           null
           #7

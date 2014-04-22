@@ -7,17 +7,18 @@
 # Development Date  : October 2013 - Present
 #**********************************************************************************
 
-plotTS <- function(plotNum  = 1,
-                   png      = .PNG,
-                   fileText = "Default",
-                   plotMCMC = FALSE,
-                   ci       = NULL, # confidence interval in %
-                   multiple = FALSE,
-                   retros   = FALSE,
-                   btarg    = 0.4,  # Biomass target line for depletion plots
-                   blim     = 0.25, # Biomass limit line for depletion plots
-                   units    = .UNITS,
-                   silent   = .SILENT){
+plotTS <- function(plotNum    = 1,
+                   png        = .PNG,
+                   fileText   = "Default",
+                   plotMCMC   = FALSE,
+                   ci         = NULL, # confidence interval in %
+                   recrOffset = 0.1,
+                   multiple   = FALSE,
+                   retros     = FALSE,
+                   btarg      = 0.4,  # Biomass target line for depletion plots
+                   blim       = 0.25, # Biomass limit line for depletion plots
+                   units      = .UNITS,
+                   silent     = .SILENT){
 
   # If multiple = TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -142,8 +143,7 @@ plotTS <- function(plotNum  = 1,
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
-
+      plotRecruitmentMCMC(out, colors, names, ci, offset=recrOffset, verbose = !silent, legendLoc = legendLoc)
     }else{
       plotRecruitmentMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
     }
@@ -151,7 +151,6 @@ plotTS <- function(plotNum  = 1,
   if(plotNum == 7){
     if(plotMCMC){
       plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
-
     }else{
       plotIndexMPD(out, colors, names, inputs, index = index, verbose = !silent, legendLoc = legendLoc)
     }
@@ -169,7 +168,7 @@ plotBiomassMPD <- function(out       = NULL,
                            names     = NULL,
                            verbose   = FALSE,
                            legendLoc = "topright"){
-	# Biomass plot for an MPD
+  # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -190,7 +189,7 @@ plotBiomassMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
   for(model in 1:length(out)){
     yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
@@ -206,7 +205,7 @@ plotBiomassMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-	par(oldpar)
+  par(oldpar)
 }
 
 plotBiomassMCMC <- function(out       = NULL,
@@ -215,7 +214,7 @@ plotBiomassMCMC <- function(out       = NULL,
                             ci        = NULL,
                             verbose   = FALSE,
                             legendLoc = "topright"){
-	# Biomass plot for an MCMC
+  # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -242,7 +241,7 @@ plotBiomassMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -272,7 +271,7 @@ plotDepletionMPD <- function(out       = NULL,
                              names     = NULL,
                              verbose   = FALSE,
                              legendLoc = "topright"){
-	# Depletion plot for an MPD
+  # Depletion plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -293,7 +292,7 @@ plotDepletionMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   yUpper <- max(depl)
   for(model in 1:length(out)){
@@ -311,7 +310,7 @@ plotDepletionMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-	par(oldpar)
+  par(oldpar)
 }
 
 plotDepletionMCMC <- function(out       = NULL,
@@ -320,7 +319,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               ci        = NULL,
                               verbose   = FALSE,
                               legendLoc = "topright"){
-	# Depletion plot for an MCMC
+  # Depletion plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -347,7 +346,7 @@ plotDepletionMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -378,7 +377,7 @@ plotRecruitmentMPD <- function(out       = NULL,
                                names     = NULL,
                                verbose   = FALSE,
                                legendLoc = "topright"){
-	# Recruitment plot for an MPD
+  # Recruitment plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -399,7 +398,7 @@ plotRecruitmentMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   sage   <- out[[1]]$mpd$sage
   nyear  <- length(out[[1]]$mpd$yr)
   ryr    <- out[[1]]$mpd$yr[(1+sage):nyear]
@@ -407,7 +406,7 @@ plotRecruitmentMPD <- function(out       = NULL,
 
   yUpper <- max(rt)
   for(model in 1:length(out)){
-    rt     <- out[[1]]$mpd$rt
+    rt     <- out[[model]]$mpd$rt
     yUpper <- max(yUpper, rt)
   }
   plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
@@ -422,19 +421,23 @@ plotRecruitmentMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-	par(oldpar)
+  par(oldpar)
 }
 
 plotRecruitmentMCMC <- function(out       = NULL,
                                 colors    = NULL,
                                 names     = NULL,
                                 ci        = NULL,
+                                offset    = 0.1,
                                 verbose   = FALSE,
                                 legendLoc = "topright"){
-	# Recruitment plot for an MCMC
+  # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
-  # col is a list of the colors to use in the plot
+  # colors is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
+  # ci is the confidence interval in percent, eg 95
+  # offset is the number of years to offset the points and bars
+  #  for clarity on the plot, i.e. so that there is no overlapping.
   # TODO: These lists should be modified by the code so that only
   #  MCMC models will be included on the plot and legend.
   currFuncName <- getCurrFunc()
@@ -458,7 +461,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -472,15 +475,17 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, ylim=c(0,yUpper), xlab="Year", ylab="Recruitment", las=1)
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlab="Year", ylab="Recruitment", las=1)
   arrows(yrs, quants[[1]][1,],
-         yrs, quants[[1]][3,], code=3, angle=90, length=0.01)
+         yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
+    incOffset <- offset
     for(line in 2:length(out)){
       # Plot the uncertainty
-      points(yrs, quants[[1]][2,])
-      arrows(yrs, quants[[line]][1,],
-             yrs, quants[[line]][3,], code=3, angle=90, length=0.01)
+      points(yrs+incOffset, quants[[1]][2,], pch=20, col=colors[[line]])
+      arrows(yrs+incOffset, quants[[line]][1,],
+             yrs+incOffset, quants[[line]][3,], col=colors[[line]], code=3, angle=90, length=0.01)
+      incOffset <- incOffset + offset
     }
   }
   if(!is.null(legendLoc)){
@@ -496,7 +501,7 @@ plotIndexMPD <- function(out       = NULL,
                          index     = NULL,
                          verbose   = FALSE,
                          legendLoc = "topright"){
-	# Index fits plot for an MPD
+  # Index fits plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -529,7 +534,7 @@ plotIndexMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(inputs[[1]]$indices)," (index).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- inputs[[1]]$indices[[index]]
@@ -562,7 +567,7 @@ plotIndexMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-	par(oldpar)
+  par(oldpar)
 }
 
 plotIndexMCMC <- function(out       = NULL,
@@ -572,7 +577,7 @@ plotIndexMCMC <- function(out       = NULL,
                           ci        = NULL,
                           verbose   = FALSE,
                           legendLoc = "topright"){
-	# Recruitment plot for an MCMC
+  # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -599,7 +604,7 @@ plotIndexMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-	oldpar <- par(no.readonly=T)
+  oldpar <- par(no.readonly=T)
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
