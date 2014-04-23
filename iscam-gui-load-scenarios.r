@@ -109,9 +109,11 @@
                           projection        = "",
                           log               = "",
                           par               = "",
+                          report            = "",
                           mcmc              = "",
                           mcmcsbt           = "",
                           mcmcrt            = "",
+                          mcmcft            = "",
                           warnings          = "",
                           sensitivityGroup  = "",
                           lastCommandRun    = "")
@@ -136,11 +138,13 @@
                           mcmc              = FALSE,
                           mcmcsbt           = FALSE,
                           mcmcrt            = FALSE,
+                          mcmcft            = FALSE,
                           log               = FALSE,
                           par               = FALSE,
+                          report            = FALSE,
                           sensitivityGroup  = FALSE,
                           lastCommandRun    = FALSE)
-  tmp$outputs     <- list(mpd               = NULL,
+  tmp$outputs     <- list(mpd               = NULL, # Report file is loaded in here
                           mcmc              = NULL,
                           par               = NULL,
                           retro             = NULL) # The retrospective plotting code looks at this.
@@ -150,6 +154,7 @@
   tmp$names$tableDir       <- file.path(dired,.TABLES_DIR_NAME)
   tmp$names$starter        <- file.path(dired,.STARTER_FILE_NAME)
   tmp$names$par            <- file.path(dired,.PAR_FILE_NAME)
+  tmp$names$report         <- file.path(dired,.REPORT_FILE_NAME)
   tmp$names$lastCommandRun <- file.path(dired,.LAST_COMMAND_RUN_FILE_NAME)
   tmp$names$log            <- file.path(dired,.LOG_FILE_NAME)
 
@@ -183,7 +188,6 @@
     cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     # Do nothing, is is likely not a scenario directory
   })
-
   # Try to load control file.
   tryCatch({
     tmp$inputs$control <- readControl(file    = tmp$names$control,
@@ -278,10 +282,10 @@
     cat0(.PROJECT_NAME,"->",currFuncName,"  Error message: ", err$message)
   })
 
-  # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
+  # Try to load MCMC results.
   tryCatch({
     tmp$outputs$mcmc <- readMCMC(dired = dired, verbose=!silent)
-    tmp$fileSuccess$mcmc <- TRUE
+    tmp$fileSuccess$mcmc    <- TRUE
     cat0(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   },error=function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
@@ -466,6 +470,14 @@
     #  tmp$numWarnings <- "0"
     #}
 
+    # The '2' in the following is because the sentence appears twice in the output.
+    hessWarn <- logData[grep("Hessian does not appear to be positive definite",logData)][2]
+    if(!is.na(hessWarn)){
+      tmp$hessianWarning <- "Non-positive-definite Hessian"
+    }else{
+      tmp$hessianWarning <- ""
+    }
+
     if(length(grep("mcmc",logData)) > 0){
       tmp$isMCMC    <- TRUE
       tmp$isMPD     <- FALSE
@@ -478,11 +490,11 @@
       tmp$hasMCeval   <- TRUE
     }
   }else{
-    tmp$finishTimes <- ""
-    tmp$numWarnings <- "0"
-    tmp$isMPD       <- FALSE
-    tmp$isMCMC      <- FALSE
-    tmp$hasMCeval   <- FALSE
+    tmp$finishTimes  <- ""
+    tmp$warningsText <- ""
+    tmp$isMPD        <- FALSE
+    tmp$isMCMC       <- FALSE
+    tmp$hasMCeval    <- FALSE
   }
   return(tmp)
 }
@@ -682,17 +694,17 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$agecomps    <- NULL
   # one list element for each gear (tmp$nagears)
-  if (tmp$nagearsvec > 0) {   #but, only if age composition data exist (i.e., 1 or more rows or data)
-     tmp$agecomps    <- list()
-     for(gear in 1:tmp$nagears){
-       nrows <- tmp$nagearsvec[gear]
-       ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header               columns
-       tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
-       for(row in 1:nrows){
-         tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-       }
-       colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+  if(tmp$nagearsvec[1] > 0){ # Check to see if there are age comp data
+   tmp$agecomps <- list()
+   for(gear in 1:tmp$nagears){
+     nrows <- tmp$nagearsvec[gear]
+     ncols <- tmp$nagearsnage[gear] - tmp$nagearssage[gear] + 6 # 5 of the 6 here is for the header columns
+     tmp$agecomps[[gear]] <- matrix(NA, nrow = nrows, ncol = ncols)
+     for(row in 1:nrows){
+       tmp$agecomps[[gear]][row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
      }
+     colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
+   }
   }
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
@@ -961,6 +973,7 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   mcmcfn    <- file.path(dired,.MCMC_FILE_NAME)
   mcmcsbtfn <- file.path(dired,.MCMC_BIOMASS_FILE_NAME)
   mcmcrtfn  <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
+  mcmcftfn  <- file.path(dired,.MCMC_FISHING_MORT_FILE_NAME)
 
   tmp        <- list()
   tmp$params <- read.csv(mcmcfn)
@@ -968,11 +981,14 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$sbt    <- extractGroupMatrices(sbt, prefix = "sbt")
   rt         <- read.csv(mcmcrtfn)
   tmp$rt     <- extractGroupMatrices(rt, prefix = "rt")
+  ft         <- read.csv(mcmcftfn)
+  tmp$ft     <- extractAreaSexMatrices(ft, prefix = "ft")
+
   return(tmp)
 }
 
 extractGroupMatrices <- function(data = NULL, prefix = NULL){
-  # Extract the data frame given (data) by unflattening into t alist of matrices
+  # Extract the data frame given (data) by unflattening into a list of matrices
   # by group. The group number is located in the names of the columns of the
   # data frame in this format: "prefix[groupnum]_year" where [groupnum] is one
   # or more digits representing the group number and prefix is the string
@@ -1005,6 +1021,53 @@ extractGroupMatrices <- function(data = NULL, prefix = NULL){
     dat <- data[,grep(groupPattern, names)]
     colnames(dat) <- groupNames
     tmp[[group]]  <- dat
+  }
+  return(tmp)
+}
+
+extractAreaSexMatrices <- function(data = NULL, prefix = NULL){
+  # Extract the data frame given (data) by unflattening into a list of matrices
+  # by area-sex and gear. The area-sex number is located in the names of the columns of the
+  # data frame in this format: "prefix[areasexnum]_gear[gearnum]_year" where [areasexnum]
+  # and [gearnum] are one or more digits and prefix is the string given as an argument
+  # to the function.
+  # Returns a list (area-sex) of lists (gears) of matrices, one element per group.
+
+  currFuncName <- getCurrFunc()
+  if(is.null(data) || is.null(prefix)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must give two arguments (data & prefix). Returning NULL.")
+    return(NULL)
+  }
+
+  names <- names(data)
+  pattern <- paste0(prefix,"([[:digit:]]+)_gear[[:digit:]]+_[[:digit:]]+")
+  groups  <- sub(pattern,"\\1",names)
+  uniqueGroups <- unique(as.numeric(groups))
+  tmp <- vector("list", length = length(uniqueGroups))
+  # This code assumes that the groups are numbered sequentially from 1,2,3...N
+  for(group in 1:length(uniqueGroups)){
+    # Get all the column names (groupNames) for this group by making a specific pattern for it
+    groupPattern <- paste0(prefix,group,"_gear[[:digit:]]+_[[:digit:]]+")
+    groupNames   <- names[grep(groupPattern, names)]
+    # Remove the group number in the name, as it is not needed anymore
+    pattern      <- paste0(prefix,"[[:digit:]]+_gear([[:digit:]]+_[[:digit:]]+)")
+    groupNames   <- sub(pattern,"\\1",groupNames)
+    # At this point, groupNames' elements look like this: 1_1963
+    # The first value is the gear, and the second, the year.
+    # Get the unique gears for this area-sex group
+    pattern <- "([[:digit:]]+)_[[:digit:]]+"
+    gears   <- sub(pattern,"\\1",groupNames)
+    uniqueGears <- unique(as.numeric(gears))
+    tmp2 <- vector("list", length = length(uniqueGears))
+    for(gear in 1:length(uniqueGears)){
+      gearPattern <- paste0(prefix, group,"_gear",gear,"_[[:digit:]]+")
+      # Now, the data must be extracted
+      # Get the column numbers that this group are included in
+      dat <- data[,grep(gearPattern, names)]
+      #colnames(dat) <- groupNames
+      tmp2[[gear]] <- dat
+    }
+    tmp[[group]] <- tmp2
   }
   return(tmp)
 }

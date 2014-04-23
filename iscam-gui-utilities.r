@@ -177,6 +177,10 @@ getValidModelsList <- function(models, type = "mpd"){
   for(model in 1:length(models)){
     hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
   }
+  if(hasType == 0){
+    cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in mcmc mode. No plot to draw.")
+    return(NULL)
+  }
   inputs <- out <- colors <- names <- vector("list", len <- sum(hasType))
   nonmodels <- models[hasType == 0]
   models <- models[hasType == 1]

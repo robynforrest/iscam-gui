@@ -101,10 +101,10 @@ plotCatches <- function(inp,
 }
 
 plotSPR <-  function(inp,
-                        scenarioName,
-                        verbose = FALSE,
-                        legendLoc = "topright",
-                        col = 1){
+                     scenarioName,
+                     verbose = FALSE,
+                     legendLoc = "topright",
+                     col = 1){
 
 }
 

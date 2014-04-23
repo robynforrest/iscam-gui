@@ -25,7 +25,7 @@
 # Add the ability to copy any one of the scenarios, at which time the gui will have to reload (how?)
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
-  
+
 removeAllExcept <- function(vars  = c("op","sens")){
   # removeAllExcept()
   # Removes everything in the workspace except for what is in the vars list.
@@ -48,7 +48,7 @@ removeAllExcept()
 require(PBSmodelling)
 
 options(stringsAsFactors = FALSE)
-options(warn = -1)          
+options(warn = -1)
 source("iscam-gui-globals.r")
 if(.OS == "Linux" || .OS == "Darwin"){
   # This stops PBSmodelling from complaining and erroring out in Linux
@@ -212,12 +212,12 @@ iscam <- function(reloadScenarios      = FALSE,
   graphics.off()
   .PLOT_IS_LIVE <<- FALSE
 
-  val      <- getWinVal()
-  plotMCMC <- val$plotMCMC
-  ci       <- val$entryConfidence  # Confidence interval
-  pType    <- val$viewPlotType
+  val        <- getWinVal()
+  plotMCMC   <- val$plotMCMC
+  ci         <- val$entryConfidence  # Confidence interval
+  pType      <- val$viewPlotType
   if(.checkEntries()){
-    
+
     switch(pType,
            # From iscam-gui-figures-timeseries.r
            "sTSSpawningBiomassAllAreas"             = {plotTS(1,png,"SpawningBiomassAllAreas",plotMCMC,ci)},
@@ -227,6 +227,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSRecruitmentAllAreas"                 = {plotTS(5,png,"RecruitmentAllAreas",plotMCMC,ci)},
            "sTSRecruitmentByArea"                   = {plotTS(6,png,"RecruitmentByArea",plotMCMC,ci)},
            "sTSIndex"                               = {plotTS(7,png,"Index",plotMCMC,ci)},
+           "sSPRRatio"                              = {plotTS(8,png,"SPRRatio",plotMCMC,ci)},
+           "sFishingMortality"                      = {plotTS(9,png,"Fishing Mortality",plotMCMC,ci)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci)},
@@ -278,13 +280,14 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
            "sSensBRatio"                            = {plotTS(3,png,"Depletion",plotMCMC,ci,TRUE)},
-           "sSensRecruit"                           = {plotTS(5,png,"Recruitment",plotMCMC,ci,TRUE)},
+           "sSensRecruit"                           = {plotTS(5,png,"Recruitment",plotMCMC,ci,TRUE, recrOffset=val$entryRecrOffset)},
            "sSensIndex"                             = {plotTS(7,png,"Index",plotMCMC,ci,TRUE)},
-           "sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           "sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
-           "sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
-           "sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
-           "sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
+           #"sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           #"sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
+           "sSensF"                                 = {plotTS(9,png,"MeanF",plotMCMC,ci,TRUE)},
+           #"sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
+           #"sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
+           #"sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(plotNum=1,retros=TRUE,endyrvec=val$entryEndyr:val$entryStartyr,
                                                               png=png,fileText="RetroSpawningBiomass")},
@@ -384,6 +387,9 @@ iscam <- function(reloadScenarios      = FALSE,
          "editParFile" = {
            .editFile(scenario = val$entryScenario, type=7)
          },
+         "editReportFile" = {
+           .editFile(scenario = val$entryScenario, type=8)
+         },
          # These are from the 'RunModel' tab
          "refreshLogfileTimestamps" = {
            .updateGUIStamps()
@@ -458,6 +464,8 @@ iscam <- function(reloadScenarios      = FALSE,
            }
          },
          "changeBurnThin" = {
+         },
+         "changeRecrOffset" = {
          },
          "changeEndyrvec" = {
          },
@@ -556,19 +564,19 @@ iscam <- function(reloadScenarios      = FALSE,
                  mpdTimestamp    = op[[scenario]]$inputs$log$finishTimes[1],
                  mcmcTimestamp   = "",
                  mcevalTimestamp = "",
-                 warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                 warningsText    = op[[scenario]]$inputs$log$hessianWarning)
   }else if(loadLogFileSuccess){
     winList <- c(val$winList,
                  mpdTimestamp    = "",
                  mcmcTimestamp   = op[[scenario]]$inputs$log$finishTimes[1],
                  mcevalTimestamp = "MCEval not run",
-                 warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                 warningsText    = op[[scenario]]$inputs$log$hessianWarning)
     if(op[[scenario]]$inputs$log$hasMCeval){
       winList <- c(winList,
                    mpdTimestamp    = "",
                    mcmcTimestamp   = op[[scenario]]$inputs$log$finishTimes[1],
                    mcevalTimestamp = op[[scenario]]$inputs$log$finishTimes[2],
-                   warningsText    = op[[scenario]]$inputs$log$numWarnings)
+                   warningsText    = op[[scenario]]$inputs$log$hessianWarning)
     }
   }
   try(setWinVal(winList), silent=silent)
@@ -660,7 +668,7 @@ iscam <- function(reloadScenarios      = FALSE,
   }
 }
 
-.runRetros <- function(scenario=val$entryScenario, silent = .SILENT){
+.runRetros <- function(scenario = val$entryScenario, silent = .SILENT){
   # Steps:
   # 1. Save the current REP file by copying using file.copy
   # 2. Run the scenario using a system call for MLE retro, 1 for each retro year.
@@ -670,27 +678,73 @@ iscam <- function(reloadScenarios      = FALSE,
   val <- getWinVal()
   retroYears <- val$entryRetro
   showOutput <- val$showRetroOutput
+  srcDir <- op[[scenario]]$names$dir
+  currFuncName <- getCurrFunc()
+  overwrite <- getYes(paste0("Warning, any retrospectives previously run for the '",op[[scenario]]$names$scenario,
+                             "' scenario will be deleted if they exist. Continue?"),title="Proceed?",icon="question")
+  if(!overwrite){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Aborting retrospective run.\n")
+    return(NULL)
+  }
+  for(retro in 1:retroYears){
+    # Copy the current model's directory 'retroYears' times, with
+    #  each new directory being the number of years subtracted
+    destDir <- file.path(srcDir,paste0("retro",retro))
+    files <- dir(srcDir)
+    for(ind in 1:length(.OUTPUT_FILES)){
+      # Remove any output files from the copy source so as not to mess up the retro directory
+      pattern <- .OUTPUT_FILES[ind]
+      # Replace * wildcard with an alphnumeric wildcard
+      pattern <- sub("\\*","[[:alnum:]]+",pattern)
+      gr <- grep(pattern, files)
+      if(length(gr) > 0){
+        files <- files[-gr]
+      }
+    }
+    # Remove Figures and Tables directories
+    gr <- grep(.FIGURES_DIR_NAME,files)
+    if(length(gr) > 0){
+      files <- files[-gr]
+    }
+    gr <- grep(.TABLES_DIR_NAME,files)
+    if(length(gr) > 0){
+      files <- files[-gr]
+    }
+
+    # Add scenarioInfo file if it is not still there
+    gr <- grep(.SCENARIO_INFO_FILE_NAME, files)
+    if(length(gr) == 0){
+      gr <- grep(.SCENARIO_INFO_FILE_NAME, dir(srcDir))
+      if(length(gr) > 0){
+        # The ScenarioInfo file is in the srcDir, but not in our file list, so add it
+        files <- c(files,.SCENARIO_INFO_FILE_NAME)
+      }
+    }
+    srcFiles  <- file.path(srcDir,files)
+    destFiles <- file.path(destDir,files)
+    dir.create(destDir, showWarnings=FALSE)
+    file.copy(srcFiles, destFiles, overwrite=TRUE, recursive=TRUE)
+  }
 
   # Save the rscripts directory so we can get back to it
   rscriptsDir <- getwd()
+
   # change to this scenario's directory
-  setwd(op[[scenario]][[1]])
-  # Save the REP file from the main non-retro run by copying to a backup file
-  file.copy("sscam.rep","sscam.backup.rep")
+  setwd(op[[scenario]]$names$dir)
 
   for(retro in 1:retroYears){
-    modelCall <- paste(.EXE_FILE_NAME,"-retro",retro)
-    system(modelCall,wait=T,show.output.on.console=showOutput)
-    file.copy("sscam.rep",paste("sscam.ret",retro,sep=""),overwrite=T)
+    modelCall <- .EXE_FILE_NAME
+    if(.OS == "Linux" || .OS == "Darwin"){
+      modelCall <- paste0("./",modelCall)
+    }
+    modelCall <- paste(modelCall,"-retro",retro)
+    modelCall <- paste(modelCall, .DOS_PIPE_TO_LOG)
+
+    cat0(.PROJECT_NAME,"->",currFuncName,"Running retrospective\nScenario: ",
+         op[[scenario]]$names$scenario,"\nRetroyear: ",retro,"\n")
+    shell(modelCall)
   }
-
-  # Reinstantiate the REP file from the main non-retro run
-  file.copy("sscam.backup.rep","sscam.rep",overwrite=T)
-
   setwd(rscriptsDir)
-  # Needs fixing...
-  .loadScenario(scenario)
-  assignGlobals(scenario)
 }
 
 .buildModelCall <- function(scenario, silent = .SILENT){

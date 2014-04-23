@@ -42,8 +42,7 @@
 }
 
 .deleteOutputs <- function(scenario, silent = .SILENT){
-  # delete all MPD files output by SS3.  Keep MCMC output files if they exist.
-  # TODO: Need to add retrospective RET* files to deletion list if they exist.
+  # delete all files output by iSCAM.
   currFuncName <- getCurrFunc()
   outputsFullPath <- file.path(op[[scenario]]$names$dir, .OUTPUT_FILES)
   if(!any(file.exists(outputsFullPath))){
@@ -71,6 +70,7 @@
   # 5 = Forecast file
   # 6 = Warning file
   # 7 = PAR file
+  # 8 = Report file
   if(type==1){
     editCall <- paste(.EDITOR,op[[scenario]]$names$control)
     shell(editCall, wait=F)
@@ -112,6 +112,15 @@
     }else{
       cat(.PROJECT_NAME,"->.editFile: '",op[[scenario]]$names$par,"' does not exist.\n",
           "You must run the model from within the GUI to create this file.\n")
+    }
+  }
+  if(type==8){
+    if(file.exists(op[[scenario]]$names$report)){
+      editCall <- paste(.EDITOR,op[[scenario]]$names$report)
+      shell(editCall, wait=F)
+    }else{
+      cat(.PROJECT_NAME,"->.editFile: '",op[[scenario]]$names$report,"' does not exist.\n",
+          "You must run the model to create this file.\n")
     }
   }
 
