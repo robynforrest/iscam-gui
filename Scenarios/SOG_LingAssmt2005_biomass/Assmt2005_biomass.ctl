@@ -16,12 +16,12 @@
 7
 ## ival   lb      ub      phz     prior   p1      p2      #parameter  ##
 7.0       0.0     15     1       0       0.0     10      #log_ro      ##
-0.75      0.2     1.0    -3       3       3.00    2.00     #steepness   ##
+0.75      0.2     1.0    3       3       3.00    2.00     #steepness   ##
 -1.61    -3.0     2.0    -2       1       -1.203  0.15    #log_m g&b  ##
 7.0       0.0     15     2       0       0.0     10      #log_avgrec  ##
 7.0       0.0     15     1       0       0.0     10      #log_recinit ##
-0.5        0.01    0.99   -3       3       75.5    75.5   #rho         ##
-1.16       0.01   15.0    3       4       2.50    1.50    #vartheta    ##
+0.26        0.01    0.99   -3       3       75.5    75.5   #rho         ##
+0.735       0.01   15.0    -3       4       2.50    1.50    #vartheta    ##
 ## ------------------------------------------------------------------------- ##
 ##
 ## ------------------------------------------------------------------------- ##
@@ -97,8 +97,8 @@
 ## ------------------------------------------------------------------------- ##
 0           # 1  -verbose ADMB output (0=off, 1=on)
 2           # 2  -recruitment model (1=beverton-holt, 2=ricker)
-0.5          # 3  -std in observed catches in first phase.
-1.0        # 4  -std in observed catches in last phase.
+1.0          # 3  -std in observed catches in first phase.
+0.5        # 4  -std in observed catches in last phase.
 1           # 5  -Assume unfished in first year (0=FALSE, 1=TRUE)
 0.00        # 6  -Minimum proportion to consider in age-proportions for dmvlogistic
 0.20        # 7  -Mean fishing mortality for regularizing the estimates of Ft

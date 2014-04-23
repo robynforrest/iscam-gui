@@ -77,6 +77,9 @@ plotCatch <- function(plotNum  = 1,
   if(plotNum == 2){
     plotSPR(inp = inputs, scenarioName, legendLoc = legendLoc, col = color)
   }
+  if(plotNum == 3){
+    plotExpVsObsCatch(inp = inputs, out=out, scenarioName, legendLoc = legendLoc, col = color)
+  }
 
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -102,5 +105,43 @@ plotSPR <-  function(inp,
                         verbose = FALSE,
                         legendLoc = "topright",
                         col = 1){
+
+}
+
+
+plotExpVsObsCatch<-function(inp,
+                                out,
+                                scenarioName,
+                                verbose = FALSE,
+                                legendLoc = "topright",
+                                col = 1){
+
+  ngear<-inp$data$ngear
+  catchData <- inp$data$catch
+  years <- catchData[,"year"]
+  obsCt <- catchData[,"value"]
+  gear <-catchData[,"gear"]
+  gearList<-unique(gear)
+  predCt <-out$ct
+
+  if (ngear==1) par(mfrow=c(1,1),mar=c(5,4,2,2))
+  if (ngear == 2) par(mfrow=c(2,1),mar=c(4,4,2,2))
+  if (ngear == 3 | ngear == 4) par(mfrow=c(2,2),mar=c(3,3,2,2))
+  if (ngear == 5 | ngear == 6) par(mfrow=c(3,2),mar=c(2,2,2,2))
+
+  for (i in 1:ngear) {
+      # Set-up plot area
+      xLim <- range(years)
+      yLim <- c(0,(max(obsCt[gear==gearList[i]],predCt[gear==gearList[i]])*1.1))
+
+      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Index")
+
+      points(years[gear==gearList[i]], obsCt[gear==gearList[i]], pch=19)
+      lines(years[gear==gearList[i]], predCt[gear==gearList[i]], col="grey50")
+      box()
+
+  }
+
+  par(mfrow=c(1,1),mar=c(5,4,2,2))
 
 }
