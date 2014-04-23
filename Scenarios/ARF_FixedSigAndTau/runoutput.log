@@ -237,7 +237,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
  49  0.54265 3.66626e+001 | 50  0.49363 7.71386e+001 | 51  0.56215 -7.35047e-001
  52  0.49115 4.53171e+001 | 53  0.53376 -3.60255e+000 | 54  0.47800 -8.55520e+000
  55  0.00000 0.00000e+000 | 56  0.00000 0.00000e+000 |
-You got here
 You got to the end of the report section
 
 Initial statistics: 135 variables; iteration 0; function evaluation 0; phase 2
@@ -964,7 +963,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
 127  0.00049 -1.93975e+002 |128 -0.00051 -1.54109e+002 |129 -0.00059 -9.39314e+001
 130 -0.00101 -8.13931e+001 |131 -0.00024 -4.10942e+001 |132  0.44388 -2.46176e+001
 133  0.39490 -4.24760e+001 |134  0.84144 1.98609e+001 |135  0.77385 1.57710e+001
-You got here
 You got to the end of the report section
 
 Initial statistics: 142 variables; iteration 0; function evaluation 0; phase 3
@@ -3419,7 +3417,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
 136 -0.01541 6.42897e-005 |137 -0.01868 2.53511e-005 |138  0.00315 2.23527e-004
 139  1.00124 -2.61588e-005 |140  0.99908 -9.52665e-005 |141  0.97607 -1.33095e-003
 142  0.95528 -4.34368e-003 |
-You got here
 |------------------------------------------|
 | MSY-BASED REFERENCE POINTS               |
 |------------------------------------------|
@@ -3603,11 +3600,11 @@ In write empirical covariance matrix
 
 
 *******************************************
---Start time: Tue Apr 22 09:53:37 2014
+--Start time: Wed Apr 23 09:51:44 2014
 
---Finish time: Tue Apr 22 09:54:39 2014
+--Finish time: Wed Apr 23 09:52:48 2014
 
---Runtime: 0 hours, 1 minutes, 2 seconds
+--Runtime: 0 hours, 1 minutes, 4 seconds
 --Number of function evaluations: 2378
 --Results are saved with the base name:
 	arf
@@ -5500,9 +5497,9 @@ Running mceval phase
 
 
 *******************************************
---Start time: Tue Apr 22 09:54:39 2014
+--Start time: Wed Apr 23 09:52:48 2014
 
---Finish time: Tue Apr 22 09:54:42 2014
+--Finish time: Wed Apr 23 09:52:51 2014
 
 --Runtime: 0 hours, 0 minutes, 3 seconds
 --Number of function evaluations: 100

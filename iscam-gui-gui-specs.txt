@@ -63,7 +63,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                          #label text=""
                grid 1 2
                     label text="Command:" font=bold sticky=NE
-                    entry name=runCommandText  width=40 entryfont="12" edit=F
+                    entry name=runCommandText  width=70 entryfont="8" edit=F
                     #check name=loadCovar   checked=T   text="Load covar" function=.subView action="loadCovar"
                #label text=""
                grid 1 4
@@ -71,7 +71,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                     button name=reloadScenario          function=.subView action="reloadScenario"          width=15 text="Reload Scenario"   fg="blue"
                     button name=editCurrScenarioLogfile function=.subView action="editCurrScenarioLogfile" width=15 text="Logfile"           fg="blue"
                     #button name=editWarningfile        function=.subView action="editWarningfile"         width=15 text="View Warning File" fg="blue"
-                                        button name=cleanDirectory          function=.subView action="cleanDirectory"          width=15 text="Clean directory"   fg="blue"
+                    button name=cleanDirectory          function=.subView action="cleanDirectory"          width=15 text="Clean directory"   fg="blue"
                grid 1 1
                     #label text=""
                     grid 4 4 relief=raised
@@ -98,7 +98,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 
      grid 1 2 relief=raised
           grid 10 1 sticky=N relief=raised
-               label text="Time series" font=bold sticky=N
+               label text="Time series" font="bold 10" sticky=N
                radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass all areas"   function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSSpawningBiomassByArea            text="Spawning biomass by area"     function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSSpawningDepletionAllAreas        text="Spawning depletion all areas" function=.subView sticky=W mode=character
@@ -109,9 +109,9 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sFishingMortality                   text="Fishing mortality"            function=.subView sticky=W mode=character
                radio name=viewPlotType value=sSPRRatio                           text="SPR ratio"                    function=.subView sticky=W mode=character
           grid 3 1 sticky=N relief=raised
-               label text="Catch" font=bold sticky=N
-               radio name=viewPlotType value=sCatchLandings                 text="Landings" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsStacked          text="Landings stacked" function=.subView sticky=W mode=character
+               label text="Catch" font="bold 10" sticky=N
+               radio name=viewPlotType value=sCatchLandings                  text="Landings" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sCatchLandingsStacked           text="Landings stacked" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchLandingsObsVsExpLandings text="Observed vs. expected landinngs" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
@@ -132,7 +132,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 
      grid 1 2 sticky=N pady=10
           grid 3 1 sticky=N relief=raised
-               label text="Biology" font=bold sticky=N
+               label text="Biology" font="bold 10" sticky=N
                radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyFecundity           text="Fecundity" function=.subView sticky=W mode=character
@@ -144,7 +144,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sBiologyTVGrowthPersp       text="Perspective of time-varying growth" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyTVGrowthContour     text="Contour of time-varying growth" function=.subView sticky=W mode=character
           grid 2 1 sticky=N relief=raised
-               label text="Selectivity" font=bold sticky=N
+               label text="Selectivity" font="bold 10" sticky=N
                #radio name=viewPlotType value=sSelexLengthBasedByFleet text="Length based in end year by fleet" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sSelexAgeBasedByFleet text="Age based in end year by fleet" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexTVAtLengthSurface text="Time-varying length surface" function=.subView sticky=W mode=character
@@ -181,7 +181,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 4 1 sticky=N relief=raised
-          label text="Parameter Estimates" font=bold sticky=NW
+          label text="Parameter Estimates" font="bold 10" sticky=NW
           radio name=viewPlotType value=sParameterPairs     text="Pairs with histograms"            function=.subView mode=character sticky=W
           radio name=viewPlotType value=sPriorsVsPosts      text="Priors vs. Posts"                 function=.subView mode=character sticky=W
           radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
@@ -192,25 +192,25 @@ grid 3 1 padx=10 pady=5 sticky=W
 
      grid 4 3 byrow=T sticky=N relief=raised
           #1
-          label text="MCMC Diagnostics" font=bold sticky=NW
+          label text="MCMC Diagnostics" font="bold 10" sticky=NW
           null
           null
           #2
           radio name=viewPlotType value=sMCMCTrace          text="Traceplots"                       function=.subView mode=character sticky=W
-          label text="Burn" font=bold width=5 sticky=E
-          entry name=burn function=.subView action="changeBurnThin" width=5 value=0   entryfont="14"
+          label text="Burn" font="bold 10" width=5 sticky=E
+          entry name=burn function=.subView action="changeBurnThin" width=5 value=0   entryfont="10"
           #3
           radio name=viewPlotType value=sMCMCAutocor        text="Autocorrelation"                  function=.subView mode=character sticky=W
-          label text="Thin" font="14" width=5 sticky=E
-          entry name=thin function=.subView action="changeBurnThin" width=5 value=1   entryfont="14"
+          label text="Thin" font="bold 10" width=5 sticky=E
+          entry name=thin function=.subView action="changeBurnThin" width=5 value=1   entryfont="10"
           #4
           radio name=viewPlotType value=sMCMCDensity         text="Density"                        function=.subView mode=character sticky=W
           null
           null
           #5
           #radio name=viewPlotType value=sMCMCGeweke         text="Geweke Diagnostic"                     function=.subView mode=character sticky=W
-          #label text="Nbin" font=bold width=5 sticky=E
-          #entry name=nbin  function=.subView action="changeBurnThin" width=5 value=20   entryfont="14"
+          #label text="Nbin" font="bold 10" width=5 sticky=E
+          #entry name=nbin  function=.subView action="changeBurnThin" width=5 value=20   entryfont="10"
           #6
           #radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
           #null
@@ -221,7 +221,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
      grid 12 5 byrow=T sticky=N relief=raised
           #1
-          label text="Sensitivity Groups"     font=bold sticky=W
+          label text="Sensitivity Groups"     font="bold 10" sticky=W
           null
           null
           null
@@ -229,7 +229,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           #2
           label text="Group number"     sticky=W
           button name=prevSens   function=.subView action="prevSens"     width=5 text="<--" fg="blue"
-          entry name=entrySensitivityGroup function=.subView action="changeSensitivityGroup" width=5  padx=10 entryfont="14" value=1 sticky=W
+          entry name=entrySensitivityGroup function=.subView action="changeSensitivityGroup" width=5  padx=10 entryfont="10" value=1 sticky=W
           button name=nextSens   function=.subView action="nextSens"     width=5 text="-->" fg="blue"
           null
           #3
@@ -247,13 +247,13 @@ grid 3 1 padx=10 pady=5 sticky=W
           #5
           radio name=viewPlotType value=sSensBRatio         text="Depletion"                         function=.subView mode=character sticky=W
           label text="B target" sticky=W
-          entry name=entryBtarg function=.subView action="changeBtarg" width=5  padx=10 entryfont="14" value=0.4 sticky=W
+          entry name=entryBtarg function=.subView action="changeBtarg" width=5  padx=10 entryfont="10" value=0.4 sticky=W
           null
           null
           #6
           radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
           label text="Bar offset" sticky=W
-          entry name=entryRecrOffset function=.subView action="changeRecrOffset" width=5  padx=10 entryfont="14" value=0.1 sticky=W
+          entry name=entryRecrOffset function=.subView action="changeRecrOffset" width=5  padx=10 entryfont="10" value=0.1 sticky=W
           null
           null
           #7
@@ -299,7 +299,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 
      grid 11 3 sticky=N relief=raised
           #1
-          label text="Retrospectives"     font=bold sticky=NW
+          label text="Retrospectives"     font="bold 10" sticky=NW
           null
           null
           #2
@@ -308,34 +308,34 @@ grid 3 1 padx=10 pady=5 sticky=W
           label text="max Y"
           #3
 	  radio name=viewPlotType value=sRetroSB             text="Spawning biomass"                 function=.subView mode=character sticky=W
-          entry name=biomassRetroYlim  width=5 value=6 function=.subView action="changeBiomassRetroYlim" entryfont="12"
+          entry name=biomassRetroYlim  width=5 value=6 function=.subView action="changeBiomassRetroYlim" entryfont="10"
           check name=maxBiomassRetroYlim checked=F function=.subView action="changeBiomassRetroYlim"
           #4
           radio name=viewPlotType value=sRetroD              text="Depletion"                        function=.subView mode=character sticky=W
-          entry name=depletionRetroYlim  width=5 value=2.5 function=.subView action="changeDepletionRetroYlim" entryfont="12"
+          entry name=depletionRetroYlim  width=5 value=2.5 function=.subView action="changeDepletionRetroYlim" entryfont="10"
           check name=maxDepletionRetroYlim checked=F function=.subView action="changeDepletionRetroYlim"
           #5
 	  radio name=viewPlotType value=sRetroRec            text="Age-1 Recruits"                   function=.subView mode=character sticky=W
-          entry name=recruitmentRetroYlim  width=5 value=35 function=.subView action="changeRecruitmentRetroYlim" entryfont="12"
+          entry name=recruitmentRetroYlim  width=5 value=35 function=.subView action="changeRecruitmentRetroYlim" entryfont="10"
           check name=maxRecruitmentRetroYlim checked=F function=.subView action="changeRecruitmentRetroYlim"
-          #6          
+          #6
 	  radio name=viewPlotType value=sRetroSquid           text="Cohorts (squid plot)"            function=.subView mode=character sticky=W
           null
           null
           #7
           label text="End years vector"
-          entry name=entryEndyr    width=5 value="2013" function=.subView action="changeEndyrvec" entryfont="12"
-          entry name=entryStartyr  width=5 value="2000" function=.subView action="changeEndyrvec" entryfont="12"
+          entry name=entryEndyr    width=5 value="2013" function=.subView action="changeEndyrvec" entryfont="10"
+          entry name=entryStartyr  width=5 value="2000" function=.subView action="changeEndyrvec" entryfont="10"
           #8
           label text="Cohorts"
-          entry name=entryFirstCohort width=5 value="1999" function=.subView action="changeCohort" entryfont="12"
-          entry name=entryLastCohort  width=5 value="2012" function=.subView action="changeCohort" entryfont="12"
+          entry name=entryFirstCohort width=5 value="1999" function=.subView action="changeCohort" entryfont="10"
+          entry name=entryLastCohort  width=5 value="2012" function=.subView action="changeCohort" entryfont="10"
           #9
           null
           check name=showRetroOutput checked=F function=.subView action="changeShowRetroOutput" sticky=E
           label text="Show Retro Output\n(slow if checked)" font="10" width=20 pady=5 sticky=N
           #10
-          entry name=entryRetro width=5 pady=5 value=5 entryfont="12" sticky=E
+          entry name=entryRetro width=5 pady=5 value=5 entryfont="10" sticky=E
           label text="Years" font="12" width=5 pady=5 sticky=N
           button name=runRetros function=.subView action="runRetros"     width=15 padx=5 pady=5 text="Run retros"  fg="blue"
           #11
@@ -348,7 +348,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 5 1 sticky=NW relief=raised
-          label text="Runtime values" font=bold sticky=NW
+          label text="Runtime values" font="bold 10" sticky=NW
           radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
           radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
           radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
@@ -361,7 +361,7 @@ grid 3 1 padx=10 pady=5 sticky=W
   grid 3 1
     grid 1 1
       grid 3 7
-      
+
         label text="Index to plot" font="bold 10" sticky=W
         entry name=entryIndex width=5 padx=5 value=2 function=.subView action="changeIndex" entryfont="10" sticky=W
         null
@@ -369,7 +369,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         null
         label text="Confidence %" font="bold 10" sticky=W
         entry name=entryConfidence width=5 padx=5 value=95 function=.subView action="changeConfidence" entryfont="10" sticky=W
-        
+
         label text="Screen graphics:" font="bold 10" sticky=W
         null
         null
@@ -377,7 +377,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         entry name=entryWidthScreen width=5 padx=5 value=10 function=.subView action="changeScreenGraphics" entryfont="10" sticky=W
         label text="Height" font="bold 10" sticky=W
         entry name=entryHeightScreen width=5 padx=5 value=7 function=.subView action="changeScreenGraphics" entryfont="10" sticky=W
-        
+
         label text="Figure output PNG:" font="bold 10" sticky=W
         label text="Resolution" font="bold 10" sticky=W
         entry name=entryResolution width=5 padx=5 value=300 entryfont="10" sticky=W
@@ -385,7 +385,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         entry name=entryWidth width=5 padx=5 value=6.5 entryfont="10" sticky=W
         label text="Height" font="bold 10" sticky=W
         entry name=entryHeight width=5 padx=5 value=3.25 entryfont="10" sticky=W
-   
+
    grid 1 6
       label text="Legend location" font="bold 10" sticky=W
       radio name=legendLoc value=sLegendTopright text="Top right" function=.subView mode=character sticky=W font="bold 10"
