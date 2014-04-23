@@ -366,7 +366,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         label text="Index to plot" font="bold 10" sticky=W
         entry name=entryIndex width=5 padx=5 value=2 function=.subView action="changeIndex" entryfont="10" sticky=W
         null
-        check name=plotMCMC checked=F text="Plot MCMC" function=.subView action="changePlotMCMC" font="bold 10" sticky=W
+        check name=plotMCMC checked=T text="Plot MCMC" function=.subView action="changePlotMCMC" font="bold 10" sticky=W
         null
         label text="Confidence %" font="bold 10" sticky=W
         entry name=entryConfidence width=5 padx=5 value=95 function=.subView action="changeConfidence" entryfont="10" sticky=W
