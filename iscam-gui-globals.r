@@ -63,6 +63,7 @@ if(.OS == "Linux"){
 .MCMC_FILE_NAME                  <- "iscam_mcmc.csv"
 .MCMC_BIOMASS_FILE_NAME          <- "iscam_sbt_mcmc.csv"
 .MCMC_RECRUITMENT_FILE_NAME      <- "iscam_rt_mcmc.csv"
+.MCMC_FISHING_MORT_FILE_NAME     <- "iscam_ft_mcmc.csv"
 
 # GUI Header labels
 .SCENARIO_LIST_LABEL             <- "Scenario List"

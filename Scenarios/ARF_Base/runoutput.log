@@ -237,7 +237,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
  49  0.49137 -1.47356e+002 | 50  0.57618 -4.22251e+000 | 51  0.49073 -1.23270e+002
  52  0.53433 -2.03941e+002 | 53  0.47719 -1.35976e+002 | 54  0.00000 0.00000e+000
  55  0.00000 0.00000e+000 |
-You got here
 You got to the end of the report section
 
 Initial statistics: 134 variables; iteration 0; function evaluation 0; phase 2
@@ -964,7 +963,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
 127 -0.00017 5.76508e+000 |128  0.00070 1.12675e+001 |129 -0.00051 -1.07373e+002
 130  0.00034 6.99577e+000 |131  0.33139 -3.01529e+001 |132  0.28512 -4.91291e+001
 133  0.83082 2.54366e+001 |134  0.80601 6.61376e+001 |
-You got here
 You got to the end of the report section
 
 Initial statistics: 142 variables; iteration 0; function evaluation 0; phase 3
@@ -2502,7 +2500,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
 136  0.00026 -1.01254e-004 |137 -0.00004 -1.19513e-004 |138  0.00010 -1.03380e-004
 139  0.99947 -5.70321e-006 |140 -0.02578 -2.81473e-005 |141  0.95994 -7.76273e-004
 142  0.45452 2.91497e-005 |
-You got here
 You got to the end of the report section
 
 Initial statistics: 144 variables; iteration 0; function evaluation 0; phase 4
@@ -8783,7 +8780,6 @@ Var   Value    Gradient   |Var   Value    Gradient   |Var   Value    Gradient
 136  0.02315 -1.91673e-006 |137  0.01924 -2.95095e-006 |138  0.01844 -2.10877e-006
 139  0.01745 -5.03758e-006 |140  0.01852 -1.09575e-005 |141 -0.11921 -2.75946e-007
 142 -0.13656 1.94972e-007 |143  0.28435 -3.61591e-007 |144  0.13523 -2.64758e-007
-You got here
 |------------------------------------------|
 | MSY-BASED REFERENCE POINTS               |
 |------------------------------------------|
@@ -8966,11 +8962,11 @@ In write empirical covariance matrix
 
 
 *******************************************
---Start time: Tue Apr 22 09:00:43 2014
+--Start time: Wed Apr 23 09:32:31 2014
 
---Finish time: Tue Apr 22 09:04:59 2014
+--Finish time: Wed Apr 23 09:36:30 2014
 
---Runtime: 0 hours, 4 minutes, 16 seconds
+--Runtime: 0 hours, 3 minutes, 59 seconds
 --Number of function evaluations: 3646
 --Results are saved with the base name:
 	arf
@@ -10863,9 +10859,9 @@ Running mceval phase
 
 
 *******************************************
---Start time: Tue Apr 22 09:04:59 2014
+--Start time: Wed Apr 23 09:36:31 2014
 
---Finish time: Tue Apr 22 09:05:04 2014
+--Finish time: Wed Apr 23 09:36:36 2014
 
 --Runtime: 0 hours, 0 minutes, 5 seconds
 --Number of function evaluations: 100

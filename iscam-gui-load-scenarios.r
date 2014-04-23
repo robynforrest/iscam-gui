@@ -113,6 +113,7 @@
                           mcmc              = "",
                           mcmcsbt           = "",
                           mcmcrt            = "",
+                          mcmcft            = "",
                           warnings          = "",
                           sensitivityGroup  = "",
                           lastCommandRun    = "")
@@ -137,6 +138,7 @@
                           mcmc              = FALSE,
                           mcmcsbt           = FALSE,
                           mcmcrt            = FALSE,
+                          mcmcft            = FALSE,
                           log               = FALSE,
                           par               = FALSE,
                           report            = FALSE,
@@ -280,10 +282,10 @@
     cat0(.PROJECT_NAME,"->",currFuncName,"  Error message: ", err$message)
   })
 
-  # Try to load MCMC results.  If they don't exist then set a global variable to reflect this
+  # Try to load MCMC results.
   tryCatch({
     tmp$outputs$mcmc <- readMCMC(dired = dired, verbose=!silent)
-    tmp$fileSuccess$mcmc <- TRUE
+    tmp$fileSuccess$mcmc    <- TRUE
     cat0(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   },error=function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"No MCMC output found for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
@@ -971,6 +973,7 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   mcmcfn    <- file.path(dired,.MCMC_FILE_NAME)
   mcmcsbtfn <- file.path(dired,.MCMC_BIOMASS_FILE_NAME)
   mcmcrtfn  <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
+  mcmcftfn  <- file.path(dired,.MCMC_FISHING_MORT_FILE_NAME)
 
   tmp        <- list()
   tmp$params <- read.csv(mcmcfn)
@@ -978,6 +981,9 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$sbt    <- extractGroupMatrices(sbt, prefix = "sbt")
   rt         <- read.csv(mcmcrtfn)
   tmp$rt     <- extractGroupMatrices(rt, prefix = "rt")
+  ft         <- read.csv(mcmcftfn)
+  tmp$ft     <- extractAreaSexMatrices(ft, prefix = "ft")
+
   return(tmp)
 }
 
@@ -1015,6 +1021,53 @@ extractGroupMatrices <- function(data = NULL, prefix = NULL){
     dat <- data[,grep(groupPattern, names)]
     colnames(dat) <- groupNames
     tmp[[group]]  <- dat
+  }
+  return(tmp)
+}
+
+extractAreaSexMatrices <- function(data = NULL, prefix = NULL){
+  # Extract the data frame given (data) by unflattening into a list of matrices
+  # by area-sex and gear. The area-sex number is located in the names of the columns of the
+  # data frame in this format: "prefix[areasexnum]_gear[gearnum]_year" where [areasexnum]
+  # and [gearnum] are one or more digits and prefix is the string given as an argument
+  # to the function.
+  # Returns a list (area-sex) of lists (gears) of matrices, one element per group.
+
+  currFuncName <- getCurrFunc()
+  if(is.null(data) || is.null(prefix)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must give two arguments (data & prefix). Returning NULL.")
+    return(NULL)
+  }
+
+  names <- names(data)
+  pattern <- paste0(prefix,"([[:digit:]]+)_gear[[:digit:]]+_[[:digit:]]+")
+  groups  <- sub(pattern,"\\1",names)
+  uniqueGroups <- unique(as.numeric(groups))
+  tmp <- vector("list", length = length(uniqueGroups))
+  # This code assumes that the groups are numbered sequentially from 1,2,3...N
+  for(group in 1:length(uniqueGroups)){
+    # Get all the column names (groupNames) for this group by making a specific pattern for it
+    groupPattern <- paste0(prefix,group,"_gear[[:digit:]]+_[[:digit:]]+")
+    groupNames   <- names[grep(groupPattern, names)]
+    # Remove the group number in the name, as it is not needed anymore
+    pattern      <- paste0(prefix,"[[:digit:]]+_gear([[:digit:]]+_[[:digit:]]+)")
+    groupNames   <- sub(pattern,"\\1",groupNames)
+    # At this point, groupNames' elements look like this: 1_1963
+    # The first value is the gear, and the second, the year.
+    # Get the unique gears for this area-sex group
+    pattern <- "([[:digit:]]+)_[[:digit:]]+"
+    gears   <- sub(pattern,"\\1",groupNames)
+    uniqueGears <- unique(as.numeric(gears))
+    tmp2 <- vector("list", length = length(uniqueGears))
+    for(gear in 1:length(uniqueGears)){
+      gearPattern <- paste0(prefix, group,"_gear",gear,"_[[:digit:]]+")
+      # Now, the data must be extracted
+      # Get the column numbers that this group are included in
+      dat <- data[,grep(gearPattern, names)]
+      #colnames(dat) <- groupNames
+      tmp2[[gear]] <- dat
+    }
+    tmp[[group]] <- tmp2
   }
   return(tmp)
 }

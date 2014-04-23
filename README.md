@@ -174,7 +174,7 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
         op[[N]]$fileSuccess$control          - Control file
         op[[N]]$fileSuccess$projection       - Projection file
         op[[N]]$fileSuccess$mpd              - MPD data files
-        op[[N]]$fileSuccess$mpdForecast      - MPD forecating file
+        op[[N]]$fileSuccess$mpdForecast      - MPD forecasting file
         op[[N]]$fileSuccess$mcmc             - MCMC output files
         op[[N]]$fileSuccess$log              - Log file created by runCurrScenario()
         op[[N]]$fileSuccess$par              - PAR file
@@ -186,6 +186,7 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
           op[[N]]$outputs$mcmc$params - Output parameter posteriors from the MCEVAL phase
           op[[N]]$outputs$mcmc$sbt    - Spawning biomass posteriors from the MCEVAL phase
           op[[N]]$outputs$mcmc$rt     - Recruitment posteriors from the MCEVAL phase
+          op[[N]]$outputs$mcmc$ft     - Fishing mortality posteriors from the MCEVAL phase
         op[[N]]$outputs$par  - Parameter file contents (iscam model PAR file)
         op[[N]]$outputs$par$theta1                  - log_ro parameter estimate
         op[[N]]$outputs$par$theta2                  - h (steepness) parameter estimate

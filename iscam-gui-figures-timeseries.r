@@ -163,7 +163,7 @@ plotTS <- function(plotNum    = 1,
   }
   if(plotNum == 9){
     if(plotMCMC){
-      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
+      plotFMPD(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
     }else{
       plotFMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
     }
@@ -613,7 +613,7 @@ plotIndexMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  if(is.null(names)){
+  if(is.null(ci)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
@@ -691,7 +691,7 @@ plotFMPD <- function(out       = NULL,
     for(gear in 1:ngear){
       meanF <- f[((sex-1) * ngear + gear),]
       if(all(meanF == 0)){
-        cat0(.PROJECT_NAME,"->",currFuncName,"All meanF's for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+        cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
@@ -710,6 +710,7 @@ plotFMPD <- function(out       = NULL,
     }
   }
 
+  # THIS IS FOR F-at-age outputs to be done later perhaps
   # If sex==2 then every even row of F will be females and every odd row will be males
   ## if(nsex == 2){
   ##   # Split the matrix into odd and even matrices
@@ -725,7 +726,7 @@ plotFMPD <- function(out       = NULL,
   ## }
 
   if(length(out) > 1){
-    for(line in 2:length(out)){
+    for(line in 2:length(out)){  # For each model in the sensitivity list..
       nsex   <- out[[line]]$mpd$nsex
       yrs    <- out[[line]]$mpd$yr
       nyear  <- length(yrs)
@@ -734,7 +735,7 @@ plotFMPD <- function(out       = NULL,
         for(gear in 1:ngear){
           meanF <- f[((sex-1) * ngear + gear),]
           if(all(meanF == 0)){
-            cat0(.PROJECT_NAME,"->",currFuncName,"All meanF's for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+            cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
             lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=1)
             if(sex == 1){
@@ -751,6 +752,67 @@ plotFMPD <- function(out       = NULL,
   }
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=1)
+  }
+  par(oldpar)
+}
+
+plotFMCMC <- function(out       = NULL,
+                      colors    = NULL,
+                      names     = NULL,
+                      ci        = NULL,
+                      verbose   = FALSE,
+                      legendLoc = "topright"){
+
+  # Fishing mortality plot for an MCMC
+  # out is a list of the mcmc outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval 0-100.
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(ci)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  oldpar <- par(no.readonly=T)
+  # Figure out which area-sex/gear combos are all zeros and discard those from the plot
+  browser()
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  quants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    rt <- out[[1]]$mcmc$rt[[1]]
+    quants[[model]] <- getQuants(rt, ci)
+  }
+  yUpper <- max(quants[[1]])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]])
+  }
+
+  yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
+
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+    }
+  }
+  if(!is.null(legendLoc)){
+    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
   par(oldpar)
 }
