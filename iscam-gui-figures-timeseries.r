@@ -588,6 +588,7 @@ plotIndexMCMC <- function(out       = NULL,
                           names     = NULL,
                           inputs    = NULL,
                           ci        = NULL,
+                          index     = NULL,
                           verbose   = FALSE,
                           legendLoc = "topright"){
   # Recruitment plot for an MCMC
@@ -617,7 +618,22 @@ plotIndexMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
+  if(is.null(index)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
+    return(NULL)
+  }
+  if(index > length(inputs[[1]]$indices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(inputs[[1]]$indices)," (index).")
+    return(NULL)
+  }
   oldpar <- par(no.readonly=T)
+
+  # Get the plotting limits by looking through the input lists and outputs of indices
+  inputindices <- inputs[[1]]$indices[[index]]
+  yUpper <- max(inputindices[,2])  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
+  minYear <- min(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
+  maxYear <- max(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -698,9 +714,15 @@ plotFMPD <- function(out       = NULL,
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
+<<<<<<< Updated upstream
           plot(yrs, meanF, type = "l", col=colors[[1]], pch=pch, lty=sex, lwd=1,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
         }else{
           lines(yrs, meanF, type = "l", col=colors[[1]], pch=pch, lty=sex, lwd=1)
+=======
+          plot(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
+        }else{
+          lines(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2)
+>>>>>>> Stashed changes
         }
         if(sex == 1){
           legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Female"))
@@ -740,7 +762,11 @@ plotFMPD <- function(out       = NULL,
           if(all(meanF == 0)){
             cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
+<<<<<<< Updated upstream
             lines(yrs, meanF, type = "l", col=colors[[line]], pch=pch, lty=sex, lwd=1)
+=======
+            lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=2)
+>>>>>>> Stashed changes
             if(sex == 1){
               legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Female"))
             }else{
@@ -754,7 +780,7 @@ plotFMPD <- function(out       = NULL,
     }
   }
   if(!is.null(legendLoc)){
-    legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=1)
+    legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
   par(oldpar)
 }

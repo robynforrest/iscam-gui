@@ -281,7 +281,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
            "sSensBRatio"                            = {plotTS(3,png,"Depletion",plotMCMC,ci,TRUE)},
            "sSensRecruit"                           = {plotTS(5,png,"Recruitment",plotMCMC,ci,TRUE, recrOffset=val$entryRecrOffset)},
-           "sSensIndex"                             = {plotTS(7,png,"Index",plotMCMC,ci,TRUE)},
+           # No sensitivity plot for MCMC Indices
+           "sSensIndex"                             = {plotTS(7,png,"Index",FALSE,ci,TRUE)},
            #"sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway

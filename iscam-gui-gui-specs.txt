@@ -258,7 +258,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #7
-          radio name=viewPlotType value=sSensF              text="Mean F"                            function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensF              text="Mean F (MPD only)"                 function=.subView mode=character sticky=W
           null
           null
           null
@@ -276,7 +276,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #10
-          radio name=viewPlotType value=sSensIndex          text="Index fits"                        function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensIndex          text="Index fits (MPD only)"             function=.subView mode=character sticky=W
           null
           null
           null
