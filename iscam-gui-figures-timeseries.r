@@ -163,7 +163,7 @@ plotTS <- function(plotNum    = 1,
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMPD(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
+      plotFMCMC(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
     }else{
       plotFMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
     }
@@ -735,7 +735,7 @@ plotFMPD <- function(out       = NULL,
         for(gear in 1:ngear){
           meanF <- f[((sex-1) * ngear + gear),]
           if(all(meanF == 0)){
-            cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+            cat0(.PROJECT_NAME,"->",currFuncName,"All meanF=0 for scenario ",names[[line]],", gear ",gear,", and sex ",sex," so it is not plotted.")
           }else{
             lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=1)
             if(sex == 1){
@@ -791,28 +791,55 @@ plotFMCMC <- function(out       = NULL,
   }
   oldpar <- par(no.readonly=T)
   # Figure out which area-sex/gear combos are all zeros and discard those from the plot
-  browser()
+  ft <- out[[1]]$mcmc$ft
+  tmp <- list()
+  legendNames <- NULL
+  legendCols <- NULL
+  legendLines <- NULL
+  iter <- 0
+  yUpper <- 0
+
+  for(group in 1:length(ft)){
+    # For each area-sex group...
+    ngear <- length(ft[[group]])
+    for(gear in 1:ngear){
+      # For each gear in the group
+      if(!all(ft[[group]][[gear]]==0)){
+        tmp[[iter <- iter + 1]] <- ft[[group]][[gear]]
+        if(group ==1){
+          legendNames[[iter]] <- paste0(names[[1]]," gear ",gear," - Female")
+        }else{
+          legendNames[[iter]] <- paste0(names[[1]]," gear ",gear," - Male")
+        }
+        legendCols[[iter]] <- colors[[1]]
+        legendLines <- c(legendLines, (group-1) * ngear + gear)
+        yUpper <- max(yUpper, as.matrix(ft[[group]][[gear]]))
+      }else{
+        cat0(.PROJECT_NAME,"->",currFuncName,"All F=0 for scenario ",names[[1]],", gear ",gear,", and sex ",group," so it is not plotted.")
+      }
+    }
+  }
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
-  for(model in 1:length(out)){
-    rt <- out[[1]]$mcmc$rt[[1]]
-    quants[[model]] <- getQuants(rt, ci)
-  }
-  yUpper <- max(quants[[1]])
-  for(model in 1:length(out)){
+  for(model in 1:length(tmp)){
+    ft <- tmp[[model]]
+    quants[[model]] <- getQuants(ft, ci)
     yUpper <- max(yUpper, quants[[model]])
   }
 
-  yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
+  # Get years for plotting
+  pattern <- ".*_([[:digit:]]+)$"
+  yrs <- as.numeric(sub(pattern, "\\1", colnames(quants[[1]])))
 
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
-  if(length(out) > 1){
-    for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+  drawEnvelope(yrs, quants[[1]], legendCols[[1]], yUpper, first=TRUE, ylab="F", xlab="Year", main="Fishing mortality", las=1)
+  if(length(tmp) > 1){
+    for(line in 2:length(tmp)){
+      drawEnvelope(yrs, quants[[line]], legendCols[[line]], yUpper, first=FALSE)
     }
   }
   if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+    legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=1)
   }
   par(oldpar)
 }
