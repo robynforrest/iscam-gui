@@ -71,6 +71,7 @@ source(.FIGURES_BIOLOGY_SOURCE)
 source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
+source(.FIGURES_MCMC_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
                   copyModelExecutables = FALSE,
@@ -275,8 +276,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sParameterPairs"                        = {fig.estimated.params.pairs(scenario=val$entryScenario)},
            "sVariancePartitions"                    = {fig.variance.partitions(scenario=val$entryScenario)},
            # MCMC diagnostics
-           "sPriorsVsPosts"                         = {fig.mcmc.priors.vs.posts(exFactor=1.5,showEntirePrior=T,scenario=val$entryScenario)},
-           "sMCMCTrace"                             = {fig.mcmc.trace(scenario=val$entryScenario)},
+           "sPriorsVsPosts"                         = {fig.mcmc.trace(scenario=val$entryScenario)},
+           "sMCMCTrace"                             = {plotConvergence(1,png,"Trace",exFactor=1.5,showEntirePrior=T)},
            "sMCMCAutocor"                           = {fig.mcmc.autocor(scenario=val$entryScenario)},
            "sMCMCDensity"                           = {fig.mcmc.density(scenario=val$entryScenario)},
            "sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
@@ -304,11 +305,11 @@ iscam <- function(reloadScenarios      = FALSE,
                                                               cohorts = val$entryFirstCohort:val$entryLastCohort,
                                                               png=png,fileText="RetroSquid")},
            # Plot runtime values returned from ADMB
-           "sObjFuncVal"                            = {plotRuntimeStats(1,png,"ObjectiveFunctionValue")},
-           "sMaxGrad"                               = {plotRuntimeStats(2,png,"MaximumGradient")},
-           "sFuncEvals"                             = {plotRuntimeStats(3,png,"FunctionEvaluations")},
-           "sHangCodes"                             = {plotRuntimeStats(4,png,"HangCodes")},
-           "sExitCodes"                             = {plotRuntimeStats(5,png,"ExitCodes")},
+           "sObjFuncVal"                            = {plotConvergence(1,png,"ObjectiveFunctionValue")},
+           "sMaxGrad"                               = {plotConvergence(2,png,"MaximumGradient")},
+           "sFuncEvals"                             = {plotConvergence(3,png,"FunctionEvaluations")},
+           "sHangCodes"                             = {plotConvergence(4,png,"HangCodes")},
+           "sExitCodes"                             = {plotConvergence(5,png,"ExitCodes")},
            {
              # Default
            }

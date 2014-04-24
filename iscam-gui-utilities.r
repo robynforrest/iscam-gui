@@ -201,3 +201,8 @@ getValidModelsList <- function(models, type = "mpd"){
   ret <- list(out,colors,names,inputs)
   return(ret)
 }
+
+is.wholenumber <- function(x, tol = .Machine$double.eps^0.5){
+  # Return TRUE if x is an integer, FALSE otherwise
+  abs(x - round(x)) < tol
+}
