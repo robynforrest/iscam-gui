@@ -8,9 +8,12 @@
 #**********************************************************************************
 
 plotCatch <- function(plotNum  = 1,
-                      fileText = "Default",
+                      png        = .PNG,
+                      fileText   = "Default",
+                      plotMCMC   = FALSE,
+                      ci         = NULL, # confidence interval in %
+                      multiple   = FALSE,
                       units    = .UNITS,
-                      png      = .PNG,
                       silent   = .SILENT){
 
   # Assumes that 'op' list exists and has been populated correctly.
@@ -18,7 +21,6 @@ plotCatch <- function(plotNum  = 1,
   # 1  Landings
   # 2  SPR status, or the spawning potential ratio:
   #    (1-spr)/(1-spr.at.msy)
-
   currFuncName <- getCurrFunc()
   val          <- getWinVal()
   scenario     <- val$entryScenario
@@ -93,11 +95,14 @@ plotCatches <- function(inp,
                         verbose = FALSE,
                         legendLoc = "topright",
                         col = 1){
-  # Catch plot for iscam model
-  catch <- inp$data$catch
-  years <- catch[,"year"]
-  value <- catch[,"value"]
-	barplot(value, names.arg=years, xlab="Year", ylab="Landings", las=1, col = col)
+  # Catch plot for iscam model, plots by gear
+  catch <- as.data.frame(inp$data$catch)
+  p <- ggplot(catch,aes(x=factor(year),value,fill=factor(gear)))
+	p <- p + geom_bar(width=0.75,position="dodge",stat="identity")
+  p <- p + labs(x="Year",y="Catch",fill="Gear")
+  p <- p + .PLOT_THEME
+  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0))
+	print(p)
 }
 
 plotSPR <-  function(inp,

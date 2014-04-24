@@ -567,7 +567,7 @@ plotIndexMPD <- function(out       = NULL,
   dat <- out[[1]]$mpd$it_hat[index,]
   yrs <- inputs[[1]]$indices[[index]][,1]
   dat <- dat[!is.na(dat)]
-  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Index fits", las=1)
+  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main=paste0("Index fit gear ",index), las=1)
   points(yrs, inputindices[,2], pch=3)
   if(length(out) > 1){
     for(model in 2:length(out)){
@@ -583,93 +583,18 @@ plotIndexMPD <- function(out       = NULL,
   par(oldpar)
 }
 
-plotIndexMCMC <- function(out       = NULL,
-                          colors    = NULL,
-                          names     = NULL,
-                          inputs    = NULL,
-                          ci        = NULL,
-                          index     = NULL,
-                          verbose   = FALSE,
-                          legendLoc = "topright"){
-  # Recruitment plot for an MCMC
-  # out is a list of the mcmc outputs to show on the plot
-  # col is a list of the colors to use in the plot
-  # names is a list of the names to use in the legend
-  # TODO: These lists should be modified by the code so that only
-  #  MCMC models will be included on the plot and legend.
-  currFuncName <- getCurrFunc()
-  if(is.null(out)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
-    return(NULL)
-  }
-  if(length(out) < 1){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
-    return(NULL)
-  }
-  if(is.null(colors)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
-    return(NULL)
-  }
-  if(is.null(names)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
-    return(NULL)
-  }
-  if(is.null(ci)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
-    return(NULL)
-  }
-  if(is.null(index)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
-    return(NULL)
-  }
-  if(index > length(inputs[[1]]$indices)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(inputs[[1]]$indices)," (index).")
-    return(NULL)
-  }
-  oldpar <- par(no.readonly=T)
-
-  # Get the plotting limits by looking through the input lists and outputs of indices
-  inputindices <- inputs[[1]]$indices[[index]]
-  yUpper <- max(inputindices[,2])  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
-  minYear <- min(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
-  maxYear <- max(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
-
-  # Calculate quantiles for the posterior data if an MCMC is to be plotted
-  quants <- vector("list", length(out))
-  for(model in 1:length(out)){
-    rt <- out[[1]]$mcmc$rt[[1]]
-    quants[[model]] <- getQuants(rt, ci)
-  }
-  yUpper <- max(quants[[1]])
-  for(model in 1:length(out)){
-    yUpper <- max(yUpper, quants[[model]])
-  }
-
-  yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
-
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
-  if(length(out) > 1){
-    for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
-    }
-  }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
-  }
-  par(oldpar)
-}
-
 plotFMPD <- function(out       = NULL,
                      colors    = NULL,
                      names     = NULL,
-                     pch       = 1,
+                     pch       = 19,
+                     pointSize = 0.2,
                      verbose   = FALSE,
                      legendLoc = "topright"){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  #colors<-c(26,50,504,12,81,639)
+  # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -696,6 +621,7 @@ plotFMPD <- function(out       = NULL,
   # This is the mean F with the # of rows being the number of gears, and that is multiplied
   # by the number of sexes. So for a 3-gear, 2 sex model, there will be 6 rows in f with main grouping
   # by gear, i.e. two, three-row groupings.
+  numModels <- length(out)
   f      <- out[[1]]$mpd$ft
   yUpper <- max(f)
   for(model in 1:length(out)){
@@ -707,16 +633,20 @@ plotFMPD <- function(out       = NULL,
 
   for(sex in 1:nsex){
     for(gear in 1:ngear){
-
       meanF <- f[((sex-1) * ngear + gear),]
+      if(numModels == 1){
+        color <- gear
+      }else{
+        color <- colors[[1]]
+      }
       if(all(meanF == 0)){
         cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
-          plot(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
+          plot(yrs, meanF, type = "b", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
         }else{
-          lines(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2)
+          lines(yrs, meanF, type = "b", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2)
         }
         if(sex == 1){
           legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Female"))
@@ -724,7 +654,7 @@ plotFMPD <- function(out       = NULL,
           legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Male"))
         }
         legendLines <- c(legendLines, (sex-1) * ngear + gear)
-        legendCols  <- c(legendCols, colors[[1]])
+        legendCols  <- c(legendCols, color)
       }
     }
   }
@@ -756,7 +686,7 @@ plotFMPD <- function(out       = NULL,
           if(all(meanF == 0)){
             cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
-            lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=2)
+            lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, cex=pointSize, lty=sex, lwd=2)
             if(sex == 1){
               legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Female"))
             }else{

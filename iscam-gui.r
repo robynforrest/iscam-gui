@@ -46,6 +46,8 @@ removeAllExcept <- function(vars  = c("op","sens")){
 removeAllExcept()
 
 require(PBSmodelling)
+require(ggplot2)
+require(reshape2)
 
 options(stringsAsFactors = FALSE)
 options(warn = -1)
@@ -226,9 +228,11 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSSpawningDepletionByArea"             = {plotTS(4,png,"SpawningDepletionByArea",plotMCMC,ci)},
            "sTSRecruitmentAllAreas"                 = {plotTS(5,png,"RecruitmentAllAreas",plotMCMC,ci)},
            "sTSRecruitmentByArea"                   = {plotTS(6,png,"RecruitmentByArea",plotMCMC,ci)},
-           "sTSIndex"                               = {plotTS(7,png,"Index",plotMCMC,ci)},
+           # Only MPD fir Index
+           "sTSIndex"                               = {plotTS(7,png,"Index",FALSE,ci)},
            "sSPRRatio"                              = {plotTS(8,png,"SPRRatio",plotMCMC,ci)},
-           "sFishingMortality"                      = {plotTS(9,png,"Fishing Mortality",plotMCMC,ci)},
+           # Only MPD for Fishing mortality
+           "sFishingMortality"                      = {plotTS(9,png,"Fishing Mortality",FALSE,ci)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci)},
