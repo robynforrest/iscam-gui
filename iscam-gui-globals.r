@@ -44,10 +44,10 @@ if(.OS == "Darwin"){
 
 # iScam executable location
 .EXE_BASE_NAME                   <- "iscam"
-if(.OS == "Linux"){
-  .EXE_FILE_NAME                   <- .EXE_BASE_NAME
+if(.OS == "Linux" || .OS == "Darwin"){
+  .EXE_FILE_NAME                 <- .EXE_BASE_NAME
 }else{
-  .EXE_FILE_NAME                   <- paste0(.EXE_BASE_NAME,".exe")
+  .EXE_FILE_NAME                 <- paste0(.EXE_BASE_NAME,".exe")
 }
 .EXE_FILE_NAME_FULL_PATH         <- file.path("..","iSCAM","src","admb-code",.EXE_FILE_NAME)
 

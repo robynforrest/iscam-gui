@@ -178,27 +178,29 @@
   # Try to load data file.
   tryCatch({
     tmp$inputs$data      <- readData(file = tmp$names$data, verbose=!silent)
-    tmp$fileSuccess$data <- TRUE 
+    tmp$fileSuccess$data <- TRUE
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading data file: '",tmp$names$data,"'")
     cat0(.PROJECT_NAME,"->",currFuncName,war$message)
     stop()
   }, error = function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem loading data file: '",tmp$names$data,"'")
-    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
+    cat0(.PROJECT_NAME,"->",currFuncName,err$message)
     # Do nothing, is is likely not a scenario directory
   })
+
   # Try to load control file.
   tryCatch({
-    tmp$inputs$control <- readControl(file    = tmp$names$control,
-                                      ngears  = tmp$inputs$data$ngear,
-                                      nagears = tmp$inputs$data$nagears,
-                                      verbose =!silent)
+    suppressWarnings(
+      tmp$inputs$control <- readControl(file    = tmp$names$control,
+                                        ngears  = tmp$inputs$data$ngear,
+                                        nagears = tmp$inputs$data$nagears,
+                                        verbose =!silent)
+    )
     tmp$fileSuccess$control  <- TRUE
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading control file: '",tmp$names$control,"'")
     cat0(.PROJECT_NAME,"->",currFuncName,war$message)
-    stop()
   }, error = function(err){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading control file: '",tmp$names$control,"'")
     cat0(.PROJECT_NAME,"->",currFuncName,err$message)
