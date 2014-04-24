@@ -714,15 +714,9 @@ plotFMPD <- function(out       = NULL,
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
-<<<<<<< Updated upstream
-          plot(yrs, meanF, type = "l", col=colors[[1]], pch=pch, lty=sex, lwd=1,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
-        }else{
-          lines(yrs, meanF, type = "l", col=colors[[1]], pch=pch, lty=sex, lwd=1)
-=======
           plot(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2,ylim=c(0,yUpper),ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
         }else{
           lines(yrs, meanF, type = "b", col=colors[[1]], pch=pch, lty=sex, lwd=2)
->>>>>>> Stashed changes
         }
         if(sex == 1){
           legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Female"))
@@ -762,11 +756,7 @@ plotFMPD <- function(out       = NULL,
           if(all(meanF == 0)){
             cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
-<<<<<<< Updated upstream
-            lines(yrs, meanF, type = "l", col=colors[[line]], pch=pch, lty=sex, lwd=1)
-=======
             lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, lty=sex, lwd=2)
->>>>>>> Stashed changes
             if(sex == 1){
               legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Female"))
             }else{
