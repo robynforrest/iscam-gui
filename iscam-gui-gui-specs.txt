@@ -17,7 +17,7 @@ grid 3 1 padx=10 pady=5 sticky=W
            button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
            button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
-     notebook name=nbPage tabs="RunModel Figures1 Figures2 SaveFigures Parameters MCMC SENS RETRO RV" font="8"
+     notebook name=nbPage tabs="RunModel Figures1 Figures2 SaveFigures MCMC SensPlots Retrospectives Runtime" font="8"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: RunModel                    --#
@@ -178,20 +178,10 @@ grid 3 1 padx=10 pady=5 sticky=W
                     button name=writeRetroPlots  function=.subView action="writeRetroPlots"      width=25 text="Write retrospective figures" fg="chocolate4"
 
 #--------------------------------------------------------------------#
-#--                      Notebook Tab: ParameterEstimates          --#
-#--------------------------------------------------------------------#
-
-     grid 4 1 sticky=N relief=raised
-          label text="Parameter Estimates" font="bold 10" sticky=NW
-          radio name=viewPlotType value=sParameterPairs     text="Pairs with histograms"            function=.subView mode=character sticky=W
-          radio name=viewPlotType value=sPriorsVsPosts      text="Priors vs. Posts"                 function=.subView mode=character sticky=W
-          radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
-
-#--------------------------------------------------------------------#
 #--                      Notebook Tab: MCMC Diagnostics            --#
 #--------------------------------------------------------------------#
 
-     grid 4 3 byrow=T sticky=N relief=raised
+     grid 7 3 byrow=T sticky=N relief=raised
           #1
           label text="MCMC Diagnostics" font="bold 10" sticky=NW
           null
@@ -206,6 +196,18 @@ grid 3 1 padx=10 pady=5 sticky=W
           entry name=thin function=.subView action="changeBurnThin" width=5 value=1   entryfont="10"
           #4
           radio name=viewPlotType value=sMCMCDensity         text="Density"                        function=.subView mode=character sticky=W
+          null
+          null
+          #5
+          radio name=viewPlotType value=sParameterPairs     text="Pairs with histograms"            function=.subView mode=character sticky=W
+          null
+          null
+          #6
+          radio name=viewPlotType value=sPriorsVsPosts      text="Priors vs. Posts"                 function=.subView mode=character sticky=W
+          null
+          null
+          #7
+          radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
           null
           null
           #5
