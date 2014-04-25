@@ -51,12 +51,12 @@ plotCatch <- function(plotNum  = 1,
   if(val$legendLoc == "sLegendNone"){
     legendLoc <- NULL
   }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
 
   if(plotNum < 1 || plotNum > 15){
     return(FALSE)
   }
-  val      <- getWinVal()
-  scenario <- val$entryScenario
   isMCMC   <- op[[scenario]]$inputs$log$isMCMC
   figDir   <- op[[scenario]]$names$figDir
   out      <- op[[scenario]]$outputs$mpd
@@ -66,7 +66,6 @@ plotCatch <- function(plotNum  = 1,
   if(png){
     graphics.off()
     png(filename,res=res,width=width,height=height,units=units)
-
   }
   if(isMCMC){
    # plot mcmc model runs
@@ -96,6 +95,9 @@ plotCatches <- function(inp,
                         legendLoc = "topright",
                         col = 1){
   # Catch plot for iscam model, plots by gear
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   catch <- as.data.frame(inp$data$catch)
   p <- ggplot(catch,aes(x=factor(year),value,fill=factor(gear)))
 	p <- p + geom_bar(width=0.75,position="dodge",stat="identity")

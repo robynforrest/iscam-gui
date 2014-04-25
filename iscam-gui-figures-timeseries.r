@@ -202,7 +202,9 @@ plotBiomassMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
   for(model in 1:length(out)){
     yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
@@ -218,7 +220,6 @@ plotBiomassMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotBiomassMCMC <- function(out       = NULL,
@@ -254,7 +255,9 @@ plotBiomassMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -276,7 +279,6 @@ plotBiomassMCMC <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotDepletionMPD <- function(out       = NULL,
@@ -305,7 +307,9 @@ plotDepletionMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   yUpper <- max(depl)
   for(model in 1:length(out)){
@@ -323,7 +327,6 @@ plotDepletionMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotDepletionMCMC <- function(out       = NULL,
@@ -359,7 +362,9 @@ plotDepletionMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -382,7 +387,6 @@ plotDepletionMCMC <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotRecruitmentMPD <- function(out       = NULL,
@@ -411,7 +415,9 @@ plotRecruitmentMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   sage   <- out[[1]]$mpd$sage
   nyear  <- length(out[[1]]$mpd$yr)
   ryr    <- out[[1]]$mpd$yr[(1+sage):nyear]
@@ -434,7 +440,6 @@ plotRecruitmentMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotRecruitmentMCMC <- function(out       = NULL,
@@ -474,7 +479,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -504,7 +511,6 @@ plotRecruitmentMCMC <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotIndexMPD <- function(out       = NULL,
@@ -547,7 +553,8 @@ plotIndexMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(inputs[[1]]$indices)," (index).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- inputs[[1]]$indices[[index]]
@@ -580,7 +587,6 @@ plotIndexMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
-  par(oldpar)
 }
 
 plotFMPD <- function(out       = NULL,
@@ -612,7 +618,9 @@ plotFMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldpar <- par(no.readonly=T)
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   nsex   <- out[[1]]$mpd$nsex
   yrs    <- out[[1]]$mpd$yr
   nyear  <- length(yrs)
@@ -702,5 +710,4 @@ plotFMPD <- function(out       = NULL,
   if(!is.null(legendLoc)){
     legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
-  par(oldpar)
 }
