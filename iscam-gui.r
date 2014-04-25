@@ -273,16 +273,16 @@ iscam <- function(reloadScenarios      = FALSE,
            "sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci)},
            "sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci)},
            "sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci)},
-           # From iscam-gui-figures.r
-           "sParameterPairs"                        = {fig.estimated.params.pairs(scenario=val$entryScenario)},
-           "sVariancePartitions"                    = {fig.variance.partitions(scenario=val$entryScenario)},
-           # MCMC diagnostics
-           "sPriorsVsPosts"                         = {fig.mcmc.trace(scenario=val$entryScenario)},
+           # MCMC diagnostics, convergence, and parameter plots
+           # From iscam-gui-figures-mcmc-convergence.r
            "sMCMCTrace"                             = {plotConvergence(1,png,"Trace",exFactor=1.5,showEntirePrior=T)},
            "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor",exFactor=1.5,showEntirePrior=T)},
            "sMCMCDensity"                           = {plotConvergence(3,png,"Density",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
-           "sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
+           "sParameterPairs"                        = {plotConvergence(4,png,"Pairs",exFactor=1.5,showEntirePrior=T)},
+           "sPriorsVsPosts"                         = {plotConvergence(5,png,"PriorsPoseriors",exFactor=1.5,showEntirePrior=T)},
+           "sVariancePartitions"                    = {plotConvergence(4,png,"VariancePartitions",exFactor=1.5,showEntirePrior=T)},
+           #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
+           #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
            "sSensBRatio"                            = {plotTS(3,png,"Depletion",plotMCMC,ci,TRUE)},

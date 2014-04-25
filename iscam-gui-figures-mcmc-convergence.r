@@ -69,6 +69,9 @@ plotConvergence <- function(plotNum         = 1,
   if(plotNum == 3){
     plotDensity(mcmcData)
   }
+  if(plotNum == 4){
+    plotPairs(mcmcData)
+  }
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
@@ -176,4 +179,36 @@ plotDensity <- function(mcmcData = NULL, color = 1, opacity = 30){
     shade <- .getShade(color, opacity)
     polygon(xx, yy, density = NA, col = shade)
   }
+}
+
+plotPairs <- function(mcmcData = NULL){
+  # Pairs plots for an mcmc matrix, mcmcData
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  val          <- getWinVal()
+  burnin       <- val$burn
+  thinning     <- val$thin
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
+  numParams <- ncol(mcmcData)
+  mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
+  pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
+}
+
+panel.hist <- function(x, ...){
+  usr    <- par("usr"); on.exit(par(usr))
+  par(usr = c(usr[1:2], 0, 1.5) )
+  h      <- hist(x, plot = FALSE)
+  breaks <- h$breaks; nB <- length(breaks)
+  y      <- h$counts; y <- y/max(y)
+  rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
 }
