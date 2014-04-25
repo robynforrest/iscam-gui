@@ -38,7 +38,7 @@ if(.OS == "Darwin"){
 .FIGURES_SELEX_SOURCE            <- paste0(.PROJECT_NAME,"-figures-selex.r")
 .FIGURES_TIMESERIES_SOURCE       <- paste0(.PROJECT_NAME,"-figures-timeseries.r")
 .FIGURES_CATCH_SOURCE            <- paste0(.PROJECT_NAME,"-figures-catch.r")
-.FIGURES_MCMC_SOURCE             <- paste0(.PROJECT_NAME,"-figures-mcmc-convergence.r")
+.FIGURES_MCMC_SOURCE             <- paste0(.PROJECT_NAME,"-figures-mcmc-diagnostics.r")
 
 # Plotting theme
 .PLOT_THEME                      <- theme_bw(11)
