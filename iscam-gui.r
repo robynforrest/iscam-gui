@@ -280,7 +280,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sPriorsVsPosts"                         = {fig.mcmc.trace(scenario=val$entryScenario)},
            "sMCMCTrace"                             = {plotConvergence(1,png,"Trace",exFactor=1.5,showEntirePrior=T)},
            "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCDensity"                           = {fig.mcmc.density(scenario=val$entryScenario)},
+           "sMCMCDensity"                           = {plotConvergence(3,png,"Density",exFactor=1.5,showEntirePrior=T)},
            "sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            "sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r

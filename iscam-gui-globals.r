@@ -69,6 +69,9 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .MCMC_RECRUITMENT_FILE_NAME      <- "iscam_rt_mcmc.csv"
 .MCMC_FISHING_MORT_FILE_NAME     <- "iscam_ft_mcmc.csv"
 
+# MCMC convergence plot margins
+.MCMC_MARGINS                    <- c(2,4,2,2)
+
 # GUI Header labels
 .SCENARIO_LIST_LABEL             <- "Scenario List"
 .SENSITIVITY_GROUP_LABEL         <- "Group"

@@ -66,6 +66,9 @@ plotConvergence <- function(plotNum         = 1,
   if(plotNum == 2){
     plotAutocor(mcmcData)
   }
+  if(plotNum == 3){
+    plotDensity(mcmcData)
+  }
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
@@ -88,6 +91,10 @@ plotTraces <- function(mcmcData = NULL, axis.lab.freq=200){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
     return(NULL)
   }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
   numParams <- ncol(mcmcData)
   # The next line is a simple algorithm, just generate the smallest square grid
   # that will hold all of the parameter trace plots.
@@ -95,7 +102,7 @@ plotTraces <- function(mcmcData = NULL, axis.lab.freq=200){
 	par(mfrow=c(nrows, ncols), las=1)
   mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
   for(param in 1:numParams){
-    par(mar=c(2,4,2,2))
+    par(mar=.MCMC_MARGINS)
     mcmcTrace <- as.matrix(mcmcData[,param])
     plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",axes=F)
     box()
@@ -106,9 +113,8 @@ plotTraces <- function(mcmcData = NULL, axis.lab.freq=200){
 }
 
 plotAutocor <- function(mcmcData = NULL,
-                        lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50),
-                        axis.lab.freq=200){
-  # Plot autocorrelations for mcmc parameters
+                        lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50)){
+  # Plot autocorrelations for all mcmc parameters
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
@@ -120,6 +126,10 @@ plotAutocor <- function(mcmcData = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
     return(NULL)
   }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
   numParams <- ncol(mcmcData)
   # The next line is a simple algorithm, just generate the smallest square grid
   # that will hold all of the parameter trace plots.
@@ -127,8 +137,43 @@ plotAutocor <- function(mcmcData = NULL,
 	par(mfrow=c(nrows, ncols), las=1)
 
   for(param in 1:numParams){
-    par(mar=c(2,4,2,2))
+    par(mar=.MCMC_MARGINS)
     mcmcAutocor <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
     autocorr.plot(mcmcAutocor, lag.max = 100, main = colnames(mcmcData)[param], auto.layout = FALSE)
+  }
+}
+
+plotDensity <- function(mcmcData = NULL, color = 1, opacity = 30){
+  # Plot densities for the mcmc parameters in the matrix mcmcData
+	oldPar	<- par(no.readonly=T)
+  on.exit(par(oldPar))
+
+  val          <- getWinVal()
+  burnin       <- val$burn
+  thinning     <- val$thin
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
+  numParams <- ncol(mcmcData)
+  # The next line is a simple algorithm, just generate the smallest square grid
+  # that will hold all of the parameter trace plots.
+  nrows <- ncols <- ceiling(sqrt(numParams))
+	par(mfrow=c(nrows, ncols), las=1)
+
+  for(param in 1:numParams){
+    par(mar=.MCMC_MARGINS)
+    dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
+    dens <- density(dat)
+    plot(dens, main = colnames(mcmcData)[param], ylab="")
+    xx <- c(dens$x,rev(dens$x))
+    yy <- c(rep(min(dens$y), length(dens$y)), rev(dens$y))
+    shade <- .getShade(color, opacity)
+    polygon(xx, yy, density = NA, col = shade)
   }
 }
