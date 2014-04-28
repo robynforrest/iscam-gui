@@ -248,30 +248,7 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
     cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
     return(NULL)
   }
-  numParams <- ncol(mcmcData)
-  outputParamNames <- names(mcmcData)
-
-  paramSpecs <- inputs$control$param
-  inpParamNames <- rownames(paramSpecs)
-  # Ugliness ensues here as the parameter names in the control file do not match those in the output.
-  # Must use a series of special checks to match up estimated parameters with names that contain
-  #  parameter names that had priors and ignore those that don't.
-  allEstParamNames <- colnames(mcmcData)
-  pattern <- "^log_([[:alnum:]]+)$"
-  logp <- grep(pattern, inpParamNames)
-  logInpNames <- inpParamNames[logp]
-  logInpNames <- sub(pattern, "\\1", logInpNames) # Now the log param names have no "log_" in front of them
-  logParamSpecs <- paramSpecs[logp,]
-  # Special cases.... yuck
-  logInpNames <- sub("avgrec","rbar",logInpNames)
-  logInpNames <- sub("recinit","rinit",logInpNames)
-
-  nonLogInpNames <- inpParamNames[-logp]
-  # Special case... yuck
-  nonLogInpNames <- sub("steepness","h",nonLogInpNames)
-  nonLogParamSpecs <- paramSpecs[-logp,]
-
-  # The values in the DATA file (inputs$control$param) for each of priorN are:
+  # The values in the control file (inputs$control$param) for each of priorN are:
   # 1. ival  = initial value
   # 2. lb    = lower bound
   # 3. ub    = upper bound
@@ -287,21 +264,14 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
   fNames <- c(dunif,dnorm,dlnorm,dbeta,dgamma)
   fNamesR <- c(runif,rnorm,rlnorm,rbeta,rgamma)
 
-  for(param in 1:length(logInpNames)){
-    # exp the log functions before sending them off for plotting
-    logParamSpecs[param, 1] <- exp(logParamSpecs[param,1])
-    logParamSpecs[param, 2] <- exp(logParamSpecs[param,2])
-    logParamSpecs[param, 3] <- exp(logParamSpecs[param,3])
-    logParamSpecs[param, 6] <- exp(logParamSpecs[param,6])
-    logParamSpecs[param, 7] <- exp(logParamSpecs[param,7])
-  }
-  rownames(logParamSpecs) <- logInpNames
-  paramSpecs <- rbind(nonLogParamSpecs, logParamSpecs)
-  priorParamNames <- rownames(paramSpecs)
-  # paramSpecs now holds the input values for all parameters in regular (non-log) space with
-  # names to reflect this (log_) has been removed from the names of the log parameters
+  numParams <- ncol(mcmcData)
+  outputParamNames <- names(mcmcData)
+
+  # Convert the priors in logspace into standard space
+  paramSpecs <- convertLogParams(inputs$control$param)
 
   # First, figure out how many output parameters have associated priors and make the grid that size
+  priorParamNames <- rownames(paramSpecs)
   numWithPriors <- 0
   for(priorParam in 1:length(priorParamNames)){
     pattern <- paste0("^",priorParamNames[priorParam],"_?[[:alnum:]]+$")
@@ -329,24 +299,61 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
       specs <- paramSpecs[row,]
       priorfn <- fNames[[specs[5]+1]] # +1 because the control prior starts at zero
       priorfnr <- fNamesR[[specs[5]+1]] # +1 because the control prior starts at zero
-      xx <- list(p = dat, mu = specs[6], sig = specs[7], fn = priorfn, fnr = priorfnr, nm = outputParamNames[param])
+      xx <- list(p = dat, p1 = specs[6], p2 = specs[7], fn = priorfn, fnr = priorfnr, nm = outputParamNames[param])
       plot.marg(xx, breaks = "sturges", col = "wheat")
     }
   }
 }
 
-plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
-  # xx is a list(p=samples, mu=prior mean, s=prior varian, fn=prior distribution)
-  # exFactor is a multiplier for the minimum and maximum xlims.
-  #  and ignore posterior distribution limits
-  ssNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
-  xl <- seq(min(ssNoPlot$breaks)/exFactor, max(ssNoPlot$breaks)*exFactor, length=250)
+convertLogParams <- function(paramSpecs = NULL){
+  # Take data frame 'paramSpecs' and change all the parameters within it that are labelled as "log_XXX" to
+  # be in standard space, i.e. use the exp() command on all values.
+  # Returns a data frame of the same size as 'dat', with all 'log_' removed from the parameter names
 
-  pd <- xx$fn(xl, xx$mu, xx$sig)
-  z <- cbind(xl, pd)
-  #xlim <- c(min(xl,xlPrior),max(xl,xlPrior))
-  xlim <- c(min(xl),max(xl))
+  inpParamNames <- rownames(paramSpecs)
+  # Ugliness ensues here as the parameter names in the control file do not match those in the output.
+  # Must use a series of special checks to match up estimated parameters with names that contain
+  #  parameter names that had priors and ignore those that don't.
+  pattern <- "^log_([[:alnum:]]+)$"
+  logp <- grep(pattern, inpParamNames)
+  logInpNames <- inpParamNames[logp]
+  logInpNames <- sub(pattern, "\\1", logInpNames) # Now the log param names have no "log_" in front of them
+  logParamSpecs <- paramSpecs[logp,]
+  # Special cases.... yuck
+  logInpNames <- sub("avgrec","rbar",logInpNames)
+  logInpNames <- sub("recinit","rinit",logInpNames)
+
+  nonLogInpNames <- inpParamNames[-logp]
+  # Special case... yuck
+  nonLogInpNames <- sub("steepness","h",nonLogInpNames)
+  nonLogParamSpecs <- paramSpecs[-logp,]
+
+  for(param in 1:length(logInpNames)){
+    # exp the log functions before sending them off for plotting
+    logParamSpecs[param, 1] <- exp(logParamSpecs[param,1])
+    logParamSpecs[param, 2] <- exp(logParamSpecs[param,2])
+    logParamSpecs[param, 3] <- exp(logParamSpecs[param,3])
+    logParamSpecs[param, 6] <- exp(logParamSpecs[param,6])
+    logParamSpecs[param, 7] <- exp(logParamSpecs[param,7])
+  }
+  rownames(logParamSpecs) <- logInpNames
+  paramSpecs <- rbind(nonLogParamSpecs, logParamSpecs)
+  # paramSpecs now holds the input values for all parameters in regular (non-log) space with
+  # names to reflect this (log_) has been removed from the names of the log parameters
+  return(paramSpecs)
+}
+
+plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
+  # xx is a list(p=samples, p1=prior param 1, p2=prior param 2, fn=prior distribution)
+  #  and ignore posterior distribution limits
+
+  posteriorNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
+  xvals <- seq(min(posteriorNoPlot$breaks)/exFactor, max(posteriorNoPlot$breaks)*exFactor, length=250)
+
+  pd <- xx$fn(xvals, xx$p1, xx$p2)
+  z <- cbind(xvals, pd)
+  xlim <- c(min(xvals), max(xvals))
   ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
-  lines(xl, pd, col="green", lwd=2)
+  lines(xvals, pd, col="green", lwd=2)
   #abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
