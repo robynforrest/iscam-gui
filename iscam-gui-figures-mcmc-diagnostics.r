@@ -249,10 +249,7 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
     return(NULL)
   }
   numParams <- ncol(mcmcData)
-  # The next line is a simple algorithm, just generate the smallest square grid
-  # that will hold all of the parameter trace plots.
-  nrows <- ncols <- ceiling(sqrt(numParams))
-	par(mfrow=c(nrows, ncols), las=1)
+  outputParamNames <- names(mcmcData)
 
   paramSpecs <- inputs$control$param
   inpParamNames <- rownames(paramSpecs)
@@ -264,6 +261,7 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
   logp <- grep(pattern, inpParamNames)
   logInpNames <- inpParamNames[logp]
   logInpNames <- sub(pattern, "\\1", logInpNames) # Now the log param names have no "log_" in front of them
+  logParamSpecs <- paramSpecs[logp,]
   # Special cases.... yuck
   logInpNames <- sub("avgrec","rbar",logInpNames)
   logInpNames <- sub("recinit","rinit",logInpNames)
@@ -271,44 +269,84 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
   nonLogInpNames <- inpParamNames[-logp]
   # Special case... yuck
   nonLogInpNames <- sub("steepness","h",nonLogInpNames)
+  nonLogParamSpecs <- paramSpecs[-logp,]
+
+  # The values in the DATA file (inputs$control$param) for each of priorN are:
+  # 1. ival  = initial value
+  # 2. lb    = lower bound
+  # 3. ub    = upper bound
+  # 4. phz   = ADMB phase
+  # 5. prior = prior distribution funnction
+  #             0 = Uniform
+  #             1 = normal    (p1=mu,p2=sig)
+  #             2 = lognormal (p1=log(mu),p2=sig)
+  #             3 = beta      (p1=alpha,p2=beta)
+  #             4 = gamma     (p1=alpha,p2=beta)
+  # 6. p1 (defined by 5 above)
+  # 7. p2 (defined by 5 above)
+  fNames <- c(dunif,dnorm,dlnorm,dbeta,dgamma)
+  fNamesR <- c(runif,rnorm,rlnorm,rbeta,rgamma)
 
   for(param in 1:length(logInpNames)){
     # exp the log functions before sending them off for plotting
-    pattern <- paste0("^",logInpNames[param],"_?.*")
-    grep(pattern, logInpNames[param], allEstParams)
-browser()
+    logParamSpecs[param, 1] <- exp(logParamSpecs[param,1])
+    logParamSpecs[param, 2] <- exp(logParamSpecs[param,2])
+    logParamSpecs[param, 3] <- exp(logParamSpecs[param,3])
+    logParamSpecs[param, 6] <- exp(logParamSpecs[param,6])
+    logParamSpecs[param, 7] <- exp(logParamSpecs[param,7])
   }
-  
+  rownames(logParamSpecs) <- logInpNames
+  paramSpecs <- rbind(nonLogParamSpecs, logParamSpecs)
+  priorParamNames <- rownames(paramSpecs)
+  # paramSpecs now holds the input values for all parameters in regular (non-log) space with
+  # names to reflect this (log_) has been removed from the names of the log parameters
 
+  # First, figure out how many output parameters have associated priors and make the grid that size
+  numWithPriors <- 0
+  for(priorParam in 1:length(priorParamNames)){
+    pattern <- paste0("^",priorParamNames[priorParam],"_?[[:alnum:]]+$")
+    priorLoc <- grep(pattern, outputParamNames)
+    if(length(priorLoc) > 0){
+      numWithPriors <- numWithPriors + length(priorLoc)
+    }
+  }
+  # Make a square grid of plots
+  nrows <- ncols <- ceiling(sqrt(numWithPriors))
+	par(mfrow=c(nrows, ncols), las=1)
+
+  # Plot posteriors, then match up the input prior and plot
   for(param in 1:numParams){
     # Plot posterior density first
     par(mar=.MCMC_MARGINS)
+    # Get posterior data
     dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
-    dens <- density(dat)
-    plot(dens, main = colnames(mcmcData)[param], ylab="")
-    xx <- c(dens$x,rev(dens$x))
-    yy <- c(rep(min(dens$y), length(dens$y)), rev(dens$y))
-    shade <- .getShade(color, opacity)
-    polygon(xx, yy, density = NA, col = shade)
-
-    # Plot prior over top
-#    browser()
-    #plot.prior(
+    # Get rid of the trailing _ and group/area/sex numbers
+    name <-  sub("_.*","",outputParamNames[param])
+    paramNames <- rownames(paramSpecs)
+    # Match the name of the output posterior with its input parameter specifications
+    row <- grep(name, paramNames)
+    if(length(row) > 0){
+      specs <- paramSpecs[row,]
+      priorfn <- fNames[[specs[5]+1]] # +1 because the control prior starts at zero
+      priorfnr <- fNamesR[[specs[5]+1]] # +1 because the control prior starts at zero
+      xx <- list(p = dat, mu = specs[6], sig = specs[7], fn = priorfn, fnr = priorfnr, nm = outputParamNames[param])
+      plot.marg(xx, breaks = "sturges", col = "wheat")
+    }
   }
-
 }
 
-getPriorFunc <- function(code, p1, p2){
-  # Take the prior code, the p1 and p2 (mean and std deviation or shapoe parameters depending on distribution)
-  #  and return a list which can be used by plot.prior.
-  
-}
-
-plot.prior <- function(xx, breaks="sturges", ...){
+plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   # xx is a list(p=samples, mu=prior mean, s=prior varian, fn=prior distribution)
-  randsamp <- xx$fnr(10000,  xx$mu, xx$sig) #get random sample
-  xl       <- seq(min(randsamp), max(randsamp), length = 250)
-  pd       <- xx$fn(xl, xx$mu, xx$sig)
-  plot(xl, pd, col=1, lwd=2, type="l", main = xx$nm, las=1, cex.axis=1.2)
-}
+  # exFactor is a multiplier for the minimum and maximum xlims.
+  #  and ignore posterior distribution limits
+  ssNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
+  xl <- seq(min(ssNoPlot$breaks)/exFactor, max(ssNoPlot$breaks)*exFactor, length=250)
 
+  pd <- xx$fn(xl, xx$mu, xx$sig)
+  z <- cbind(xl, pd)
+  #xlim <- c(min(xl,xlPrior),max(xl,xlPrior))
+  xlim <- c(min(xl),max(xl))
+  ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
+  lines(xl, pd, col="green", lwd=2)
+  #abline(v = xx$mle, lwd=2, lty=2, col=2)
+}
