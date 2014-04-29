@@ -21,6 +21,7 @@ plotConvergence <- function(plotNum         = 1,
   # 3 Density plots
   # 4 Pairs plots with histograms
   # 5 Priors vs. Posteriors plots
+  # 6 Variance partitions
 
   currFuncName <- getCurrFunc()
   val          <- getWinVal()
@@ -78,12 +79,10 @@ plotConvergence <- function(plotNum         = 1,
     plotPairs(mcmcData)
   }
   if(plotNum == 5){
-    if(is.null(mcmcOut)){
-      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no inputs associated with it. ",
-           "Check the load scenarios routines to make sure the control file is being loaded correctly.\n")
-      return(NULL)
-    }
     plotPriorsPosts(mcmcData, inputs = inputs)
+  }
+  if(plotNum == 6){
+    plotVariancePartitions(mcmcData)
   }
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -356,4 +355,72 @@ plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
   lines(xvals, pd, col="green", lwd=2)
   #abline(v = xx$mle, lwd=2, lty=2, col=2)
+}
+
+plotVariancePartitions <- function(mcmcData){
+  # Produce a grid of pairs plots for the variance parameters' posteriors
+  # Assumes that there are an equal number of each rho and vartheta
+  #  parameters, i.e. each group must have both rho and vartheta and
+  #  they must be in the same column order in the matrix mcmcData.
+
+	oldPar	<- par(no.readonly=T)
+  on.exit(par(oldPar))
+
+  val          <- getWinVal()
+  burnin       <- val$burn
+  thinning     <- val$thin
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  # Create an empty parameter list and data frame for mcmc data and add each parameter to it
+  rhoparams <- NULL
+  vparams <- NULL
+
+  # Get the names of all the output parameters for parsing
+  names <- names(mcmcData)
+
+  # Get rho parameters
+  pattern <- "rho"
+  rholoc <- grep(pattern, names)
+  rhoparams <- c(rhoparams, names[rholoc])
+  # Get vartheta parameters
+  pattern <- "vartheta"
+  varthetaloc <- grep(pattern, names)
+  vparams <- c(vparams, names[varthetaloc])
+
+
+  if(length(rhoparams) < 1 || length(vparams) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must contain at least one of each variance parameter (rho and vartheta).\n")
+    return(NULL)
+  }
+  rhodat <- window(mcmc(as.ts(mcmcData[rhoparams[1]])), start = burnin, thin = thinning)
+  vdat   <- window(mcmc(as.ts(mcmcData[vparams[1]])), start = burnin, thin = thinning)
+  sig    <- rhodat * vdat
+  tau    <- (1 - rhodat) * vdat
+  # Make names for sig and tau for this group
+  # Get the group name from the first element of the rho names
+  rhoname <- names[rholoc][1]
+  gname <- sub("rho_([[:alnum:]]+)","\\1",rhoname)
+  namevec <- c(paste0("sig_",gname), paste0("tau_",gname))
+  d <- data.frame(rhodat, vdat)
+  d[,namevec] <- c(sig, tau)
+  # Now the first group's variance parameters are correctly loaded into the data.frame
+  if(length(rhoparams) > 1){
+    for(param in 2:length(rhoparams)){
+      rhodat <- window(mcmc(as.ts(mcmcData[rhoparams[param]])), start = burnin, thin = thinning)
+      vdat   <- window(mcmc(as.ts(mcmcData[vparams[param]])), start = burnin, thin = thinning)
+      sig    <- rhodat * vdat
+      tau    <- (1 - rhodat) * vdat
+      # Make names for sig and tau for this group
+      # Get the group name from the first element of the rho names
+      rhoname <- names[rholoc][param]
+      gname   <- sub("rho_([[:alnum:]]+)","\\1",rhoname)
+      namevec <- c(rhoparams[param], vparams[parma], paste0("sig_",gname), paste0("tau_",gname))
+      d[,namevec] <- c(rhodat, vdat, sig, tau)
+    }
+  }
+  pairs(d, pch=".", upper.panel=NULL, gap=0)
+
 }

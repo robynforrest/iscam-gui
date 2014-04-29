@@ -275,12 +275,12 @@ iscam <- function(reloadScenarios      = FALSE,
            "sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
-           "sMCMCTrace"                             = {plotConvergence(1,png,"Trace",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCDensity"                           = {plotConvergence(3,png,"Density",exFactor=1.5,showEntirePrior=T)},
-           "sParameterPairs"                        = {plotConvergence(4,png,"Pairs",exFactor=1.5,showEntirePrior=T)},
+           "sMCMCTrace"                             = {plotConvergence(1,png,"Trace")},
+           "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor")},
+           "sMCMCDensity"                           = {plotConvergence(3,png,"Density")},
+           "sParameterPairs"                        = {plotConvergence(4,png,"Pairs")},
            "sPriorsVsPosts"                         = {plotConvergence(5,png,"PriorsPosteriors",exFactor=1.5,showEntirePrior=T)},
-           "sVariancePartitions"                    = {plotConvergence(4,png,"VariancePartitions",exFactor=1.5,showEntirePrior=T)},
+           "sVariancePartitions"                    = {plotConvergence(6,png,"VariancePartitions")},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
