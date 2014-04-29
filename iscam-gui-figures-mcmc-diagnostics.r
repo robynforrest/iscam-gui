@@ -264,17 +264,31 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
   fNamesR <- c(runif,rnorm,rlnorm,rbeta,rgamma)
 
   numParams <- ncol(mcmcData)
+  numQParams <- ncol(inputs$control$survq)
+  qParams <- inputs$control$survq
   outputParamNames <- names(mcmcData)
 
   # Convert the priors in logspace into standard space
   paramSpecs <- convertLogParams(inputs$control$param)
-
+  # Add in the q parameters
+  for(q in 1:numQParams){
+    # Add a row for each q to the paramSpecs matrix
+    paramSpecs <- rbind(paramSpecs, c(NA, NA, NA, NA, qParams[1,q], exp(qParams[2,q]), exp(qParams[3,q])))
+    rownames(paramSpecs)[nrow(paramSpecs)] <- paste0("q",q)
+  }
   # First, figure out how many output parameters have associated priors and make the grid that size
   priorParamNames <- rownames(paramSpecs)
+  # Add in the q parameters
+  priorParamNames <- c(priorParamNames, paste0("q",1:numQParams))
   numWithPriors <- 0
   for(priorParam in 1:length(priorParamNames)){
-    pattern <- paste0("^",priorParamNames[priorParam],"_?[[:alnum:]]+$")
+    # For each prior that exists, match up the output paramater estimates
+    pattern <- paste0("^",priorParamNames[priorParam],"_[[:alnum:]]+$")
     priorLoc <- grep(pattern, outputParamNames)
+    if(length(priorLoc) == 0){
+      pattern <- paste0("^",priorParamNames[priorParam],"$")
+      priorLoc <- grep(pattern, outputParamNames)
+    }
     if(length(priorLoc) > 0){
       numWithPriors <- numWithPriors + length(priorLoc)
     }
@@ -290,7 +304,7 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
     # Get posterior data
     dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
     # Get rid of the trailing _ and group/area/sex numbers
-    name <-  sub("_.*","",outputParamNames[param])
+    name <- sub("_.*","",outputParamNames[param])
     paramNames <- rownames(paramSpecs)
     # Match the name of the output posterior with its input parameter specifications
     row <- grep(name, paramNames)
@@ -310,7 +324,7 @@ convertLogParams <- function(paramSpecs = NULL){
   # Returns a data frame of the same size as 'dat', with all 'log_' removed from the parameter names
 
   inpParamNames <- rownames(paramSpecs)
-  # Ugliness ensues here as the parameter names in the control file do not match those in the output.
+  # Ugliness ensues here as the parameter names in the control file may not match those in the output.
   # Must use a series of special checks to match up estimated parameters with names that contain
   #  parameter names that had priors and ignore those that don't.
   pattern <- "^log_([[:alnum:]]+)$"
