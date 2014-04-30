@@ -16,6 +16,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
                    sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
                    index      = 1,         # Survey index to plot if plotNum==7
+                   # PlotSpecs: Width, height, and resolution of screen and file
                    ps         = list(pngres = .RESOLUTION,
                                      pngw   = .WIDTH,
                                      pngh   = .HEIGHT,
@@ -23,7 +24,6 @@ plotTS <- function(scenario   = 1,         # Scenario number
                                      w      = .WIDTH,
                                      h      = .HEIGHT),
                    leg        = "topright",# Legend location. If NULL, none will be drawn
-                                           # PlotSpecs: Width, height, and resolution of screen and file
                    recrOffset = 0.1,       # Recruitment bar offset used if multiple==TRUE
                    retros     = FALSE,     # TRUE/FALSE to plot retropectives
                    btarg      = 0.4,       # Biomass target line for depletion plots
