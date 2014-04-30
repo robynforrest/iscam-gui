@@ -33,7 +33,6 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   # 2  SPR status, or the spawning potential ratio:
   #    (1-spr)/(1-spr.at.msy)
   currFuncName <- getCurrFunc()
-  val          <- getWinVal()
   scenarioName <- op[[scenario]]$names$scenario
   inp          <- op[[scenario]]$inputs$data
   inputs       <- op[[scenario]]$inputs

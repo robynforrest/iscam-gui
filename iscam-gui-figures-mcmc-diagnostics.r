@@ -6,9 +6,18 @@
 # Development Date  : April 2014 - Present
 #**********************************************************************************
 
-plotConvergence <- function(plotNum         = 1,
-                            png             = .PNG,
-                            fileText        = "Default",
+plotConvergence <- function(scenario   = 1,         # Scenario number
+                            plotNum    = 1,         # Plot code number
+                            png        = .PNG,      # TRUE/FALSE for PNG image output
+                            fileText   = "Default", # Name of the file if png==TRUE
+                            # PlotSpecs: Width, height, and resolution of screen and file
+                            ps         = list(pngres = .RESOLUTION,
+                                              pngw   = .WIDTH,
+                                              pngh   = .HEIGHT,
+                                              res    = .RESOLUTION,
+                                              w      = .WIDTH,
+                                              h      = .HEIGHT),
+                            burnthin   = list(0,1), # List of two elements, burnin and thinning
                             exFactor        = 1.5,
                             showEntirePrior = TRUE,
                             units           = .UNITS,
@@ -24,10 +33,7 @@ plotConvergence <- function(plotNum         = 1,
   # 6 Variance partitions
 
   currFuncName <- getCurrFunc()
-  val          <- getWinVal()
-  scenario     <- val$entryScenario
   scenarioName <- op[[scenario]]$names$scenario
-  sensGroup    <- val$entrySensitivityGroup
   mcmcOut      <- op[[scenario]]$outputs$mcmc
   inputs       <- op[[scenario]]$inputs # For the priors information
   if(is.null(mcmcOut)){
@@ -36,27 +42,13 @@ plotConvergence <- function(plotNum         = 1,
   }
 
   figDir       <- op[[scenario]]$names$figDir
-  res          <- val$entryResolution
-  width        <- val$entryWidth
-  height       <- val$entryHeight
-  resScreen    <- val$entryResolutionScreen
-  widthScreen  <- val$entryWidthScreen
-  heightScreen <- val$entryHeightScreen
-  if(val$legendLoc == "sLegendTopright"){
-    legendLoc <- "topright"
-  }
-  if(val$legendLoc == "sLegendTopleft"){
-    legendLoc <- "topleft"
-  }
-  if(val$legendLoc == "sLegendBotright"){
-    legendLoc <- "bottomright"
-  }
-  if(val$legendLoc == "sLegendBotleft"){
-    legendLoc <- "bottomleft"
-  }
-  if(val$legendLoc == "sLegendNone"){
-    legendLoc <- NULL
-  }
+  res          <- ps$pngres
+  width        <- ps$pngw
+  height       <- ps$pngh
+  resScreen    <- ps$res
+  widthScreen  <- ps$w
+  heightScreen <- ps$h
+
   filenameRaw  <- paste0(scenarioName,"_",fileText,".png")
   filename     <- file.path(figDir,filenameRaw)
   if(png){
@@ -67,22 +59,22 @@ plotConvergence <- function(plotNum         = 1,
   }
   mcmcData <- mcmcOut$params
   if(plotNum == 1){
-    plotTraces(mcmcData)
+    plotTraces(mcmcData, burnthin=burnthin)
   }
   if(plotNum == 2){
-    plotAutocor(mcmcData)
+    plotAutocor(mcmcData, burnthin=burnthin)
   }
   if(plotNum == 3){
-    plotDensity(mcmcData)
+    plotDensity(mcmcData, burnthin=burnthin)
   }
   if(plotNum == 4){
-    plotPairs(mcmcData)
+    plotPairs(mcmcData, burnthin=burnthin)
   }
   if(plotNum == 5){
-    plotPriorsPosts(mcmcData, inputs = inputs)
+    plotPriorsPosts(mcmcData, inputs = inputs, burnthin=burnthin)
   }
   if(plotNum == 6){
-    plotVariancePartitions(mcmcData)
+    plotVariancePartitions(mcmcData, burnthin=burnthin)
   }
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -91,16 +83,15 @@ plotConvergence <- function(plotNum         = 1,
   return(TRUE)
 }
 
-plotTraces <- function(mcmcData = NULL, axis.lab.freq=200){
+plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200){
   # Traceplots for an mcmc matrix, mcmcData
   # axis.lab.freq is the frequency of x-axis labelling
 
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[1]
+  thinning     <- burnthin[2]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -128,14 +119,14 @@ plotTraces <- function(mcmcData = NULL, axis.lab.freq=200){
 }
 
 plotAutocor <- function(mcmcData = NULL,
+                        burnthin = c(0,1),
                         lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50)){
   # Plot autocorrelations for all mcmc parameters
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[1]
+  thinning     <- burnthin[2]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -158,14 +149,13 @@ plotAutocor <- function(mcmcData = NULL,
   }
 }
 
-plotDensity <- function(mcmcData = NULL, color = 1, opacity = 30){
+plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity = 30){
   # Plot densities for the mcmc parameters in the matrix mcmcData
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
 
-  val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[1]
+  thinning     <- burnthin[2]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -193,15 +183,14 @@ plotDensity <- function(mcmcData = NULL, color = 1, opacity = 30){
   }
 }
 
-plotPairs <- function(mcmcData = NULL){
+plotPairs <- function(mcmcData = NULL, burnthin = c(0,1)){
   # Pairs plots for an mcmc matrix, mcmcData
 
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[1]
+  thinning     <- burnthin[2]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -226,14 +215,13 @@ plotPairs <- function(mcmcData = NULL){
   pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
 }
 
-plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
+plotPriorsPosts <- function(mcmcData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30){
   # Produce a grid of the parameters' posteriors with their priors overlaid.
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
 
-  val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[1]
+  thinning     <- burnthin[2]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -320,7 +308,7 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, color = 1, opacity = 30){
 
 convertLogParams <- function(paramSpecs = NULL){
   # Take data frame 'paramSpecs' and change all the parameters within it that are labelled as "log_XXX" to
-  # be in standard space, i.e. use the exp() command on all values.
+  # be in standard space, i.e. use the exp() command on all appropriate values.
   # Returns a data frame of the same size as 'dat', with all 'log_' removed from the parameter names
 
   inpParamNames <- rownames(paramSpecs)
@@ -371,7 +359,7 @@ plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   #abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
 
-plotVariancePartitions <- function(mcmcData){
+plotVariancePartitions <- function(mcmcData, burnthin = c(0,1)){
   # Produce a grid of pairs plots for the variance parameters' posteriors
   # Assumes that there are an equal number of each rho and vartheta
   #  parameters, i.e. each group must have both rho and vartheta and

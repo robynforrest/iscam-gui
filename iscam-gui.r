@@ -230,6 +230,8 @@ iscam <- function(reloadScenarios      = FALSE,
              res = val$entryResolutionScreen,
              w = val$entryWidthScreen,
              h = val$entryHeightScreen)
+  burnthin <- c(val$burn, val$thin)
+
   if(val$legendLoc == "sLegendTopright"){
     leg <- "topright"
   }
@@ -301,12 +303,12 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
-           "sMCMCTrace"                             = {plotConvergence(1,png,"Trace")},
-           "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor")},
-           "sMCMCDensity"                           = {plotConvergence(3,png,"Density")},
-           "sParameterPairs"                        = {plotConvergence(4,png,"Pairs")},
-           "sPriorsVsPosts"                         = {plotConvergence(5,png,"PriorsPosteriors",exFactor=1.5,showEntirePrior=T)},
-           "sVariancePartitions"                    = {plotConvergence(6,png,"VariancePartitions")},
+           "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},
+           "sMCMCAutocor"                           = {plotConvergence(s,2,png,"Autocor",ps=ps,burnthin=burnthin)},
+           "sMCMCDensity"                           = {plotConvergence(s,3,png,"Density",ps=ps,burnthin=burnthin)},
+           "sParameterPairs"                        = {plotConvergence(s,4,png,"Pairs",ps=ps,burnthin=burnthin)},
+           "sPriorsVsPosts"                         = {plotConvergence(s,5,png,"PriorsPosteriors",ps=ps,burnthin=burnthin,exFactor=1.5,showEntirePrior=T)},
+           "sVariancePartitions"                    = {plotConvergence(s,6,png,"VariancePartitions",ps=ps,burnthin=burnthin)},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
