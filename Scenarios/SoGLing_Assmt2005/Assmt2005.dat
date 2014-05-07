@@ -236,6 +236,8 @@
 20
 ## effective sample size for multinomial
 1
+## Age Composition flag (1==age comps, 0==length comps)
+1
 ## year gear area group sex | data columns (numbers or proportions)
 ##
 ## ------------------------------------------------------------------------- ##

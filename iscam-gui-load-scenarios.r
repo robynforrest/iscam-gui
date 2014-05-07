@@ -694,6 +694,7 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$eff         <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  tmp$agecompflag <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$agecomps    <- NULL
   # one list element for each gear (tmp$nagears)
   if(tmp$nagearsvec[1] > 0){ # Check to see if there are age comp data
