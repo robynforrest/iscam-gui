@@ -91,6 +91,15 @@
 0	0	0	# -prior log(mean)
 0.5	0.5	0	# -prior sd
 ## ------------------------------------------------------------------------- ##
+#
+## ------------------------------------------------------------------------- ##
+## CONTROLS FOR FITTING TO MEAN WEIGHT DATA	 //START_RF_ADD
+## RF added this for testing with Pacific Cod data 
+## ------------------------------------------------------------------------- ##
+1      #SWITCH :: 1= fit to annual mean weights; 0=do not fit to annual mean weights   int fitMeanWt
+1	# Number of annual mean weight series      int nMeanWtCV
+0.25  #sd for likelihood for fitting to annual mean weight (one for each series) ::  vector weight_sig(1,nMeanWtCV)	        //END_RF_ADD
+## ------------------------------------------------------------------------- ##
 ##
 ## ------------------------------------------------------------------------- ##
 ## OTHER MISCELANEOUS CONTROLS                                               ##
