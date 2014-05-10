@@ -48,7 +48,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  if(plotNum < 1 || plotNum > 15){
+  if(plotNum < 1 || plotNum > 16){		  #RF changed 15 to 16
     return(FALSE)
   }
   isMCMC   <- op[[scenario]]$inputs$log$isMCMC
@@ -74,6 +74,9 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 3){
     plotExpVsObsCatch(inp = inputs, out=out, scenarioName, leg = leg, col = color)
+  }
+  if(plotNum == 16){
+      plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
   }
 
   if(png){
@@ -117,7 +120,8 @@ plotExpVsObsCatch<-function(inp,
                                 leg = "topright",
                                 col = 1){
 
-  ngear<-inp$data$ngear
+  #ngear<-inp$data$ngear
+  ngear <- 1 #RF:: iscam only fits to one catch time series
   catchData <- inp$data$catch
   years <- catchData[,"year"]
   obsCt <- catchData[,"value"]
@@ -135,10 +139,49 @@ plotExpVsObsCatch<-function(inp,
       xLim <- range(years)
       yLim <- c(0,(max(obsCt[gear==gearList[i]],predCt[gear==gearList[i]])*1.1))
 
-      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Index")
+      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Catch")
 
       points(years[gear==gearList[i]], obsCt[gear==gearList[i]], pch=19)
       lines(years[gear==gearList[i]], predCt[gear==gearList[i]], col="grey50")
+      box()
+
+  }
+
+  par(mfrow=c(1,1),mar=c(5,4,2,2))
+
+}
+
+
+#RF added this function -- only works in branch FitMeanWt
+plotExpVsObsAnnualMeanWt<-function(inp,
+                                out,
+                                scenarioName,
+                                verbose = FALSE,
+                                leg = "topright",
+                                col = 1){
+
+  meanwtData <- inp$data$meanwtdata
+  years <- meanwtData[,"year"]
+  obsMeanWt <- meanwtData[,"meanwt"]
+  gear <-meanwtData[,"gear"]
+  gearList<-unique(gear)
+  ngear<-length(gearList)	 #only plot for gears with data
+  predMeanWt <-out$annual_mean_weight
+
+  if (ngear==1) par(mfrow=c(1,1),mar=c(5,4,2,2))
+  if (ngear == 2) par(mfrow=c(2,1),mar=c(4,4,2,2))
+  if (ngear == 3 | ngear == 4) par(mfrow=c(2,2),mar=c(3,3,2,2))
+  if (ngear == 5 | ngear == 6) par(mfrow=c(3,2),mar=c(2,2,2,2))
+
+  for (i in 1:ngear) {
+      # Set-up plot area
+      xLim <- range(years)
+      yLim <- c(0,(max(obsMeanWt[gear==gearList[i]],predMeanWt[gear==gearList[i]])*1.1))
+
+      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Mean Weight in Catch")
+
+      points(years[gear==gearList[i]], obsMeanWt[gear==gearList[i]], pch=19)
+      lines(years[gear==gearList[i]], predMeanWt[gear==gearList[i]], col="red")
       box()
 
   }

@@ -724,9 +724,22 @@ readData <- function(file = NULL, verbose = FALSE){
     }
     colnames(tmp$indices) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
   }
-  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+ 
+ #Annual Mean Weight data   RF added this -- only works in FitMeanWt branch
+   # Catch data
+  tmp$nmeanwt <- as.numeric(dat[ind <- ind + 1])
+  tmp$nmeanwtobs <- as.numeric(dat[ind <- ind + 1])
+  tmp$meanwtdata  <- matrix(NA, nrow = sum(tmp$nmeanwtobs), ncol = 7)
+   for(row in 1:sum(tmp$nmeanwtobs)){
+     tmp$meanwtdata[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+   }
+   colnames(tmp$meanwtdata) <- c("year","meanwt","gear","area","group","sex","timing")
+
+ tmp$eof <- as.numeric(dat[ind <- ind + 1])
+
   return(tmp)
 }
+
 
 readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FALSE){
   # Read in the iscam control file given by 'file'

@@ -126,10 +126,10 @@ if(.OS == "Linux" || .OS == "Darwin"){
                                   .MCMC_FILE_NAME,
                                   .MCMC_BIOMASS_FILE_NAME,
                                   .MCMC_RECRUITMENT_FILE_NAME,
-                                  .MCMC_FISHING_MORT_FILE_NAME,
+                                  .MCMC_FISHING_MORT_FILE_NAME
                                   # Executable
-                                  .EXE_FILE_NAME)
-
+                                  #.EXE_FILE_NAME  -- RF don't delete the executable!
+				    )
 # Figure types
 .PNG                             <- FALSE
 .DEPLETION_FIGURE                <- 1

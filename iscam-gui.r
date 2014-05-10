@@ -288,7 +288,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(s,1,png,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            #"sCatchLandingsStacked"                  = {plotCatch(s,2,png,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchTotal"                            = {plotCatch(s,4,png,"CatchTotal",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchTotalStacked"                     = {plotCatch(s,5,png,"CatchTotalStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscards"                         = {plotCatch(s,6,png,"CatchDiscards",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -301,6 +301,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+	   "sCatchAnnualMeanWt" 		     = {plotCatch(s,16,png,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
            "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},

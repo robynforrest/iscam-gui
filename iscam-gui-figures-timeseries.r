@@ -503,9 +503,17 @@ plotRecruitmentMCMC <- function(out       = NULL,
       incOffset <- incOffset + offset
     }
   }
-  if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+   
+   #RF added median and mean for 1 scenario plot
+   if(length(out) == 1){
+        abline(h=median(as.matrix(rt)),col=2, lty=1)
+        abline(h=mean(as.matrix(rt)),col=3,lty=1)
+	 if(!is.null(leg))  legend(leg, legend=c(names,"Long-term median","MCMC long-term mean"), col=c(unlist(colors),2,3), lty=1, lwd=2)
+   }
+    if(length(out) > 1){
+	 if(!is.null(leg))  legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
+
 }
 
 plotIndexMPD <- function(out       = NULL,
@@ -553,7 +561,8 @@ plotIndexMPD <- function(out       = NULL,
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- inputs[[1]]$indices[[index]]
-  yUpper <- max(inputindices[,2])  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
+
+  yUpper <- max(inputindices[,2] + inputindices[,2]*(1/inputindices[,7]))  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
   minYear <- min(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
   maxYear <- max(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
   for(model in 1:length(out)){
@@ -562,15 +571,17 @@ plotIndexMPD <- function(out       = NULL,
     inputit  <- inputindices[,2] # NOTE 2 is hardwired (it). If this function breaks look here!
     yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE) # NA is removed here because surveys have different years, and missing ones are NA
     minYear1 <- min(inputindices[,1]) # yr column
-    maxYear1 <- max(inputindices[,1]) # yr column
+    maxYear1 <- max(inputindices[,1] ) # yr column
     minYear  <- min(minYear,  minYear1)
     maxYear  <- max(maxYear, maxYear1)
   }
   dat <- out[[1]]$mpd$it_hat[index,]
   yrs <- inputs[[1]]$indices[[index]][,1]
+  CV <-  1./inputs[[1]]$indices[[index]][,7]    #RF added CVs
   dat <- dat[!is.na(dat)]
-  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main=paste0("Index fit gear ",index), las=1)
+  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=paste0("Index fit gear ",index), las=1)
   points(yrs, inputindices[,2], pch=3)
+  arrows(yrs,inputindices[,2]+CV*inputindices[,2] ,yrs,inputindices[,2]-CV*inputindices[,2],code=3,angle=90,length=0.01, col=colors[[1]]) #RF added error bars
   if(length(out) > 1){
     for(model in 2:length(out)){
       dat <- out[[model]]$mpd$it_hat[index,]

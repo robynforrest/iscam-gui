@@ -108,12 +108,13 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sTSIndex                            text="Index fits"                   function=.subView sticky=W mode=character
                radio name=viewPlotType value=sFishingMortality                   text="Fishing mortality"            function=.subView sticky=W mode=character
                radio name=viewPlotType value=sSPRRatio                           text="SPR ratio"                    function=.subView sticky=W mode=character
-          grid 4 1 sticky=N relief=raised
+          grid 5 1 sticky=N relief=raised
                label text="Catch" font="bold 10" sticky=N
                radio name=viewPlotType value=sCatchLandings                  text="Landings" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sCatchLandingsStacked           text="Landings stacked" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsObsVsExpLandings text="Observed vs. expected landinngs" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sCatchLandingsObsVsExpLandings text="Observed vs. expected landings" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sCatchAnnualMeanWt text="Annual mean weights in catch" function=.subView sticky=W mode=character
+              #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscards                 text="Discards" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscardsStacked          text="Discards stacked" function=.subView sticky=W mode=character
@@ -366,7 +367,7 @@ grid 3 1 padx=10 pady=5 sticky=W
       grid 3 7
 
         label text="Index to plot" font="bold 10" sticky=W
-        entry name=entryIndex width=5 padx=5 value=2 function=.subView action="changeIndex" entryfont="10" sticky=W
+        entry name=entryIndex width=5 padx=5 value=1 function=.subView action="changeIndex" entryfont="10" sticky=W
         null
         check name=plotMCMC checked=T text="Plot MCMC" function=.subView action="changePlotMCMC" font="bold 10" sticky=W
         null
