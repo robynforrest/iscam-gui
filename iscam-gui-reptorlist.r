@@ -67,7 +67,7 @@ bubble.plot <- function (x=1:dim(z)[1], y=1:dim(z)[2], z, scale = 1, log.scale =
   xo <- outer(x, rep(1, length = length(y)))
   yo <- t(outer(y, rep(1, length = length(x))))
   zo <- zo/(max(abs(zo),na.rm=T) *scale) #apply(zo, 2, "/", max(abs(zo))) * length(y) * scale
-  zo[abs(zo)<=0.001] <- NA
+  zo[abs(zo)<=0.001] <- 0
   nt <- rowSums(z)
   #zo[zo==NA]=0
   if(!add){
@@ -77,8 +77,9 @@ bubble.plot <- function (x=1:dim(z)[1], y=1:dim(z)[2], z, scale = 1, log.scale =
     iclr <- rep("transparent", length = ny)
     iclr[z[i, ] <= 0] <- "salmon"
     if(fill){
-      points(xo[i, 1:ny], yo[i, 1:ny], cex=abs(zo[i, ]), pch=16, col=iclr)
+      print(  zo[i, ])
+      points(xo[i, 1:ny], yo[i, 1:ny], cex=abs(zo[i, ]+1e-5), pch=16, col=iclr)
     }
-    points(xo[i, 1:ny], yo[i, 1:ny], cex = abs(zo[i, ]), pch=1, col="black")
+    points(xo[i, 1:ny], yo[i, 1:ny], cex = abs(zo[i, ]+1e-5), pch=1, col="black")
   }   
 }

@@ -833,8 +833,9 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   rownames(tmp$sel) <- c("iseltype","agelen50log","std50log","nagenodes","nyearnodes",
                          "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
 
-  # Start year for time blocks, one for each gear
-  tmp$syrtimeblock <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  # Start year for time blocks, one for each gear			   # RF fixed this - should be a vector not int
+ tmp$syrtimeblock <- vector(length=ngears)
+ for(ng in 1:ngears) tmp$syrtimeblock[ng] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
   # Priors for survey Q, one column for each survey
   tmp$nits <- as.numeric(dat[ind <- ind + 1])
@@ -847,6 +848,15 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   # Rownames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$survq) <- c("priortype","priormeanlog","priorsd")
 
+ #@@@@@@@@@ RF_Add@@@@@@@@@@
+ #CONTROLS FOR FITTING TO MEAN WEIGHT DATA
+ # RF added this for testing with Pacific Cod data
+  tmp$fitMeanWt <- as.numeric(dat[ind <- ind + 1])
+  tmp$nMeanWtCV <- as.numeric(dat[ind <- ind + 1])
+  nvals <- tmp$nMeanWtCV
+  tmp$weight_sig <-  vector(length=nvals)
+  for(val in 1:nvals)  tmp$weight_sig[val] <- as.numeric(dat[ind <- ind + 1])
+
   nrows <- 15
   tmp$misc <- matrix(NA, nrow = nrows, ncol = 1)
   for(row in 1:nrows){
@@ -854,7 +864,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   }
   # Rowames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$misc) <- c("verbose","rectype","sdobscatchfirstphase","sdobscatchlastphase",
-                          "unfishedfirstyear","minpropage","meanF","sdmeanFfirstphase",
+                          "unfishedfirstyear","maternaleffects","meanF","sdmeanFfirstphase",
                           "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
                           "fracZpriorspawn","agecompliketype","IFDdist")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])  

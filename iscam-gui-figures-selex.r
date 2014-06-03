@@ -8,15 +8,20 @@
 # Current version   : 1.0
 #**********************************************************************************
 
-plotSelex <- function(plotNum  = 1,
-                      fileText = "Default",
-                      units    = .UNITS,
-                      png      = .PNG,
-                      silent   = .SILENT){
+plotSelex <- function(plotNum    = 1,         # Plot code number
+                   png        = .PNG,      # TRUE/FALSE for PNG image output
+                   fileText   = "Default", # Name of the file if png==TRUE
+                   plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
+                   ci         = NULL,      # confidence interval in % (0-100)
+                   multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
+                   sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
+                   index      = 1         # Gear index to plot 
+                   ){
 
   # plotNum must be one of:
-  # 1  Length-based selectivity in end year by fleet
-  # 2  Age-based selectivity in end year by fleet
+  #1 logistic selectivity - age or length based will be detected automatically
+ 	## 1  Length-based selectivity in end year by fleet
+  	## 2  Age-based selectivity in end year by fleet
   # 3  Selectivity at length time-varying surface
   # 4  Selectivity at length time-varying contour
   # 5  Retention at length time-varying surface
@@ -77,20 +82,53 @@ plotSelex <- function(plotNum  = 1,
     # plot mpd model runs
   }
 
-  # Generate an r4ss biology plots
+  if(plotNum==1)  plotLogisticSel(scenario, index)
+  if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 
-  SSplotSelex(out,
-              plot     = TRUE,
-              print    = FALSE,
-              subplot  = plotNum,
-              pheight  = height,
-              pwidth   = width,
-              punits   = units,
-              res      = res,
-              verbose  =!silent)
+
+  #SSplotSelex(out,
+ #             plot     = TRUE,
+#              print    = FALSE,
+#              subplot  = plotNum,
+#              pheight  = height,
+#              pwidth   = width,
+ #             punits   = units,
+#              res      = res,
+#              verbose  =!silent)
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }
   return(TRUE)
 }
+
+ #Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
+ plotLogisticSel	<-	function(scenario, index){
+ 	aflag <- 0 #flag to set age or length
+ 	ngear <-  op[[scenario]]$inputs$data$ngear
+	if(index <= ngear)
+	{
+	
+		selType <-   op[[scenario]]$inputs$control$sel[1,index]
+		if(selType==1 || selType ==6)  {aflag <-1} 
+		else if(selType==11) {aflag <- 2 }
+
+		Age <- op[[scenario]]$output$mpd$age
+		Len <- op[[scenario]]$output$mpd$la
+
+		if(aflag > 0){
+			logselData <-  op[[scenario]]$output$mpd$log_sel
+			logselData <- logselData[which(logselData[,1]==index),4:ncol(logselData)]
+			
+			selData <- exp(logselData)
+			selData <- selData[nrow(selData),]
+			
+                     	if(aflag==2) Xlab="Length-at-Age"
+			if(aflag==1) Xlab="Age"
+                       
+		       if(aflag==1) plot(Age, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index))	     #, ylim=c(0,1)
+	               if(aflag==2) plot(Len, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index))
+
+			 }else cat("Plot not currently implemented for the type of selectivity used for this gear\n") 
+   	     }else cat(paste("WARNING: Gear index exceeds the number of gears. Choose gear between 1 and", ngear,"\n"))
+   	}

@@ -480,7 +480,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    rt <- out[[1]]$mcmc$rt[[1]]
+   
+   #quants[[model]] <- getQuants(out[[model]]$mcmc$rt[[1]], ci)
+   rt <- out[[model]]$mcmc$rt[[1]]
     quants[[model]] <- getQuants(rt, ci)
   }
   yUpper <- max(quants[[1]])
@@ -497,7 +499,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
     incOffset <- offset
     for(line in 2:length(out)){
       # Plot the uncertainty
-      points(yrs+incOffset, quants[[1]][2,], pch=20, col=colors[[line]])
+      points(yrs+incOffset, quants[[line]][2,], pch=20, col=colors[[line]])
       arrows(yrs+incOffset, quants[[line]][1,],
              yrs+incOffset, quants[[line]][3,], col=colors[[line]], code=3, angle=90, length=0.01)
       incOffset <- incOffset + offset
