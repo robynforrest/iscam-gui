@@ -126,8 +126,8 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
                      	if(aflag==2) Xlab="Length-at-Age"
 			if(aflag==1) Xlab="Age"
                        
-		       if(aflag==1) plot(Age, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index))	     #, ylim=c(0,1)
-	               if(aflag==2) plot(Len, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index))
+		       if(aflag==1) plot(Age, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index), ylim=c(0,1.2))	     #
+	               if(aflag==2) plot(Len, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index), ylim=c(0,1.2))
 
 			 }else cat("Plot not currently implemented for the type of selectivity used for this gear\n") 
    	     }else cat(paste("WARNING: Gear index exceeds the number of gears. Choose gear between 1 and", ngear,"\n"))

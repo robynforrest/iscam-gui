@@ -17,7 +17,7 @@
 ## ival	lb	ub	phz	prior	p1	p2     #parameter   ##
 8.48826665430	1.0	12.	1	0	1.0	15.    #log_ro      ##
 0.662613136037	0.2     1.0	1	3	5.833	2.5    #steepness   ##
--0.935070314041	-2.30	0.0	2	1	-0.693	0.1    #log_m g&b   ##
+-0.935070314041	-2.30	0.0	-2	1	-0.693	0.1    #log_m g&b   ##
 7.92292317816	1.0	12.	1	0      1.0	12.    #log_avgrec ##
 7.50223873970	1.0	12.	1	0      1.0	12.    #log_recinit ##
 0.088968	0.01  	0.999  	-3	3	3.0	12.0   #rho         ##
@@ -63,8 +63,8 @@
 ##      wt =200. 50.0 22.2 12.5 5.56 3.12 2.00                               ##
 ## ------------------------------------------------------------------------- ##
 11	6	6	6	 # 1  -selectivity type ivector(isel_type) for gear  11
-25.	1.5	1.5	1.5  # 2  -Age at 50% selectivity (logistic) 45
-5.1	0.001	0.001	0.001 # 3  -STD at 50% selectivity (logistic)  5.1
+30.	1.5	1.5	1.5  # 2  -Age at 50% selectivity (logistic) 45
+5.1	0.1	0.1	0.1 # 3  -STD at 50% selectivity (logistic)  5.1
 0	0	0	0	 # 4  -No. of age nodes for each gear (0=ignore)
 0	0	0	0	  # 5  -No. of year nodes for 2d spline(0=ignore)
 -1	-2	-2	-2	 # 6  -Phase of estimation (negative for fixed)
