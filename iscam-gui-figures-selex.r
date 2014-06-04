@@ -110,25 +110,59 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
 	{
 	
 		selType <-   op[[scenario]]$inputs$control$sel[1,index]
+		selBlocks <- op[[scenario]]$inputs$control$sel[10,index] #selectivity time blocks
 		if(selType==1 || selType ==6)  {aflag <-1} 
 		else if(selType==11) {aflag <- 2 }
 
 		Age <- op[[scenario]]$output$mpd$age
 		Len <- op[[scenario]]$output$mpd$la
-
+		
+		#no plot if sel is not one of the types listed above
 		if(aflag > 0){
 			logselData <-  op[[scenario]]$output$mpd$log_sel
-			logselData <- logselData[which(logselData[,1]==index),4:ncol(logselData)]
+			logselData <- logselData[which(logselData[,1]==index),]
+			xx <- logselData[,4:ncol(logselData)]
 			
-			selData <- exp(logselData)
-			selData <- selData[nrow(selData),]
+			selData <- exp(xx)
+			selData <- selData[1,] #selectivity in first block
+			startBlocks <- op[[scenario]]$inputs$control$syrtimeblock[index,]
+			legtext <- paste("Selectivity Block 1 :", startBlocks[1])
 			
+			selData <- as.matrix(selData)
+			
+			if(selBlocks>1)  {
+				for(i in 2:selBlocks) {
+					logselBlockData <- xx[which(logselData[,3]==startBlocks[i]),]
+					selData <- cbind(selData, exp(logselBlockData))
+				}	
+			}
+							
                      	if(aflag==2) Xlab="Length-at-Age"
 			if(aflag==1) Xlab="Age"
                        
-		       if(aflag==1) plot(Age, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index), ylim=c(0,1.2))	     #
-	               if(aflag==2) plot(Len, selData, type="l", xlab=Xlab, ylab="Proportion", lwd=2, col="blue", las=1, main=paste("Gear",index), ylim=c(0,1.2))
-
+		       if(aflag==1) {
+		       		plot(Age, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=paste("Gear",index), ylim=c(0,1.1))	     #
+	               		if(selBlocks>1){
+	               			for(i in 2:selBlocks) {
+	               				lines(Age, selData[,i], lty=i, col=i, lwd=2)
+	               				legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))               				
+	               			} #end for	
+	               		}#end if
+	               		legend("topleft", legend=legtext, lty=1:selBlocks, col=1:selBlocks, lwd=2, bty="n")
+	               	} #end if
+	               
+	               if(aflag==2) {
+	               	               plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=paste("Gear",index),ylim=c(0,1.1))   #
+	               	               if(selBlocks>1){
+					for(i in 2:selBlocks) {
+						lines(Len, selData[,i], lty=i, col=i, lwd=2)
+						legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))          				
+					}#end for		
+				}#end if
+	               		legend("topleft", legend=legtext, lty=1:selBlocks, col=1:selBlocks, lwd=2, bty="n")
+	               	               
+			}#end if
+	
 			 }else cat("Plot not currently implemented for the type of selectivity used for this gear\n") 
    	     }else cat(paste("WARNING: Gear index exceeds the number of gears. Choose gear between 1 and", ngear,"\n"))
    	}

@@ -15,7 +15,14 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                    ci         = NULL,      # confidence interval in % (0-100)
                    multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
                    sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
-                   index      = 1         # Gear index to plot if plotNum==11,12 or 13
+                   index      = 1, # PlotSpecs: Width, height, and resolution of screen and file
+                   ps         = list(pngres = .RESOLUTION,
+                                     pngw   = .WIDTH,
+                                     pngh   = .HEIGHT,
+                                     res    = .RESOLUTION,
+                                     w      = .WIDTH,
+                                     h      = .HEIGHT),
+                   leg        = "topright" # Legend location. If NULL, none will be drawn         # Gear index to plot if plotNum==11,12 or 13
                    ){
 
   # plotNum must be one of:
@@ -43,8 +50,18 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   figDir       <- op[[scenario]]$names$figDir
   out          <- op[[scenario]]$outputs$mpd
   outMCMC      <- op[[scenario]]$outputs$mcmc
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
+  #filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
+  filenameRaw  <- paste0(fileText,".png")
   filename     <- file.path(figDir,filenameRaw)
+   # PlotSpecs: Width, height, and resolution of screen and file
+  res          <- ps$pngres
+  width        <- ps$pngw
+  height       <- ps$pngh
+  resScreen    <- ps$res
+  widthScreen  <- ps$w
+  heightScreen <- ps$h
+   units      = .UNITS    # Units to use in plotting
+  
   if(png){
     graphics.off()
     png(filename,res=res,width=width,height=height,units=units)
@@ -72,11 +89,10 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==10)  cat("No Plot Yet -- Coming Soon!!\n")
   
-  
-  #composition data
-   if(plotNum==11) plotComposition(scenario, index)
-   if(plotNum==12) plotCompositionFit(scenario, index)
-   if(plotNum==13) plotCompositionResid(scenario, index)
+   #composition data
+   if(plotNum==11) plotComposition(scenario, index, leg)
+   if(plotNum==12) plotCompositionFit(scenario, index, leg)
+   if(plotNum==13) plotCompositionResid(scenario, index, leg)
   
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -85,16 +101,14 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   return(TRUE)
 }
 
-
 #Functions
- plotComposition	<-	function(scenario, index){
+ plotComposition	<-	function(scenario, index, leg){
  	nAgears <-  op[[scenario]]$input$data$nagears
  	nAgearsobs <- op[[scenario]]$input$data$nagearsvec
 	Flags <-   op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
 	
- 	
  	if(nAgearsobs[1] > 0){
- 		compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A ) #Get the composition data	   
+ 		compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A) #Get the composition data	   
 		gears <- unique(compData[,2])
 		
 		if(is.element(index, gears)){
@@ -103,27 +117,32 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
 			gearindex <- which(gears==index) 
 			sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_sage
 			nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_nage
+			nages <- length(sage:nage)
 			flag <- Flags[gearindex]
 			if(flag==0) Ylab="Length"
 		        if(flag==1) Ylab="Age"
 			
 			compData <- compData[which(compData[,2]==index) ,]   #Get only the composition data for the current index
-			syr <- compData[1,1]
-			nyr <- compData[length(compData[,1]),1]
+			
+			yrs <- compData[,1]
+			syr <- yrs[1]
+			nyr <- yrs[length(yrs)]
+			
 			compData <- compData[, 6:ncol(compData)]
-
+			compData <- compData[, 1:nages]  #remove NAs from ragged array
+			
 			Prop <- matrix(nrow=nrow(compData), ncol=ncol(compData))
                        		for(ii in 1:nrow(compData)) Prop[ii,] <-  as.numeric(compData[ii,]/sum(compData[ii,]) )
 
-			plotBubbles(t(Prop), xval=syr:nyr,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",ylab=Ylab,main=paste("Gear", index), las=1)
-			legend("topleft", legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
+			plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",ylab=Ylab,main=paste("Gear", index), las=1)
+			legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
 
 			#bubble.plot(syr:nyr,sage:nage,Prop,scale=0.3,xlab="Year",ylab=Ylab,add=F,log.scale=T, main=paste("Gear", index), las=1)
  	         }else cat("WARNING: No composition data for this gear\n") 
    	}else cat("WARNING: No composition data for this scenario\n")  
 }
 
- plotCompositionFit	<-	function(scenario, index){
+ plotCompositionFit	<-	function(scenario, index,leg){
  	nAgears <-  op[[scenario]]$input$data$nagears
  	nAgearsobs <- op[[scenario]]$input$data$nagearsvec
 	Flags <-   op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
@@ -139,27 +158,31 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
 			gearindex <- which(gears==index) 
 			sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_sage
 			nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_nage
+			nages <- length(sage:nage)
 			flag <- Flags[gearindex]
 			if(flag==0) Ylab="Length"
 		        if(flag==1) Ylab="Age"
 			
 			xx <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
-			syr <- xx[1,1]
-			nyr <- xx[nrow(xx),1]
 			yrs <- xx[,1]
+			syr <-yrs[1]
 			iyr<-length(yrs)
-                        			
-			fitData <- fitData[which(compData[,2]==index) ,]   #Use the composition dataframe to get the right rowsfor the fitted data (i.e.,for the current index)
-		      	compData <- compData[, 6:ncol(compData)]
-			Prop <- matrix(nrow=nrow(compData), ncol=ncol(compData))
-                       		for(ii in 1:nrow(compData)) Prop[ii,] <-  as.numeric(compData[ii,]/sum(compData[ii,]) )
-
-		       #Set the number of panels per plot   - no more than 16 per page
-		        if(nrow(Prop) < 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2)) 
-		       if(nrow(Prop) < 5)   par(mfrow=c(2,2), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
+                        nyr <- yrs[iyr]			
 			
-			#Set the number of graphs
-			if(nrow(Prop) >= 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))  
+			#Fit data
+			fitData <- fitData[which(compData[,2]==index) ,1:nages]   #Use the composition dataframe to get the right rowsfor the fitted data (i.e.,for the current index)
+		      	
+		      	#Observed data
+		      	xx<- xx[, 6:ncol(xx)]
+		      	xx <- xx[, 1:nages]  #remove NAs from ragged array
+		      	
+			Prop <- matrix(nrow=nrow(xx), ncol=ncol(xx))
+                       		for(ii in 1:nrow(xx)) Prop[ii,] <-  as.numeric(xx[ii,]/sum(xx[ii,]) )
+                       		
+		       #Set the number of panels per plot   - no more than 16 per page
+		       if(nrow(Prop) < 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2)) 
+		       if(nrow(Prop) < 5)   par(mfrow=c(2,2), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
+		       if(nrow(Prop) >= 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))   #multiple graphs will be made
 			
 			#counters
 			ii <- 1 #plot counter
@@ -168,9 +191,10 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
 			   year <- yrs[i]
 			   obs <-  Prop[i,]
 			   est <-   fitData[i,]
-
+		
 			   plot(sage:nage, obs, type="h", xlab="", ylab="", main=paste(year), las=1, ylim=c(0,max(rbind(obs,est))))
 			   lines(sage:nage, est, lty=1, lwd=2, col=2)
+			   if(ii==1) legend(leg, legend=c("Obs", "Est"), lty=1, lwd=2, col=1:2, bty="n")
 
 			   ii <- ii+1
 			  if(ii == 16){
@@ -192,10 +216,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
    	}else cat("WARNING: No composition data for this scenario\n")  
  }
 
-
-
-
- plotCompositionResid	<-	function(scenario, index){
+ plotCompositionResid	<-	function(scenario, index, leg){
  	nAgears <-  op[[scenario]]$input$data$nagears
  	nAgearsobs <- op[[scenario]]$input$data$nagearsvec
 	Flags <-   op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
@@ -217,12 +238,14 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
 		        if(flag==1) Ylab="Age"
 			
 			xx <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
-			syr <- xx[1,1]
-			nyr <- xx[nrow(xx),1]
+			yrs <- xx[,1]
+			syr <-yrs[1]
+			iyr<-length(yrs)
+                        nyr <- yrs[iyr]	
 			residData <- residData[which(compData[,2]==index) ,]   #Use the composition dataframe to get the right rowsfor the residuals (i.e.,for the current index)
 		      	
-		      	plotBubbles(t(residData), xval=syr:nyr,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",ylab=Ylab,main=paste("Gear", index), las=1)
-			legend("topleft", legend=c("Positive", "Negative", "Zero"), col=c("black","red","blue"), pch=1, bty="n", cex=1.25)
+		      	plotBubbles(t(residData), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",ylab=Ylab,main=paste("Gear", index), las=1, cex.axis=0.75)
+			legend(leg, legend=c("Positive", "Negative", "Zero"), col=c("black","red","blue"), pch=1, bty="n", cex=1.25)
 
 
  	         }else cat("WARNING: No composition data for this gear\n") 

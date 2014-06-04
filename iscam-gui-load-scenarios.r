@@ -833,9 +833,10 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   rownames(tmp$sel) <- c("iseltype","agelen50log","std50log","nagenodes","nyearnodes",
                          "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
 
-  # Start year for time blocks, one for each gear			   # RF fixed this - should be a vector not int
- tmp$syrtimeblock <- vector(length=ngears)
- for(ng in 1:ngears) tmp$syrtimeblock[ng] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  # Start year for time blocks, one for each gear			   # RF fixed this - should be a matrix not int
+ maxblock <- max(tmp$sel[10])
+ tmp$syrtimeblock <- matrix(nrow=ngears, ncol=maxblock)
+ for(ng in 1:ngears) tmp$syrtimeblock[ng,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
   # Priors for survey Q, one column for each survey
   tmp$nits <- as.numeric(dat[ind <- ind + 1])

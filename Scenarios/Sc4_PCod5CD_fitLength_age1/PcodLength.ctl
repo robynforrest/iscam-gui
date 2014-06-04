@@ -16,12 +16,12 @@
 7
 ## ival	lb	ub	phz	prior	p1	p2     #parameter   ##
 8.48826665430	1.0	12.	1	0	1.0	15.    #log_ro      ##
-0.662613136037	0.2     1.0	1	3	5.833	2.5    #steepness   ##
--0.935070314041	-2.30	0.0	-2	1	-0.693	0.1    #log_m g&b   ##
+0.75	0.2     1.0	1	3	5.833	2.5    #steepness   ##
+-0.935070314041	-2.30	0.0	1	1	-0.693	0.1    #log_m g&b   ##
 7.92292317816	1.0	12.	1	0      1.0	12.    #log_avgrec ##
 7.50223873970	1.0	12.	1	0      1.0	12.    #log_recinit ##
 0.088968	0.01  	0.999  	-3	3	3.0	12.0   #rho         ##
-1.423488	0.01   	150.	-2      4       7.5	5.78   #vartheta    ##
+1.423488	0.01   	150.	2      4       7.5	5.78   #vartheta    ##
 ## ------------------------------------------------------------------------- ##
 ##
 ## ------------------------------------------------------------------------- ##
@@ -36,7 +36,7 @@
 ## ------------------------------------------------------------------------- ##
 ## Number of columns == na_gears.
 1	2	3   ## Gear Index
-3	3	3   ## Likelihood type
+1	1	1   ## Likelihood type
 0	0	0   ## Minimum proportion for aggregation & tail compression
 0	0	0   ## Small constant to add to comps & renormalize
 1  	1	1   ## phase for log_age_tau2 estimation.
@@ -63,18 +63,18 @@
 ##      wt =200. 50.0 22.2 12.5 5.56 3.12 2.00                               ##
 ## ------------------------------------------------------------------------- ##
 11	11	11	6	 # 1  -selectivity type ivector(isel_type) for gear  11
-30.	20.	20.	1.5  # 2  -Age at 50% selectivity (logistic) 45
-5.1	5.1	5.1	0.1 # 3  -STD at 50% selectivity (logistic)  5.1
-0	0	0	0	 # 4  -No. of age nodes for each gear (0=ignore)
-0	0	0	0	  # 5  -No. of year nodes for 2d spline(0=ignore)
-2	2	2	-4	 # 6  -Phase of estimation (negative numbers mirror the settings for the gear with the neg number)
-2	2	2	2		# 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
-2 	2	2	2		# 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
-12	12	12	12	      # 9  -Penalty wt for time-varying selectivity
-1	1	1	1		# 10 -n_sel_blocks (number of selex blocks)
+30.	40.	40.	2.     # 2  -Age at 50% selectivity (logistic) 45
+5.1	2.1	2.1	0.3   # 3  -STD at 50% selectivity (logistic)  5.1
+0	0	0	0	# 4  -No. of age nodes for each gear (0=ignore)
+0	0	0	0	# 5  -No. of year nodes for 2d spline(0=ignore)
+2	-2	-2	-4	# 6  -Phase of estimation (negative numbers mirror the settings for the gear with the neg number)
+2	2	2	2	# 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
+2 	2	2	2	# 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
+12	12	12	12	# 9  -Penalty wt for time-varying selectivity
+2	1	1	1	# 10 -n_sel_blocks (number of selex blocks)
 ## ------------------------------------------------------------------------- ##
 ## Start year of each time block: 1 row for each gear
-1956 
+1956	1995
 1956
 1956
 1956
