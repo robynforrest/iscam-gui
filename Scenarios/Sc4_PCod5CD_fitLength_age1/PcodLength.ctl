@@ -35,14 +35,14 @@
 ##     -5 : logistic_student_T, no autocorrelation
 ## ------------------------------------------------------------------------- ##
 ## Number of columns == na_gears.
-1   ## Gear Index
-1   ## Likelihood type
-0   ## Minimum proportion for aggregation & tail compression
-0   ## Small constant to add to comps & renormalize
--1  ## phase for log_age_tau2 estimation.
--2  ## phase for phi1 estimation: bounded (-1,1) AR1
--2  ## phase for phi2 estimation: bounded (0,1)  AR2 
--2  ## phase for degrees of freedom for student T.
+1	2	3   ## Gear Index
+3	3	3   ## Likelihood type
+0	0	0   ## Minimum proportion for aggregation & tail compression
+0	0	0   ## Small constant to add to comps & renormalize
+1  	1	1   ## phase for log_age_tau2 estimation.
+-2	-2	-2  ## phase for phi1 estimation: bounded (-1,1) AR1
+-2	-2	-2  ## phase for phi2 estimation: bounded (0,1)  AR2 
+-2	-2	-2  ## phase for degrees of freedom for student T.
 -12345                      ## int check (-12345)
 ## ------------------------------------------------------------------------- ##
 ##
@@ -62,12 +62,12 @@
 ##      sig=0.05 0.10 0.15 0.20 0.30 0.40 0.50                               ##
 ##      wt =200. 50.0 22.2 12.5 5.56 3.12 2.00                               ##
 ## ------------------------------------------------------------------------- ##
-11	6	6	6	 # 1  -selectivity type ivector(isel_type) for gear  11
-30.	1.5	1.5	1.5  # 2  -Age at 50% selectivity (logistic) 45
-5.1	0.1	0.1	0.1 # 3  -STD at 50% selectivity (logistic)  5.1
+11	11	11	6	 # 1  -selectivity type ivector(isel_type) for gear  11
+30.	20.	20.	1.5  # 2  -Age at 50% selectivity (logistic) 45
+5.1	5.1	5.1	0.1 # 3  -STD at 50% selectivity (logistic)  5.1
 0	0	0	0	 # 4  -No. of age nodes for each gear (0=ignore)
 0	0	0	0	  # 5  -No. of year nodes for 2d spline(0=ignore)
--1	-2	-2	-2	 # 6  -Phase of estimation (negative for fixed)
+2	2	2	-4	 # 6  -Phase of estimation (negative numbers mirror the settings for the gear with the neg number)
 2	2	2	2		# 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
 2 	2	2	2		# 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
 12	12	12	12	      # 9  -Penalty wt for time-varying selectivity
