@@ -34,7 +34,12 @@ reptoRlist <- function(fn){
       
       for(ii in 1:length(ir:(irr-2))) {
      		tmp <- as.double(scan(fn,skip=ir+count,nlines=1,quiet=T,what=""))
-     		for(j in 1:length(tmp)) dum[ii,j] <- tmp[j]
+		ltmp <- length(tmp)
+		if(ltmp < nCol) {
+			 tmp[(ltmp+1):nCol] <- NA
+		}
+	       #Fill the matrix
+     		dum[ii,] <- tmp
       		count<-count+1
       }#end for
      } #end if
