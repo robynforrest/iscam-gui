@@ -420,15 +420,30 @@ plotRecruitmentMPD <- function(out       = NULL,
 
   yUpper <- max(rt)
   for(model in 1:length(out)){
-    rt     <- out[[model]]$mpd$rt
-    yUpper <- max(yUpper, rt)
+    tmprt     <- out[[model]]$mpd$rt
+    yUpper <- max(yUpper, tmprt)
   }
-  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+
+   #RF - need to get xlim in case time series lengths differ
+   Xlim <- c(min(ryr), max(ryr))
+    if(length(out)>1){
+	   for(model in 1:length(out)){
+		   tmpsage <- out[[model]]$mpd$sage
+		   tmpryr     <- out[[model]]$mpd$yr[(1+sage):nyear]
+		   minx <- min(min(tmpryr), min(Xlim)) 
+		   maxx <- max(max(tmpryr), max(Xlim))  
+		    Xlim <- c(minx, maxx)
+		}
+    }
+
+  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),xlim=Xlim, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
+      sage <- out[[line]]$mpd$sage
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
+   
       lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
@@ -492,12 +507,25 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlab="Year", ylab="Recruitment", las=1)
+  #RF - need to get xlim in case time series lengths differ
+    Xlim <- c(min(yrs), max(yrs))
+      if(length(out)>1){
+  	   for(model in 1:length(out)){
+  		   tmpryr     <- as.numeric(names(out[[model]]$mcmc$rt[[1]]))
+  		   minx <- min(min(tmpryr), min(Xlim)) 
+  		   maxx <- max(max(tmpryr), max(Xlim))  
+  		    Xlim <- c(minx, maxx)
+  		}
+    }
+
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment", las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
     incOffset <- offset
     for(line in 2:length(out)){
+      
+      yrs <- as.numeric(names(out[[line]]$mcmc$rt[[1]]))
       # Plot the uncertainty
       points(yrs+incOffset, quants[[line]][2,], pch=20, col=colors[[line]])
       arrows(yrs+incOffset, quants[[line]][1,],
