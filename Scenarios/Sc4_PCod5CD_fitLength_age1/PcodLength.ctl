@@ -63,7 +63,7 @@
 ##      wt =200. 50.0 22.2 12.5 5.56 3.12 2.00                               ##
 ## ------------------------------------------------------------------------- ##
 11	11	11	6	 # 1  -selectivity type ivector(isel_type) for gear  11
-30.	40.	40.	2.     # 2  -Age at 50% selectivity (logistic) 45
+30.	30.	30.	2.     # 2  -Age at 50% selectivity (logistic) 45
 5.1	2.1	2.1	0.3   # 3  -STD at 50% selectivity (logistic)  5.1
 0	0	0	0	# 4  -No. of age nodes for each gear (0=ignore)
 0	0	0	0	# 5  -No. of year nodes for 2d spline(0=ignore)
@@ -71,10 +71,10 @@
 2	2	2	2	# 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
 2 	2	2	2	# 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
 12	12	12	12	# 9  -Penalty wt for time-varying selectivity
-2	1	1	1	# 10 -n_sel_blocks (number of selex blocks)
+3	1	1	1	# 10 -n_sel_blocks (number of selex blocks)
 ## ------------------------------------------------------------------------- ##
 ## Start year of each time block: 1 row for each gear
-1956	1995
+1956	1992	1996
 1956
 1956
 1956
@@ -96,7 +96,7 @@
 ## CONTROLS FOR FITTING TO MEAN WEIGHT DATA	 //START_RF_ADD
 ## RF added this for testing with Pacific Cod data 
 ## ------------------------------------------------------------------------- ##
-1      #SWITCH :: 1= fit to annual mean weights; 0=do not fit to annual mean weights   int fitMeanWt
+0      #SWITCH :: 1= fit to annual mean weights; 0=do not fit to annual mean weights   int fitMeanWt
 1	# Number of annual mean weight series      int nMeanWtCV
 0.25  #sd for likelihood for fitting to annual mean weight (one for each series) ::  vector weight_sig(1,nMeanWtCV)	        //END_RF_ADD
 ## ------------------------------------------------------------------------- ##

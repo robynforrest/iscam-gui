@@ -17,13 +17,35 @@ reptoRlist <- function(fn){
       dum <- as.double(scan(fn,skip=ir,nlines=1,quiet=T,what=""))
     }
     if(irr-ir>2){
-      dum <- as.matrix(read.table(fn,skip=ir,nrow=irr-ir-1,fill=T))
-    }
+    #Read matrix objects
+    #Extra lines are for ragged array swhere first row is shorter than subsequent rows
+       	count<-0
+     	nCol <-1
+     	#find the longest row in the matrix
+     	for(ii in ir:(irr-2)){	
+     		tmp <- as.double(scan(fn,skip=ir+count,nlines=1,quiet=T,what=""))
+      		ltmp<- length(tmp)
+      		if(ltmp > nCol) nCol <- ltmp #get length of longest row
+      		count <- count+1
+      }#end for
+      
+      count<-0 #reset
+      dum <- matrix(ncol=nCol, nrow=irr-ir-1)
+      
+      for(ii in 1:length(ir:(irr-2))) {
+     		tmp <- as.double(scan(fn,skip=ir+count,nlines=1,quiet=T,what=""))
+     		for(j in 1:length(tmp)) dum[ii,j] <- tmp[j]
+      		count<-count+1
+      }#end for
+     } #end if
+     #dum <- as.matrix(read.table(fn,skip=ir, nrow=irr-ir-1,fill=T))
+    
     if(is.numeric(dum)) #Logical test to ensure dealing with numbers
       {
         A[[vnam[i]]] <- dum
       }
   }
+  print(A$d3_A)
   return(A)
 }
 

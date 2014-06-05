@@ -151,11 +151,13 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
  		compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A ) #Get the composition data - need this because there is no gear information with A_hat  
 		fitData  <-  as.data.frame(op[[scenario]]$output$mpd$A_hat)  #Get the fitted data
 		gears <- unique(compData[,2])
-		
+				
 		if(is.element(index, gears)){
 			#Get the index for the gear associated with the index number so the correct sage and nage can be extracted
 			#For example, if the two gears with data are 1 and 3, when the user selects index 3 on the GUI, sage and nage are the SECOND elements of n_A_sage and n_A_nage
 			gearindex <- which(gears==index) 
+			print(gearindex)
+			
 			sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_sage
 			nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]	    #Need to match the gear number to the correct element of 	n_A_nage
 			nages <- length(sage:nage)

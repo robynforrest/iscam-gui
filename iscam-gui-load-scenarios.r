@@ -709,6 +709,7 @@ readData <- function(file = NULL, verbose = FALSE){
      colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
    }
   }
+  
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
   tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])
