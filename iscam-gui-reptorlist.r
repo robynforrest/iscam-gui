@@ -45,7 +45,6 @@ reptoRlist <- function(fn){
         A[[vnam[i]]] <- dum
       }
   }
-  print(A$d3_A)
   return(A)
 }
 
