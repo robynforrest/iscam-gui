@@ -201,9 +201,20 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
+  if(out[[1]]$mpd$sbo  >  2*max(out[[1]]$mpd$sbt))   yUpper <- 1.1*max(out[[1]]$mpd$sbt)
+ 
   for(model in 1:length(out)){
-    yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
-  }
+	     
+   if(out[[model]]$mpd$sbo  >  2*max(yUpper, out[[model]]$mpd$sbt))  {
+   	yUpper <- max(yUpper, 1.1*out[[model]]$mpd$sbt)
+   }else  yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
+  
+ 	 print(max(out[[model]]$mpd$sbt)  )
+	   print(out[[model]]$mpd$sbo)
+ 	print(yUpper)
+ }
+  
+  
   plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
   if(length(out) > 1){
