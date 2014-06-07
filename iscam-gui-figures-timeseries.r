@@ -201,17 +201,14 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
-  if(out[[1]]$mpd$sbo  >  2*max(out[[1]]$mpd$sbt))   yUpper <- 1.1*max(out[[1]]$mpd$sbt)
+  if(out[[1]]$mpd$sbo  >  2*max(out[[1]]$mpd$sbt))   yUpper <- 1.1*max(out[[1]]$mpd$sbt)	     #when sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
  
   for(model in 1:length(out)){
 	     
    if(out[[model]]$mpd$sbo  >  2*max(yUpper, out[[model]]$mpd$sbt))  {
    	yUpper <- max(yUpper, 1.1*out[[model]]$mpd$sbt)
    }else  yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
-  
- 	 print(max(out[[model]]$mpd$sbt)  )
-	   print(out[[model]]$mpd$sbo)
- 	print(yUpper)
+
  }
   
   
