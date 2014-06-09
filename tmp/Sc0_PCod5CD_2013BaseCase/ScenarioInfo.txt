@@ -1,6 +1,0 @@
-# Sensitivity Group
-2
-# Plotting color
-1
-# Plotting order
-1
