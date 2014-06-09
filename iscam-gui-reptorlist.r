@@ -17,8 +17,34 @@ reptoRlist <- function(fn){
       dum <- as.double(scan(fn,skip=ir,nlines=1,quiet=T,what=""))
     }
     if(irr-ir>2){
-      dum <- as.matrix(read.table(fn,skip=ir,nrow=irr-ir-1,fill=T))
-    }
+    #Read matrix objects
+    #Extra lines are for ragged array swhere first row is shorter than subsequent rows
+       	count<-0
+     	nCol <-1
+     	#find the longest row in the matrix
+     	for(ii in ir:(irr-2)){	
+     		tmp <- as.double(scan(fn,skip=ir+count,nlines=1,quiet=T,what=""))
+      		ltmp<- length(tmp)
+      		if(ltmp > nCol) nCol <- ltmp #get length of longest row
+      		count <- count+1
+      }#end for
+      
+      count<-0 #reset
+      dum <- matrix(ncol=nCol, nrow=irr-ir-1)
+      
+      for(ii in 1:length(ir:(irr-2))) {
+     		tmp <- as.double(scan(fn,skip=ir+count,nlines=1,quiet=T,what=""))
+		ltmp <- length(tmp)
+		if(ltmp < nCol) {
+			 tmp[(ltmp+1):nCol] <- NA
+		}
+	       #Fill the matrix
+     		dum[ii,] <- tmp
+      		count<-count+1
+      }#end for
+     } #end if
+     #dum <- as.matrix(read.table(fn,skip=ir, nrow=irr-ir-1,fill=T))
+    
     if(is.numeric(dum)) #Logical test to ensure dealing with numbers
       {
         A[[vnam[i]]] <- dum
@@ -67,7 +93,7 @@ bubble.plot <- function (x=1:dim(z)[1], y=1:dim(z)[2], z, scale = 1, log.scale =
   xo <- outer(x, rep(1, length = length(y)))
   yo <- t(outer(y, rep(1, length = length(x))))
   zo <- zo/(max(abs(zo),na.rm=T) *scale) #apply(zo, 2, "/", max(abs(zo))) * length(y) * scale
-  zo[abs(zo)<=0.001] <- NA
+  zo[abs(zo)<=0.001] <- 0
   nt <- rowSums(z)
   #zo[zo==NA]=0
   if(!add){
@@ -77,8 +103,9 @@ bubble.plot <- function (x=1:dim(z)[1], y=1:dim(z)[2], z, scale = 1, log.scale =
     iclr <- rep("transparent", length = ny)
     iclr[z[i, ] <= 0] <- "salmon"
     if(fill){
-      points(xo[i, 1:ny], yo[i, 1:ny], cex=abs(zo[i, ]), pch=16, col=iclr)
+      print(  zo[i, ])
+      points(xo[i, 1:ny], yo[i, 1:ny], cex=abs(zo[i, ]+1e-5), pch=16, col=iclr)
     }
-    points(xo[i, 1:ny], yo[i, 1:ny], cex = abs(zo[i, ]), pch=1, col="black")
+    points(xo[i, 1:ny], yo[i, 1:ny], cex = abs(zo[i, ]+1e-5), pch=1, col="black")
   }   
 }

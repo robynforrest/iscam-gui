@@ -201,9 +201,17 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
+  if(out[[1]]$mpd$sbo  >  2*max(out[[1]]$mpd$sbt))   yUpper <- 1.1*max(out[[1]]$mpd$sbt)	     #when sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
+ 
   for(model in 1:length(out)){
-    yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
-  }
+	     
+   if(out[[model]]$mpd$sbo  >  2*max(yUpper, out[[model]]$mpd$sbt))  {
+   	yUpper <- max(yUpper, 1.1*out[[model]]$mpd$sbt)
+   }else  yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
+
+ }
+  
+  
   plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
   if(length(out) > 1){
@@ -420,15 +428,30 @@ plotRecruitmentMPD <- function(out       = NULL,
 
   yUpper <- max(rt)
   for(model in 1:length(out)){
-    rt     <- out[[model]]$mpd$rt
-    yUpper <- max(yUpper, rt)
+    tmprt     <- out[[model]]$mpd$rt
+    yUpper <- max(yUpper, tmprt)
   }
-  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+
+   #RF - need to get xlim in case time series lengths differ
+   Xlim <- c(min(ryr), max(ryr))
+    if(length(out)>1){
+	   for(model in 1:length(out)){
+		   tmpsage <- out[[model]]$mpd$sage
+		   tmpryr     <- out[[model]]$mpd$yr[(1+sage):nyear]
+		   minx <- min(min(tmpryr), min(Xlim)) 
+		   maxx <- max(max(tmpryr), max(Xlim))  
+		    Xlim <- c(minx, maxx)
+		}
+    }
+
+  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),xlim=Xlim, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
+      sage <- out[[line]]$mpd$sage
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
+   
       lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
@@ -480,7 +503,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    rt <- out[[1]]$mcmc$rt[[1]]
+   
+   #quants[[model]] <- getQuants(out[[model]]$mcmc$rt[[1]], ci)
+   rt <- out[[model]]$mcmc$rt[[1]]
     quants[[model]] <- getQuants(rt, ci)
   }
   yUpper <- max(quants[[1]])
@@ -490,22 +515,43 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlab="Year", ylab="Recruitment", las=1)
+  #RF - need to get xlim in case time series lengths differ
+    Xlim <- c(min(yrs), max(yrs))
+      if(length(out)>1){
+  	   for(model in 1:length(out)){
+  		   tmpryr     <- as.numeric(names(out[[model]]$mcmc$rt[[1]]))
+  		   minx <- min(min(tmpryr), min(Xlim)) 
+  		   maxx <- max(max(tmpryr), max(Xlim))  
+  		    Xlim <- c(minx, maxx)
+  		}
+    }
+
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment", las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
     incOffset <- offset
     for(line in 2:length(out)){
+      
+      yrs <- as.numeric(names(out[[line]]$mcmc$rt[[1]]))
       # Plot the uncertainty
-      points(yrs+incOffset, quants[[1]][2,], pch=20, col=colors[[line]])
+      points(yrs+incOffset, quants[[line]][2,], pch=20, col=colors[[line]])
       arrows(yrs+incOffset, quants[[line]][1,],
              yrs+incOffset, quants[[line]][3,], col=colors[[line]], code=3, angle=90, length=0.01)
       incOffset <- incOffset + offset
     }
   }
-  if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+   
+   #RF added median and mean for 1 scenario plot
+   if(length(out) == 1){
+        abline(h=median(as.matrix(rt)),col=2, lty=1)
+        abline(h=mean(as.matrix(rt)),col=3,lty=1)
+	 if(!is.null(leg))  legend(leg, legend=c(names,"Long-term median","MCMC long-term mean"), col=c(unlist(colors),2,3), lty=1, lwd=2)
+   }
+    if(length(out) > 1){
+	 if(!is.null(leg))  legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
+
 }
 
 plotIndexMPD <- function(out       = NULL,
@@ -553,7 +599,8 @@ plotIndexMPD <- function(out       = NULL,
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- inputs[[1]]$indices[[index]]
-  yUpper <- max(inputindices[,2])  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
+
+  yUpper <- max(inputindices[,2] + inputindices[,2]*(1/inputindices[,7]))  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
   minYear <- min(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
   maxYear <- max(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
   for(model in 1:length(out)){
@@ -562,15 +609,17 @@ plotIndexMPD <- function(out       = NULL,
     inputit  <- inputindices[,2] # NOTE 2 is hardwired (it). If this function breaks look here!
     yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE) # NA is removed here because surveys have different years, and missing ones are NA
     minYear1 <- min(inputindices[,1]) # yr column
-    maxYear1 <- max(inputindices[,1]) # yr column
+    maxYear1 <- max(inputindices[,1] ) # yr column
     minYear  <- min(minYear,  minYear1)
     maxYear  <- max(maxYear, maxYear1)
   }
   dat <- out[[1]]$mpd$it_hat[index,]
   yrs <- inputs[[1]]$indices[[index]][,1]
+  CV <-  1./inputs[[1]]$indices[[index]][,7]    #RF added CVs
   dat <- dat[!is.na(dat)]
-  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main=paste0("Index fit gear ",index), las=1)
+  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=paste0("Index fit gear ",index), las=1)
   points(yrs, inputindices[,2], pch=3)
+  arrows(yrs,inputindices[,2]+CV*inputindices[,2] ,yrs,inputindices[,2]-CV*inputindices[,2],code=3,angle=90,length=0.01, col=colors[[1]]) #RF added error bars
   if(length(out) > 1){
     for(model in 2:length(out)){
       dat <- out[[model]]$mpd$it_hat[index,]

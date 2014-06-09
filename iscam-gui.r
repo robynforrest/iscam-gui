@@ -264,20 +264,24 @@ iscam <- function(reloadScenarios      = FALSE,
            # Only MPD for Fishing mortality
            "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,leg=leg)},
            # From iscam-gui-figures-biology.r
-           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+             "sBiologyComposition"                = {plotBiology(11,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+	     "sBiologyCompositionFit"                = {plotBiology(12,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+	     "sBiologyCompositionResid"                = {plotBiology(13,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-selectivities.r
-           "sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexLogisticByFleet"                  = {plotSelex(1,png,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+          "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -288,7 +292,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(s,1,png,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            #"sCatchLandingsStacked"                  = {plotCatch(s,2,png,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchTotal"                            = {plotCatch(s,4,png,"CatchTotal",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchTotalStacked"                     = {plotCatch(s,5,png,"CatchTotalStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscards"                         = {plotCatch(s,6,png,"CatchDiscards",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -301,6 +305,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+	   "sCatchAnnualMeanWt" 		     = {plotCatch(s,16,png,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
            "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},
@@ -363,6 +368,7 @@ iscam <- function(reloadScenarios      = FALSE,
   # This switch statement represents an 'action' for a button or changing a text field.
   # See iscam-gui-gui-specs.r
   triggerPlot <- FALSE
+  
   switch(act,
          # Change the scenario numnber using three different methods
          "prevScenario" = {
@@ -460,6 +466,23 @@ iscam <- function(reloadScenarios      = FALSE,
            }
            setWinVal(c(entrySensitivityGroup=nextSens))
          },
+          #START RF_ADD
+         # Several ways to change the index or gear group number
+	          "prevGroup" = {
+	            prevGroup <- val$entryIndex - 1
+	            if(prevGroup < 1){
+	              prevGroup <- 1
+	            }
+	            setWinVal(c(entryIndex=prevGroup))
+	          },
+	          "nextGroup" = {
+	            nextGroup <- val$entryIndex + 1
+	            if(nextGroup > max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)){
+	              nextGroup <- max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)
+	            }
+	            setWinVal(c(entryIndex=nextGroup))
+         },
+         #END RF_ADD
          # Write the plots and tables to disk
          "writePlots" = {
            .writePlots(val$entryScenario)

@@ -12,7 +12,7 @@
 .MAIN_FUNCTION_CALL              <- "iscam"
 
 # Editor
-.EDITOR                          <- file.path("C:","Progra~1","emacs-22.1","bin","runemacs.exe")
+.EDITOR                          <- file.path("C:/Progra~1/TextPad 7/TextPad.exe")
 if(.OS == "Linux"){
   .EDITOR <- file.path("","usr","bin","emacs")
 }
@@ -126,10 +126,10 @@ if(.OS == "Linux" || .OS == "Darwin"){
                                   .MCMC_FILE_NAME,
                                   .MCMC_BIOMASS_FILE_NAME,
                                   .MCMC_RECRUITMENT_FILE_NAME,
-                                  .MCMC_FISHING_MORT_FILE_NAME,
+                                  .MCMC_FISHING_MORT_FILE_NAME
                                   # Executable
-                                  .EXE_FILE_NAME)
-
+                                  #.EXE_FILE_NAME  -- RF don't delete the executable!
+				    )
 # Figure types
 .PNG                             <- FALSE
 .DEPLETION_FIGURE                <- 1
@@ -150,7 +150,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .DEFAULT_PLOT_ORDER              <- "1"
 
 # Other globals
-.FUNEVALS                        <- 150
+.FUNEVALS                        <- 1000
 .PCHCODE                         <- 16
 .BANNER                          <- "-----------------------------------------------------------------------------------\n"
 .BANNER2                         <- "===================================================================================\n"

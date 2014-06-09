@@ -709,6 +709,7 @@ readData <- function(file = NULL, verbose = FALSE){
      colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
    }
   }
+  
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
   tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])
@@ -724,9 +725,22 @@ readData <- function(file = NULL, verbose = FALSE){
     }
     colnames(tmp$indices) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
   }
-  tmp$eof <- as.numeric(dat[ind <- ind + 1])
+ 
+ #Annual Mean Weight data   RF added this -- only works in FitMeanWt branch
+   # Catch data
+  tmp$nmeanwt <- as.numeric(dat[ind <- ind + 1])
+  tmp$nmeanwtobs <- as.numeric(dat[ind <- ind + 1])
+  tmp$meanwtdata  <- matrix(NA, nrow = sum(tmp$nmeanwtobs), ncol = 7)
+   for(row in 1:sum(tmp$nmeanwtobs)){
+     tmp$meanwtdata[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+   }
+   colnames(tmp$meanwtdata) <- c("year","meanwt","gear","area","group","sex","timing")
+
+ tmp$eof <- as.numeric(dat[ind <- ind + 1])
+
   return(tmp)
 }
+
 
 readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FALSE){
   # Read in the iscam control file given by 'file'
@@ -820,8 +834,10 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   rownames(tmp$sel) <- c("iseltype","agelen50log","std50log","nagenodes","nyearnodes",
                          "estphase","penwt2nddiff","penwtdome","penwttvs","nselblocks")
 
-  # Start year for time blocks, one for each gear
-  tmp$syrtimeblock <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  # Start year for time blocks, one for each gear			   # RF fixed this - should be a matrix not int
+ maxblock <- max(tmp$sel[10])
+ tmp$syrtimeblock <- matrix(nrow=ngears, ncol=maxblock)
+ for(ng in 1:ngears) tmp$syrtimeblock[ng,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
   # Priors for survey Q, one column for each survey
   tmp$nits <- as.numeric(dat[ind <- ind + 1])
@@ -834,6 +850,15 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   # Rownames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$survq) <- c("priortype","priormeanlog","priorsd")
 
+ #@@@@@@@@@ RF_Add@@@@@@@@@@
+ #CONTROLS FOR FITTING TO MEAN WEIGHT DATA
+ # RF added this for testing with Pacific Cod data
+  tmp$fitMeanWt <- as.numeric(dat[ind <- ind + 1])
+  tmp$nMeanWtCV <- as.numeric(dat[ind <- ind + 1])
+  nvals <- tmp$nMeanWtCV
+  tmp$weight_sig <-  vector(length=nvals)
+  for(val in 1:nvals)  tmp$weight_sig[val] <- as.numeric(dat[ind <- ind + 1])
+
   nrows <- 15
   tmp$misc <- matrix(NA, nrow = nrows, ncol = 1)
   for(row in 1:nrows){
@@ -841,7 +866,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   }
   # Rowames here are hardwired, so if you add a new row you must add a name for it here
   rownames(tmp$misc) <- c("verbose","rectype","sdobscatchfirstphase","sdobscatchlastphase",
-                          "unfishedfirstyear","minpropage","meanF","sdmeanFfirstphase",
+                          "unfishedfirstyear","maternaleffects","meanF","sdmeanFfirstphase",
                           "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
                           "fracZpriorspawn","agecompliketype","IFDdist")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])  
