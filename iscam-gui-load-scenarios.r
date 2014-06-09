@@ -945,7 +945,8 @@ readPar <- function(file = NULL, verbose = FALSE){
   convCheck <- as.numeric(strsplit(convCheck,"[[:blank:]]+")[[1]])
 
   # Note that this might have to be revisited. I don't have an example currently where scientific notation is returned.
-  #convCheck <- gsub("-","e-",convCheck) # replace "e" in scientific notation that may have been removed in the alpha gsub above    convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
+  #convCheck <- gsub("-","e-",convCheck) # replace "e" in scientific notation that may have been removed in the alpha gsub above
+  #convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
   # The following values are saved for appending to the tmp list later
   numParams   <- convCheck[1]
   objFunValue <- as.numeric(sprintf("%1.3f",convCheck[2]))

@@ -868,7 +868,7 @@ iscam <- function(reloadScenarios      = FALSE,
       }else{
         .setTimestampsRunning(type = 2)
       }
-
+browser()
       cat(.PROJECT_NAME,"->",getCurrFunc(),"'",op[[scenario]]$names$scenario,"' scenario model run started.\n\n",sep="")
       cat("Don't touch the GUI - wait until a message appears stating the run has finished.\n\n",
           "The command being run is:\n",
