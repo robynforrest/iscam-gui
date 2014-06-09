@@ -7,46 +7,56 @@
 # Development Date  : October 2013 - Present
 #**********************************************************************************
 
-plotTS <- function(plotNum    = 1,
-                   png        = .PNG,
-                   fileText   = "Default",
-                   plotMCMC   = FALSE,
-                   ci         = NULL, # confidence interval in %
-                   multiple   = FALSE,
-                   recrOffset = 0.1,
-                   retros     = FALSE,
-                   btarg      = 0.4,  # Biomass target line for depletion plots
-                   blim       = 0.25, # Biomass limit line for depletion plots
-                   units      = .UNITS,
+plotTS <- function(scenario   = 1,         # Scenario number
+                   plotNum    = 1,         # Plot code number
+                   png        = .PNG,      # TRUE/FALSE for PNG image output
+                   fileText   = "Default", # Name of the file if png==TRUE
+                   plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
+                   ci         = NULL,      # confidence interval in % (0-100)
+                   multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
+                   sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
+                   index      = 1,         # Survey index to plot if plotNum==7
+                   # PlotSpecs: Width, height, and resolution of screen and file
+                   ps         = list(pngres = .RESOLUTION,
+                                     pngw   = .WIDTH,
+                                     pngh   = .HEIGHT,
+                                     res    = .RESOLUTION,
+                                     w      = .WIDTH,
+                                     h      = .HEIGHT),
+                   leg        = "topright",# Legend location. If NULL, none will be drawn
+                   recrOffset = 0.1,       # Recruitment bar offset used if multiple==TRUE
+                   retros     = FALSE,     # TRUE/FALSE to plot retropectives
+                   btarg      = 0.4,       # Biomass target line for depletion plots
+                   blim       = 0.25,      # Biomass limit line for depletion plots
+                   units      = .UNITS,    # Units to use in plotting
                    silent     = .SILENT){
 
-  # If multiple = TRUE, whatever is in the sensitivity list (sens) for the currently
+  # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
-  # If multiple = FALSE, whatever the currently chosen scenario number is in the GUI
+  # If multiple==FALSE, whatever the currently chosen scenario number is in the GUI
   #  will be plotted by itself.
-  # If plotMCMC = TRUE, follow the same rules, but for the MCMC data. Use the
+  # If plotMCMC==TRUE, follow the same rules, but for the MCMC data. Use the
   #  confidence interval for an envelope plot in this case.
-  # If retros=TRUE, plot all retrospective models in the currently chosen scenario
+  # If retros==TRUE, plot all retrospective models in the currently chosen scenario
   #  number in the GUI.
   # Assumes that 'op' list exists and has been populated correctly.
   # Assumes that 'sens' list exists and has been populated correctly.
+  # plotSpecs is a list of length 6 holding values:
+  #  pngres (png resolution), pngw (png width), pngh (png height),
+  #  res (on-screen resolution), w (on-screen width),h (on-screen height)
 
   # If plotNum must be one of:
-  # 1 Spawning biomass total (with or without uncertainty)
+  # 1 Spawning biomass total
   # 2 Spawning biomass by area
-  # 3 Spawning depletion total (with or without uncertainty)
+  # 3 Spawning depletion total
   # 4 Spawning depletion by area
-  # 5 Recruitment total (with or without uncertainty)
+  # 5 Recruitment total
   # 6 Recruitment by area
-  # 7 Index fits
+  # 7 Index fit
   # 8 SPR ratio
   # 9 Fishing mortality
 
   currFuncName <- getCurrFunc()
-  val          <- getWinVal()
-  scenario     <- val$entryScenario
-  sensGroup    <- val$entrySensitivityGroup
-  index        <- val$entryIndex
 
   #retros       <- op[[scenario]]$outputs$retros
   scenarioName <- op[[scenario]]$names$scenario
@@ -83,28 +93,13 @@ plotTS <- function(plotNum    = 1,
   }
 
   figDir       <- op[[scenario]]$names$figDir
-  res          <- val$entryResolution
-  width        <- val$entryWidth
-  height       <- val$entryHeight
-  resScreen    <- val$entryResolutionScreen
-  widthScreen  <- val$entryWidthScreen
-  heightScreen <- val$entryHeightScreen
+  res          <- ps$pngres
+  width        <- ps$pngw
+  height       <- ps$pngh
+  resScreen    <- ps$res
+  widthScreen  <- ps$w
+  heightScreen <- ps$h
 
-  if(val$legendLoc == "sLegendTopright"){
-    legendLoc <- "topright"
-  }
-  if(val$legendLoc == "sLegendTopleft"){
-    legendLoc <- "topleft"
-  }
-  if(val$legendLoc == "sLegendBotright"){
-    legendLoc <- "bottomright"
-  }
-  if(val$legendLoc == "sLegendBotleft"){
-    legendLoc <- "bottomleft"
-  }
-  if(val$legendLoc == "sLegendNone"){
-    legendLoc <- NULL
-  }
   if(plotNum < 1 || plotNum > 9){
     return(FALSE)
   }
@@ -128,44 +123,44 @@ plotTS <- function(plotNum    = 1,
   }
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
+      plotBiomassMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
     }else{
-      plotBiomassMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
+      plotBiomassMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
+      plotDepletionMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
     }else{
-      plotDepletionMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
+      plotDepletionMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, offset=recrOffset, verbose = !silent, legendLoc = legendLoc)
+      plotRecruitmentMCMC(out, colors, names, ci, offset=recrOffset, verbose = !silent, leg = leg)
     }else{
-      plotRecruitmentMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
+      plotRecruitmentMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 7){
     if(plotMCMC){
-      plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
+      plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
     }else{
-      plotIndexMPD(out, colors, names, inputs, index = index, verbose = !silent, legendLoc = legendLoc)
+      plotIndexMPD(out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 8){
     if(plotMCMC){
-      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, legendLoc = legendLoc)
+      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
     }else{
-      #plotSPRMPD(out, colors, names, inputs, index = index, verbose = !silent, legendLoc = legendLoc)
+      #plotSPRMPD(out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMPD(out, colors, names, ci, verbose = !silent, legendLoc = legendLoc)
+      plotFMPD(out, colors, names, ci, verbose = !silent, leg = leg)
     }else{
-      plotFMPD(out, colors, names, verbose = !silent, legendLoc = legendLoc)
+      plotFMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
 
@@ -180,7 +175,7 @@ plotBiomassMPD <- function(out       = NULL,
                            colors    = NULL,
                            names     = NULL,
                            verbose   = FALSE,
-                           legendLoc = "topright"){
+                           leg = "topright"){
   # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -217,8 +212,8 @@ plotBiomassMPD <- function(out       = NULL,
       points(out[[line]]$mpd$yr[1]-0.8, out[[line]]$mpd$sbo, col=colors[[line]], pch=1)
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -227,7 +222,7 @@ plotBiomassMCMC <- function(out       = NULL,
                             names     = NULL,
                             ci        = NULL,
                             verbose   = FALSE,
-                            legendLoc = "topright"){
+                            leg = "topright"){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -276,8 +271,8 @@ plotBiomassMCMC <- function(out       = NULL,
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -285,7 +280,7 @@ plotDepletionMPD <- function(out       = NULL,
                              colors    = NULL,
                              names     = NULL,
                              verbose   = FALSE,
-                             legendLoc = "topright"){
+                             leg = "topright"){
   # Depletion plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -324,8 +319,8 @@ plotDepletionMPD <- function(out       = NULL,
       lines(out[[line]]$mpd$yrs, depl, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -334,7 +329,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               names     = NULL,
                               ci        = NULL,
                               verbose   = FALSE,
-                              legendLoc = "topright"){
+                              leg = "topright"){
   # Depletion plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -384,8 +379,8 @@ plotDepletionMCMC <- function(out       = NULL,
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -393,7 +388,7 @@ plotRecruitmentMPD <- function(out       = NULL,
                                colors    = NULL,
                                names     = NULL,
                                verbose   = FALSE,
-                               legendLoc = "topright"){
+                               leg = "topright"){
   # Recruitment plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -437,8 +432,8 @@ plotRecruitmentMPD <- function(out       = NULL,
       lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -448,7 +443,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 ci        = NULL,
                                 offset    = 0.1,
                                 verbose   = FALSE,
-                                legendLoc = "topright"){
+                                leg = "topright"){
   # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # colors is a list of the colors to use in the plot
@@ -508,8 +503,8 @@ plotRecruitmentMCMC <- function(out       = NULL,
       incOffset <- incOffset + offset
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -519,7 +514,7 @@ plotIndexMPD <- function(out       = NULL,
                          inputs    = NULL,
                          index     = NULL,
                          verbose   = FALSE,
-                         legendLoc = "topright"){
+                         leg = "topright"){
   # Index fits plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -584,8 +579,8 @@ plotIndexMPD <- function(out       = NULL,
       lines(yrs, dat,  type="l", col=colors[[model]], lty=1, lwd=2)
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=names, col=unlist(colors), lty=1, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
 
@@ -595,7 +590,7 @@ plotFMPD <- function(out       = NULL,
                      pch       = 19,
                      pointSize = 0.2,
                      verbose   = FALSE,
-                     legendLoc = "topright"){
+                     leg = "topright"){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -707,7 +702,7 @@ plotFMPD <- function(out       = NULL,
       }
     }
   }
-  if(!is.null(legendLoc)){
-    legend(legendLoc, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
+  if(!is.null(leg)){
+    legend(leg, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
 }

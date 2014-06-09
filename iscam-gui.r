@@ -216,83 +216,111 @@ iscam <- function(reloadScenarios      = FALSE,
   graphics.off()
   .PLOT_IS_LIVE <<- FALSE
 
-  val        <- getWinVal()
-  plotMCMC   <- val$plotMCMC
-  ci         <- val$entryConfidence  # Confidence interval
-  pType      <- val$viewPlotType
+  val <- getWinVal()
+  s   <- val$entryScenario
+  sgr <- val$entrySensitivityGroup
+  ind <- val$entryIndex
+  plotMCMC  <- val$plotMCMC
+  ci        <- val$entryConfidence  # Confidence interval
+  pType     <- val$viewPlotType
+  # Plot Specs list for sizing of plots
+  ps <- list(pngres  = val$entryResolution,
+             pngw = val$entryWidth,
+             pngh = val$entryHeight,
+             res = val$entryResolutionScreen,
+             w = val$entryWidthScreen,
+             h = val$entryHeightScreen)
+  burnthin <- c(val$burn, val$thin)
+
+  if(val$legendLoc == "sLegendTopright"){
+    leg <- "topright"
+  }
+  if(val$legendLoc == "sLegendTopleft"){
+    leg <- "topleft"
+  }
+  if(val$legendLoc == "sLegendBotright"){
+    leg <- "bottomright"
+  }
+  if(val$legendLoc == "sLegendBotleft"){
+    leg <- "bottomleft"
+  }
+  if(val$legendLoc == "sLegendNone"){
+    leg <- NULL
+  }
+
   if(.checkEntries()){
 
     switch(pType,
            # From iscam-gui-figures-timeseries.r
-           "sTSSpawningBiomassAllAreas"             = {plotTS(1,png,"SpawningBiomassAllAreas",plotMCMC,ci)},
-           "sTSSpawningBiomassByArea"               = {plotTS(2,png,"SpawningBiomassByArea",plotMCMC,ci)},
-           "sTSSpawningDepletionAllAreas"           = {plotTS(3,png,"SpawningDepletionAllAreas",plotMCMC,ci)},
-           "sTSSpawningDepletionByArea"             = {plotTS(4,png,"SpawningDepletionByArea",plotMCMC,ci)},
-           "sTSRecruitmentAllAreas"                 = {plotTS(5,png,"RecruitmentAllAreas",plotMCMC,ci)},
-           "sTSRecruitmentByArea"                   = {plotTS(6,png,"RecruitmentByArea",plotMCMC,ci)},
-           # Only MPD fir Index
-           "sTSIndex"                               = {plotTS(7,png,"Index",FALSE,ci)},
-           "sSPRRatio"                              = {plotTS(8,png,"SPRRatio",plotMCMC,ci)},
+           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,png,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSSpawningBiomassByArea"               = {plotTS(s,2,png,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,png,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSSpawningDepletionByArea"             = {plotTS(s,4,png,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,png,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSRecruitmentByArea"                   = {plotTS(s,6,png,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           # Only MPD for Index
+           "sTSIndex"                               = {plotTS(s,7,png,"Index",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sSPRRatio"                              = {plotTS(s,8,png,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # Only MPD for Fishing mortality
-           "sFishingMortality"                      = {plotTS(9,png,"Fishing Mortality",FALSE,ci)},
+           "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,leg=leg)},
            # From iscam-gui-figures-biology.r
-           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci)},
-           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci)},
-           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci)},
-           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci)},
-           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci)},
-           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci)},
-           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci)},
-           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci)},
-           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci)},
-           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci)},
+           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # From iscam-gui-figures-selectivities.r
-           "sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci)},
-           "sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci)},
-           "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci)},
-           "sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci)},
-           "sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci)},
-           "sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci)},
-           "sSelexTVDiscardMortalitySurface"        = {plotSelex(7,png,"SelexTVDiscardMortalitySurface",plotMCMC,ci)},
-           "sSelexTVDiscardMortalityContour"        = {plotSelex(8,png,"SelexTVDiscardMortalityContour",plotMCMC,ci)},
-           "sSelexRetentionDiscardMortalityEndYear" = {plotSelex(9,png,"SelexRetentionDiscardMortalityEndYear",plotMCMC,ci)},
-           "sSelexTVAtAgeSurface"                   = {plotSelex(11,png,"SelexUncertainty",plotMCMC,ci)},
+           "sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVDiscardMortalitySurface"        = {plotSelex(7,png,"SelexTVDiscardMortalitySurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVDiscardMortalityContour"        = {plotSelex(8,png,"SelexTVDiscardMortalityContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexRetentionDiscardMortalityEndYear" = {plotSelex(9,png,"SelexRetentionDiscardMortalityEndYear",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtAgeSurface"                   = {plotSelex(11,png,"SelexUncertainty",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # From iscam-gui-figures-catch.r
-           "sCatchLandings"                         = {plotCatch(1,png,"CatchLandings",plotMCMC,ci)},
-           "sCatchLandingsStacked"                  = {plotCatch(2,png,"CatchLandingsStacked",plotMCMC,ci)},
-           "sCatchLandingsObsVsExpLandings"         = {plotCatch(3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci)},
-           "sCatchTotal"                            = {plotCatch(4,png,"CatchTotal",plotMCMC,ci)},
-           "sCatchTotalStacked"                     = {plotCatch(5,png,"CatchTotalStacked",plotMCMC,ci)},
-           "sCatchDiscards"                         = {plotCatch(6,png,"CatchDiscards",plotMCMC,ci)},
-           "sCatchDiscardsStacked"                  = {plotCatch(7,png,"CatchDiscardsStacked",plotMCMC,ci)},
-           "sCatchDiscardFraction"                  = {plotCatch(8,png,"CatchDiscardFraction",plotMCMC,ci)},
-           "sCatchHarvestRate"                      = {plotCatch(9,png,"CatchHarvestRate",plotMCMC,ci)},
-           "sCatchLandingsSeasons"                  = {plotCatch(10,png,"CatchLandingsSeasons",plotMCMC,ci)},
-           "sCatchLandingsSeasonsStacked"           = {plotCatch(11,png,"CatchLandingsSeasonsStacked",plotMCMC,ci)},
-           "sCatchTotalSeasons"                     = {plotCatch(12,png,"CatchTotalSeasons",plotMCMC,ci)},
-           "sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci)},
-           "sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci)},
-           "sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci)},
+           "sCatchLandings"                         = {plotCatch(s,1,png,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           #"sCatchLandingsStacked"                  = {plotCatch(s,2,png,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchTotal"                            = {plotCatch(s,4,png,"CatchTotal",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchTotalStacked"                     = {plotCatch(s,5,png,"CatchTotalStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchDiscards"                         = {plotCatch(s,6,png,"CatchDiscards",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchDiscardsStacked"                  = {plotCatch(7,png,"CatchDiscardsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchDiscardFraction"                  = {plotCatch(8,png,"CatchDiscardFraction",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchHarvestRate"                      = {plotCatch(9,png,"CatchHarvestRate",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchLandingsSeasons"                  = {plotCatch(10,png,"CatchLandingsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchLandingsSeasonsStacked"           = {plotCatch(11,png,"CatchLandingsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchTotalSeasons"                     = {plotCatch(12,png,"CatchTotalSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
-           "sMCMCTrace"                             = {plotConvergence(1,png,"Trace",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCAutocor"                           = {plotConvergence(2,png,"Autocor",exFactor=1.5,showEntirePrior=T)},
-           "sMCMCDensity"                           = {plotConvergence(3,png,"Density",exFactor=1.5,showEntirePrior=T)},
-           "sParameterPairs"                        = {plotConvergence(4,png,"Pairs",exFactor=1.5,showEntirePrior=T)},
-           "sPriorsVsPosts"                         = {plotConvergence(5,png,"PriorsPosteriors",exFactor=1.5,showEntirePrior=T)},
-           "sVariancePartitions"                    = {plotConvergence(4,png,"VariancePartitions",exFactor=1.5,showEntirePrior=T)},
+           "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},
+           "sMCMCAutocor"                           = {plotConvergence(s,2,png,"Autocor",ps=ps,burnthin=burnthin)},
+           "sMCMCDensity"                           = {plotConvergence(s,3,png,"Density",ps=ps,burnthin=burnthin)},
+           "sParameterPairs"                        = {plotConvergence(s,4,png,"Pairs",ps=ps,burnthin=burnthin)},
+           "sPriorsVsPosts"                         = {plotConvergence(s,5,png,"PriorsPosteriors",ps=ps,burnthin=burnthin,exFactor=1.5,showEntirePrior=T)},
+           "sVariancePartitions"                    = {plotConvergence(s,6,png,"VariancePartitions",ps=ps,burnthin=burnthin)},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
-           "sSensSB"                                = {plotTS(1,png,"SpawningBiomass",plotMCMC,ci,TRUE)},
-           "sSensBRatio"                            = {plotTS(3,png,"Depletion",plotMCMC,ci,TRUE)},
-           "sSensRecruit"                           = {plotTS(5,png,"Recruitment",plotMCMC,ci,TRUE, recrOffset=val$entryRecrOffset)},
+           "sSensSB"                                = {plotTS(s,1,png,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sSensBRatio"                            = {plotTS(s,3,png,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sSensRecruit"                           = {plotTS(s,5,png,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,recrOffset=val$entryRecrOffset)},
            # No sensitivity plot for MCMC Indices
-           "sSensIndex"                             = {plotTS(7,png,"Index",FALSE,ci,TRUE)},
+           "sSensIndex"                             = {plotTS(s,7,png,"Index",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            #"sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
-           "sSensF"                                 = {plotTS(9,png,"MeanF",FALSE,ci,TRUE)},
+           "sSensF"                                 = {plotTS(s,9,png,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            #"sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
            #"sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
