@@ -222,7 +222,9 @@
 
   # Try to load par file.
   tryCatch({
-    tmp$outputs$par     <- readPar(tmp$names$par)
+    suppressWarnings(
+      tmp$outputs$par     <- readPar(tmp$names$par)
+    )
     tmp$fileSuccess$par <- TRUE
   }, warning = function(war){
     cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem loading par file: '",tmp$names$par,"'")
@@ -934,8 +936,9 @@ readPar <- function(file = NULL, verbose = FALSE){
 
   # Remove preceeding #
   convCheck <- gsub("^#[[:blank:]]*","",data[1])
-  # Remove all letters
-  convCheck <- gsub("[[:alpha:]]+","",convCheck)
+  # Remove all letters, except 'e'
+  #convCheck <- gsub("[[:alpha:]]+","",convCheck)
+  convCheck <- gsub("[abcdfghijklmnopqrstuvwxyz]","",convCheck, ignore.case=T)
   # Remove the equals signs
   convCheck <- gsub("=","",convCheck)
   # Remove all preceeding and trailing whitespace
@@ -943,14 +946,13 @@ readPar <- function(file = NULL, verbose = FALSE){
   convCheck <- gsub("[[:blank:]]+$","",convCheck)
   # Get the values, round is used to force non-scientific notation
   convCheck <- as.numeric(strsplit(convCheck,"[[:blank:]]+")[[1]])
+  # Remove all NA's from the vector (these were just 'e's on their own.)
+  convCheck <- convCheck[!is.na(convCheck)]
 
-  # Note that this might have to be revisited. I don't have an example currently where scientific notation is returned.
-  #convCheck <- gsub("-","e-",convCheck) # replace "e" in scientific notation that may have been removed in the alpha gsub above
-  #convCheck <- strsplit(convCheck," +",perl=TRUE) # remove spaces and make into a vector of values
   # The following values are saved for appending to the tmp list later
   numParams   <- convCheck[1]
-  objFunValue <- as.numeric(sprintf("%1.3f",convCheck[2]))
-  maxGradient <- as.numeric(sprintf("%1.9f",convCheck[3]))
+  objFunValue <-  format(convCheck[2], digits=6, scientific=FALSE)
+  maxGradient <-  format(convCheck[3], digits=8, scientific=FALSE)
 
   # Remove the first line from the par data since we already parsed it and saved the values
   data <- data[-1]

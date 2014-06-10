@@ -2,7 +2,7 @@
 ## TEMPLATE DATA FILE FOR iSCAM                                              ##
 ## TIPS: -use '#' as comment character for the data file                     ##
 ##       -use '#' on all blank lines (windows compatible)                    ##
-##       -sex: 0=asexual, 1=female, 2=male                                   ##  
+##       -sex: 0=asexual, 1=female, 2=male                                   ##
 ##                                                                           ##
 ##                                                                           ##
 ## TEMPLATE is based on Flack Lake Trout (ADMB catage example)               ##
@@ -23,7 +23,7 @@
 3        # -number of gears            (ngear)
 ##
 ## ------------------------------------------------------------------------- ##
-## Allocation for each gear in (ngear), use 0 for survey gears.             ##
+## Allocation for each gear in (ngear), use 0 for survey gears.              ##
 ## One column for each gear:
 ## Fishery, WCVI Survey, WCVI Shrimp trawl survey
 ## ------------------------------------------------------------------------- ##
@@ -110,7 +110,7 @@
    2012 1    1    1     0   1    14.09325297
    2013 1    1    1     0   1     4.87984000
 ##
-## --- ---------------------------------------------------------------------- ##
+## ------------------------------------------------------------------------- ##
 ## ABUNDANCE INDICES -A RAGGED ARRAY: (1,nit,1,nit_nobs,1,5)                 ##
 ## ------------------------------------------------------------------------- ##
 2           # Number of abundance series         int(nit)
