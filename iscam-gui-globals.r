@@ -12,7 +12,7 @@
 .MAIN_FUNCTION_CALL              <- "iscam"
 
 # Editor
-.EDITOR                          <- file.path("C:/Progra~1/TextPad 7/TextPad.exe")
+.EDITOR                          <- file.path("C:/","Progra~1","emacs-22.1","bin","runemacs.exe")
 if(.OS == "Linux"){
   .EDITOR <- file.path("","usr","bin","emacs")
 }
