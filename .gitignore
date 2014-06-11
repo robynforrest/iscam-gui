@@ -29,9 +29,9 @@ dist/
 #*.par
 *.std
 *.eva
-*.mcmc
-*.mcrt
-*.mcst
+*.ecm
+*.hst
+*.mc*
 *.sim
 *.proj
 *.ret*
@@ -39,6 +39,7 @@ dist/
 *.r[0-9]*
 *.b[0-9]*
 *.res
+sims
 
 # Latex Stuff
 *.aux
