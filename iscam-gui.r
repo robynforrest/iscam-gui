@@ -607,13 +607,12 @@ iscam <- function(reloadScenarios      = FALSE,
                         areas=areas, splitSex = splitSex, survey = survey,
                         multLen = val$entryLengthMult,
                         multWt  = val$entryWeightMult)
-           
          },
          {
            triggerPlot <- TRUE
            # Default
          }
-         ) # End switch
+         )
 
   # Whichever radio button is selected will now be plotted for the scenario
   if(triggerPlot || (!is.null(dev.list()))){

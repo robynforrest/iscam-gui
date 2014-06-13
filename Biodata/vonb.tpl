@@ -11,7 +11,7 @@ DATA_SECTION
 
 PARAMETER_SECTION
   init_bounded_number K(0.00001,1.0);
-  init_bounded_number Linf(15.0,50.0);
+  init_bounded_number Linf(1.0,1000.0);
 
   vector Lpred(1,nobs);
   objective_function_value f;
