@@ -26,7 +26,7 @@
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
 
-removeAllExcept <- function(vars  = c("op","sens")){
+removeAllExcept <- function(vars  = c("op","sens","bio")){
   # removeAllExcept()
   # Removes everything in the workspace except for what is in the vars list.
   # Upon finishing, the workspace will contain whatever is in the vars list,
@@ -58,13 +58,14 @@ if(.OS == "Linux" || .OS == "Darwin"){
   #require("Tktable")
   # This changes the windows() function call for Linux to X11()
   windows <- function(...) X11(...)
-  # This changes the windows() function call for Linux to system()
+  # This changes the shell() function call for Linux to system()
   shell   <- function(...) system(...)
 }
 
 # iscam-gui sources
 source(.UTILITIES_SOURCE)
 source(.LOAD_SCENARIOS_SOURCE)
+source(.LOAD_BIODATA_SOURCE)
 source(.FILE_CONTROL_SOURCE)
 source(.REP_PARSER_SOURCE)
 source(.FIGURES_SOURCE)
@@ -274,14 +275,16 @@ iscam <- function(reloadScenarios      = FALSE,
            "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-             "sBiologyComposition"                = {plotBiology(11,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-	     "sBiologyCompositionFit"                = {plotBiology(12,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-	     "sBiologyCompositionResid"                = {plotBiology(13,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyComposition"                    = {plotBiology(11,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyCompositionFit"                 = {plotBiology(12,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyCompositionResid"               = {plotBiology(13,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyLW"                             = {plotBiology(14,png,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyVONB"                           = {plotBiology(15,png,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-selectivities.r
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexLogisticByFleet"                  = {plotSelex(1,png,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-          "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -305,7 +308,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-	   "sCatchAnnualMeanWt" 		     = {plotCatch(s,16,png,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sCatchAnnualMeanWt" 		                = {plotCatch(s,16,png,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
            "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},
@@ -368,9 +371,9 @@ iscam <- function(reloadScenarios      = FALSE,
   # This switch statement represents an 'action' for a button or changing a text field.
   # See iscam-gui-gui-specs.r
   triggerPlot <- FALSE
-  
+
   switch(act,
-         # Change the scenario numnber using three different methods
+         # Change the scenario number using three different methods
          "prevScenario" = {
            prevScenario <- val$entryScenario-1
            if(prevScenario<as.numeric(min(scenarioList))){
@@ -466,23 +469,21 @@ iscam <- function(reloadScenarios      = FALSE,
            }
            setWinVal(c(entrySensitivityGroup=nextSens))
          },
-          #START RF_ADD
          # Several ways to change the index or gear group number
-	          "prevGroup" = {
-	            prevGroup <- val$entryIndex - 1
-	            if(prevGroup < 1){
-	              prevGroup <- 1
-	            }
-	            setWinVal(c(entryIndex=prevGroup))
-	          },
-	          "nextGroup" = {
-	            nextGroup <- val$entryIndex + 1
-	            if(nextGroup > max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)){
-	              nextGroup <- max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)
-	            }
-	            setWinVal(c(entryIndex=nextGroup))
+         "prevGroup" = {
+           prevGroup <- val$entryIndex - 1
+           if(prevGroup < 1){
+             prevGroup <- 1
+           }
+           setWinVal(c(entryIndex=prevGroup))
          },
-         #END RF_ADD
+         "nextGroup" = {
+           nextGroup <- val$entryIndex + 1
+           if(nextGroup > max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)){
+             nextGroup <- max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)
+           }
+           setWinVal(c(entryIndex=nextGroup))
+         },
          # Write the plots and tables to disk
          "writePlots" = {
            .writePlots(val$entryScenario)
@@ -492,10 +493,10 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "writeAllPlots" = {
            .writeAllPlots()
-        },
+         },
          "writeAllTables" = {
            .writeAllTables()
-        },
+         },
          "writeSensPlots" = {
            .writeSensPlots()
          },
@@ -562,6 +563,51 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "changeBlim" = {
            .doPlots(png=png)
+         },
+         "openBioDataFile" = {
+           scenario <- val$entryScenario
+           scenarioDir <- op[[scenario]]$names$dir
+           biodataFile <<- selectFile(initialdir = .BIODATA_DIR_NAME, filetype = .BIODATA_FILE_TYPES)
+           if(is.null(biodataFile)){
+             biodataFile <<- ""
+           }
+           setWinVal(c(entryBioDataFile=biodataFile))
+           .loadBiodata()
+         },
+         "showSurveyList" = {
+           print(surveyList)
+         },
+         "editLWTPL" = {
+           fn <- file.path(.BIODATA_DIR_NAME, .LW_TPL_FILE_NAME)
+           editCall <- paste(.EDITOR, fn)
+           shell(editCall, wait=F)
+         },
+         "editVONBTPL" = {
+           fn <- file.path(.BIODATA_DIR_NAME, .VONB_TPL_FILE_NAME)
+           editCall <- paste(.EDITOR, fn)
+           shell(editCall, wait=F)
+         },
+         "runBio" = {
+           scenario <- val$entryScenario
+           ages  <- .parseAges(val$entryAges)
+           areas <- .parseAreas(val$entryAreas)
+           # Assumes surveyKeys exists globally!
+           survey <- surveyKeys[val$dlSurveyList.id]
+           splitSex <- FALSE
+           if(val$sexType == "sSplit"){
+             splitSex <- TRUE
+           }
+           # model = 1 means it is a length weight model
+           model <- 1
+           if(val$lwvType == "sVB"){
+             # model = 2 means it is a vonB model
+             model <- 2
+           }
+           .runBioModel(model = model, ages = ages,
+                        areas=areas, splitSex = splitSex, survey = survey,
+                        multLen = val$entryLengthMult,
+                        multWt  = val$entryWeightMult)
+           
          },
          {
            triggerPlot <- TRUE

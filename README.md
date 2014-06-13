@@ -40,18 +40,18 @@ Thanks to the following people involved in the development of this software:
 - **Scenarios** is a directory with a specific directory structure.
   It is important to maintain this directory structure because R
   uses relative paths for maintaining inputs and outputs to automate
-  much of the running of SS and its outputs.
+  much of the running of iScam and its outputs.
 
-- To add a new model (called a *Scenario*) to isdcam-gui, copy an
-  entire directory containing an iScam model with executable (iscam.exe for Windows or iscam for Linux or MAC),
-  starter file, data file, control file, projection file, and any other
+- To add a new model (called a *Scenario*) to iscam-gui, copy an
+  entire directory containing an iScam model including the
+  starter file (iScam.dat), data file, control file, projection file, and any other
   files the model requires into the **Scenarios** directory.
 
 - There should also be a file called **ScenarioInfo.txt** in each Scenario directory
   which must contain three values representing:
     1. *Sensitivity Group* - A number which represents which group this scenario belongs to.
     2. *Color for plotting* - the R number color for plotting this scenario..
-    3. *Plotting Order* - where 1 is highest. If there are multiple values, they will be ordered by name alphabetically.
+    3. *Plotting Order* - NOT YET IMPLEMENTED where 1 is highest. If there are multiple values, they will be ordered by name alphabetically.
 
     These value can be changed inside the GUI as well,
   and when that change is made, the file will be modified to contain the new value.
@@ -61,18 +61,28 @@ Thanks to the following people involved in the development of this software:
 - Upon launching, iscam-gui will automatically try to load all directories present
   in the *Scenarios* directory and you will be able to run them from within the GUI.
 
+- If you want to look at the length-weight and length-age (VonB) relationships, you should have a
+  directory called *Biodata* at the same level as the *Scenarios* directory. This must hold the
+  lengthweight.tpl and vonb.tpl which are ADMB programs used to estimate fit for each.
+
 ---
 
 ## Data structures:
 
-- There are two global lists which hold all the data used by iscam-gui:
+- There are three global lists which hold all the data used by iscam-gui:
   - **op** - This is a list of lists, one element for each *Scenario*.  names(op) will return the directory names of your Scenarios.
 
   - **sens** - This is a list of *Sensitivity Group*, one for each unique *Sensitivity Group*.  names(sens) will return NULL
 since the groups are nameless.
+  - **bio** - This is a list of length two, containing the input data and output parameter estimates for the
+length-weight and VonB realationships.
 
-The following depicts the **op** and **sens** object structures. Indentations reflect sub-object structure.
-See source file iscam-gui-load-scenarios.r to see how these lists are populated or to add new elements.
+
+- There are three objects containing the valid surveys. These are used by functions in iscam-gui-load-biodata.r. They are:
+  surveyList, a data frame of key/description pairs, surveyKeys, the keys, and surveyValues, the descriptions.
+
+The following depicts the **op**, **sens**, and **bio** object structures. Indentations reflect sub-object structure.
+See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see how these lists are populated or to add new elements.
 
     op[[N]] - Each unique scenario number N contains the following
       op[[N]]$names - Full path names for the files and directories used in iscam-gui
@@ -80,6 +90,7 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
         op[[N]]$names$dir              - Name of scenario directory
         op[[N]]$names$figDir           - Name of Figures directory
         op[[N]]$names$tableDir         - Name of Tables directory
+        op[[N]]$names$biodata          - Name of the biological data file (default NULL)
         op[[N]]$names$data             - Name of the data file
         op[[N]]$names$control          - Name of the control file
         op[[N]]$names$projection       - Name of the projection file
@@ -214,9 +225,20 @@ See source file iscam-gui-load-scenarios.r to see how these lists are populated 
         op[[N]]$outputs$par$numParams               - The number of parameters in the model
         op[[N]]$outputs$par$objFunValue             - Objective function value returned by the run
         op[[N]]$outputs$par$maxGradient             - Maximum gradient from the run. This should be a very small number.
-        op[[N]]$outputs$par$retros                  - List of Retrospective data (with filenames as $name) - REP file contents. If NULL, no retros.
+        op[[N]]$outputs$par$retros                  - List of Retrospectives (with filenames as $name) - REP file contents. If NULL, no retros
     sens[[M]] - each unique sensitivity group number M contains the following
       sens[[M]][1] - A vector of the indicies within the op list of the Scenarios that are currently in sensitivity group M
+    bio - Contains length/weight and VonB data and parameter estimates for the species of concern.
+      bio$lw[[1]] - Length/weight data and parameter estimates for males or combined if there is no second element.
+        bio$lw[[1]][[1]] - Two-column matrix of length in mm (column 1) and weight in g (column 2).
+        bio$lw[[1]][[2]] - Vector of the two parameter estimates for this sex.
+      bio$lw[[2]] - Length/weight data and parameter estimates for females (optional).
+        bio$lw[[2]][[1]] - Two-column matrix of length in mm (column 1) and weight in g (column 2).
+        bio$lw[[2]][[2]] - Vector of the two parameter estimates for this sex.
+      bio$vonb[[1]] - Length/age data and parameter estimates for males or combined if there is no second element.
+        bio$vonb[[1]][[1]] - Two-column matrix of length in mm (column 1) and age (column 2).
+        bio$vonb[[1]][[2]] - Vector of the two parameter estimates for this sex.
+      bio$vonb[[2]] - Length/weight data and parameter estimates for females (optional).
 
 ---
 

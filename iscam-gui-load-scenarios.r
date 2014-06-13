@@ -301,7 +301,7 @@
   }
   # Make sure the figures and tables directories exist in the main (non-subdirectories), if not, create them
   dirList <- list.dirs(dired, recursive = FALSE)
-  # Remove instances of the tables and figures directory to avoid troubles with SSsummarize
+  # Remove instances of the tables, figures, and biodata directories to avoid troubles with SSsummarize
   baseList <- basename(dirList)
   ind <- match(.FIGURES_DIR_NAME,baseList)
   if(!is.na(ind)){
@@ -309,6 +309,11 @@
   }
   baseList <- basename(dirList)
   ind <- match(.TABLES_DIR_NAME,baseList)
+  if(!is.na(ind)){
+    dirList <- dirList[-ind]
+  }
+  baseList <- basename(dirList)
+  ind <- match(.BIODATA_DIR_NAME,baseList)
   if(!is.na(ind)){
     dirList <- dirList[-ind]
   }
