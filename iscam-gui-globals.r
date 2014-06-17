@@ -161,6 +161,11 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .UNITS                           <- "in"
 .VERBOSE                         <- FALSE
 
+# Retrospective colors, There are only 15 of them
+.RETRO_COLORS                    <- c("black","blue","red","green","orange","salmon",
+                                      "grey","aliceblue","chocolate","darkgreen",
+                                      "cyan","darkorchid","gold1","goldenrod","deeppink")
+
 # For the ScenarioInfo.txt file only:
 .SENS_TEXT                       <- "# Sensitivity Group"
 .DEFAULT_PLOT_COLOR              <- "1"

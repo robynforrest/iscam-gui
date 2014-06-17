@@ -14,6 +14,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                    ci         = NULL,      # confidence interval in % (0-100)
                    multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
+                   retros     = FALSE,     # TRUE/FALSE to plot retropectives
                    sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
                    index      = 1,         # Survey index to plot if plotNum==7
                    # PlotSpecs: Width, height, and resolution of screen and file
@@ -25,7 +26,6 @@ plotTS <- function(scenario   = 1,         # Scenario number
                                      h      = .HEIGHT),
                    leg        = "topright",# Legend location. If NULL, none will be drawn
                    recrOffset = 0.1,       # Recruitment bar offset used if multiple==TRUE
-                   retros     = FALSE,     # TRUE/FALSE to plot retropectives
                    btarg      = 0.4,       # Biomass target line for depletion plots
                    blim       = 0.25,      # Biomass limit line for depletion plots
                    units      = .UNITS,    # Units to use in plotting
@@ -35,10 +35,10 @@ plotTS <- function(scenario   = 1,         # Scenario number
   #  chosen sensitivity number in the GUI will be plotted.
   # If multiple==FALSE, whatever the currently chosen scenario number is in the GUI
   #  will be plotted by itself.
+  # If retros==TRUE, whatever retrospectives which are loaded on the current scenario
+  #  will be plotted against the base. 'multiples' and 'plotMCMC' will be ignored if retros==TRUE.
   # If plotMCMC==TRUE, follow the same rules, but for the MCMC data. Use the
   #  confidence interval for an envelope plot in this case.
-  # If retros==TRUE, plot all retrospective models in the currently chosen scenario
-  #  number in the GUI.
   # Assumes that 'op' list exists and has been populated correctly.
   # Assumes that 'sens' list exists and has been populated correctly.
   # plotSpecs is a list of length 6 holding values:
@@ -58,8 +58,12 @@ plotTS <- function(scenario   = 1,         # Scenario number
 
   currFuncName <- getCurrFunc()
 
-  #retros       <- op[[scenario]]$outputs$retros
+  #retroDat     <- op[[scenario]]$outputs$retros
   scenarioName <- op[[scenario]]$names$scenario
+  if(retros){
+    multiple <- FALSE
+    plotMCMC <- FALSE
+  }
   if(multiple){
     # Extract models in the current sensitivity group
     if(is.null(sens[[sensGroup]])){
@@ -68,16 +72,20 @@ plotTS <- function(scenario   = 1,         # Scenario number
     }
     models <- sens[[sensGroup]]
   }else{
-    models <- scenario # For the non-multiple case
+    models <- scenario # For the non-multiple and retro cases
   }
 
   if(plotMCMC){
     # Remove models which do not have MCMC outputs
     type <- "mcmc"
-    validModels <- getValidModelsList(models, type)
+    validModels <- getValidModelsList(models, type = type)
+  }else if(!retros){
+    # This is the single plot case, no multiples and no retros
+    type <- "mpd"
+    validModels <- getValidModelsList(models, type = type)
   }else{
     type <- "mpd"
-    validModels <- getValidModelsList(models, type)
+    validModels <- getValidModelsList(models, retros = TRUE, type = type)
   }
   out    <- validModels[[1]]
   colors <- validModels[[2]]
@@ -91,7 +99,6 @@ plotTS <- function(scenario   = 1,         # Scenario number
     }
     return(NULL)
   }
-
   figDir       <- op[[scenario]]$names$figDir
   res          <- ps$pngres
   width        <- ps$pngw
@@ -201,17 +208,17 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
-  if(out[[1]]$mpd$sbo  >  2*max(out[[1]]$mpd$sbt))   yUpper <- 1.1*max(out[[1]]$mpd$sbt)	     #when sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
- 
+  if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
+    # When sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
+    yUpper <- 1.1*max(out[[1]]$mpd$sbt)
+  }
   for(model in 1:length(out)){
-	     
-   if(out[[model]]$mpd$sbo  >  2*max(yUpper, out[[model]]$mpd$sbt))  {
-   	yUpper <- max(yUpper, 1.1*out[[model]]$mpd$sbt)
-   }else  yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
-
- }
-  
-  
+    if(out[[model]]$mpd$sbo > 2*max(yUpper, out[[model]]$mpd$sbt)){
+      yUpper <- max(yUpper, 1.1*out[[model]]$mpd$sbt)
+   }else{
+     yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
+   }
+  }
   plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
   if(length(out) > 1){

@@ -333,8 +333,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
-           "sRetroSB"                               = {plotTS(plotNum=1,retros=TRUE,endyrvec=val$entryEndyr:val$entryStartyr,
-                                                              png=png,fileText="RetroSpawningBiomass")},
+           "sRetroSB"                               = {plotTS(s,1,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
            "sRetroD"                                = {},
            "sRetroRec"                              = {},
            "sRetroSquid"                            = {plotTS(plotNum=99,retros=TRUE,
@@ -798,12 +797,7 @@ iscam <- function(reloadScenarios      = FALSE,
   # Delete all retrospective directories recursively
   for(retro in 1:retroYears){
     destDir <- file.path(srcDir,paste0(.RETRO_DIR_BASE,retro))
-    browser()
-    #tryCatch({
-      unlink(destDir, recursive = TRUE, force = TRUE)
-    #}, warning = function(war){
-    #}, error = function(err){
-    #})
+    unlink(destDir, recursive = TRUE, force = TRUE)
   }
   for(retro in 1:retroYears){
     # Copy the current model's directory 'retroYears' times, with

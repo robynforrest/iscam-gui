@@ -167,33 +167,68 @@ drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
   polygon(polyYears, polyCI, col = shade)
 }
 
-getValidModelsList <- function(models, type = "mpd"){
+getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
   # Return a list of data, colors, names, and inputs for the given set of models,
   # for type mcmc or mpd (must be lower case).
+  # If retros==TRUE, everything in the $outputs$retros list will be added,
+  #  and the first element of 'models' will be used as the base.
   # Only models which have been run in the given mode will be returned.
 
   currFuncName <- getCurrFunc()
-  hasType <- vector("numeric", length = length(models))
-  for(model in 1:length(models)){
-    hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+  if(retros){
+    numRetros <- length(op[[models[1]]]$outputs$retros) + 1  # +1 for the base
+    hasType <- vector("numeric", length = numRetros)
+    for(model in 1:numRetros){
+      if(model == 1){
+        # base model
+        hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+      }else{
+        hasType[[model]] <- !is.null(unlist(op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]))
+      }
+    }
+  }else{
+    hasType <- vector("numeric", length = length(models))
+    for(model in 1:length(models)){
+      hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+    }
   }
   if(hasType == 0){
-    cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in mcmc mode. No plot to draw.")
+    cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in '",type,"' mode. No plot to draw.")
     return(NULL)
   }
   inputs <- out <- colors <- names <- vector("list", len <- sum(hasType))
-  nonmodels <- models[hasType == 0]
-  models <- models[hasType == 1]
-  if(length(nonmodels) > 0){
-    for(model in 1:length(nonmodels)){
-      cat0(.PROJECT_NAME,"->",currFuncName,"Model name ",op[[nonmodels[model]]]$names$scenario," has not been run in ",type," mode and cannot be plotted.")
+  if(retros){
+    # models and nonmodels refer to the base followed by the retrospectives
+    nonmodels <- !hasType
+    models <- hasType
+  }else{
+    nonmodels <- models[hasType == 0]
+    models <- models[hasType == 1]
+    if(length(nonmodels) > 0){
+      for(model in 1:length(nonmodels)){
+        cat0(.PROJECT_NAME,"->",currFuncName,"Model name ",op[[nonmodels[model]]]$names$scenario,
+             " has not been run in ",type," mode and cannot be plotted.")
+      }
     }
   }
   for(model in 1:len){
-    out[[model]]    <- op[[models[model]]]$outputs[type]
-    colors[[model]] <- op[[models[model]]]$inputs$color
-    names[[model]]  <- op[[models[model]]]$names$scenario
-    inputs[[model]] <- op[[models[model]]]$inputs$data
+    if(retros){
+      if(model == 1){
+        out[[model]] <- op[[models[1]]]$outputs[type]
+        names[[model]]  <- op[[models[1]]]$names$scenario
+        inputs[[model]] <- op[[models[1]]]$inputs$data
+      }else{
+        out[[model]]    <- op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]
+        names[[model]]  <- op[[models[1]]]$outputs$retros[[model-1]]$names$scenario
+        inputs[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$data
+      }
+      colors[[model]] <- .RETRO_COLORS[model]
+    }else{
+      out[[model]]    <- op[[models[model]]]$outputs[type]
+      colors[[model]] <- op[[models[model]]]$inputs$color
+      names[[model]]  <- op[[models[model]]]$names$scenario
+      inputs[[model]] <- op[[models[model]]]$inputs$data
+    }
   }
   if(length(out) == 1 && is.null(out[[1]][[1]])){
     return(NULL)
