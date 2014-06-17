@@ -307,7 +307,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--                      Notebook Tab: Retrospectives              --#
 #--------------------------------------------------------------------#
 
-     grid 11 3 sticky=N relief=raised
+     grid 8 3 sticky=N relief=raised
           #1
           label text="Retrospectives"     font="bold 10" sticky=NW
           null
@@ -333,22 +333,10 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #7
-          label text="End years vector"
-          entry name=entryEndyr    width=5 value="2013" function=.subView action="changeEndyrvec" entryfont="10"
-          entry name=entryStartyr  width=5 value="2000" function=.subView action="changeEndyrvec" entryfont="10"
-          #8
-          label text="Cohorts"
-          entry name=entryFirstCohort width=5 value="1999" function=.subView action="changeCohort" entryfont="10"
-          entry name=entryLastCohort  width=5 value="2012" function=.subView action="changeCohort" entryfont="10"
-          #9
-          null
-          check name=showRetroOutput checked=F function=.subView action="changeShowRetroOutput" sticky=E
-          label text="Show Retro Output\n(slow if checked)" font="10" width=20 pady=5 sticky=N
-          #10
           entry name=entryRetro width=5 pady=5 value=5 entryfont="10" sticky=E
           label text="Years" font="12" width=5 pady=5 sticky=N
           button name=runRetros function=.subView action="runRetros"     width=15 padx=5 pady=5 text="Run retros"  fg="blue"
-          #11
+          #8
           null
           null
           button name=runAllRetros function=.subView action="runAllRetros"     width=15 padx=5 pady=5 text="Run All retros"  fg="blue"

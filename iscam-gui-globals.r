@@ -27,6 +27,8 @@ if(.OS == "Darwin"){
 .SENS_FIGURES_DIR_NAME           <- file.path("SensitivityFigures")
 .FIGURES_DIR_NAME                <- "Figures"
 .TABLES_DIR_NAME                 <- "Tables"
+# Retrospective directories
+.RETRO_DIR_BASE                  <- "Retrospective"
 
 # R source files
 .UTILITIES_SOURCE                <- paste0(.PROJECT_NAME,"-utilities.r")

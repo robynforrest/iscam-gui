@@ -360,6 +360,7 @@ iscam <- function(reloadScenarios      = FALSE,
   act <- getWinAct()
   val <- getWinVal()
   triggerPlot <- TRUE # this triggers plotting upon completion of this call
+  scenario <- val$entryScenario
   # scenarioList is a list of the scenario names (i.e. folder names)
   scenarioList <- as.numeric(rownames(viewHeader))
   # Could sort this but there's no need we are just looking at max and min below
@@ -367,7 +368,7 @@ iscam <- function(reloadScenarios      = FALSE,
   if(length(act)>1){
     act <- act[1]
   }
-
+  currFuncName <- getCurrFunc()
   # This switch statement represents an 'action' for a button or changing a text field.
   # See iscam-gui-gui-specs.r
   triggerPlot <- FALSE
@@ -405,7 +406,6 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "reloadScenario" = {
            val <- getWinVal()
-           scenario <- val$entryScenario
            op[[scenario]] <<- .loadScenario(scenario, dired=op[[scenario]]$names$dir)
            .updateGUIStamps()
          },
@@ -508,7 +508,7 @@ iscam <- function(reloadScenarios      = FALSE,
            if(!is.na(val$mcmc)){
              runMCMC <- TRUE  # Need this to tell runCurrScenario to do the mceval step.
            }
-           if(.runCurrScenario(runMCMC=runMCMC)){
+           if(.runCurrScenario(runMCMC = runMCMC)){
              val <- getWinVal()
              scenario <- val$entryScenario
              op[[scenario]] <<- .loadScenario(scenario, dired=op[[scenario]]$names$dir)
@@ -551,6 +551,11 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "runRetros" = {
            .runRetros()
+           # Reload this scenario, which does a recursive load of the retrospective runs
+           cat0(.PROJECT_NAME,"->",currFuncName,"Loading output from retrospective runs..\n")
+           op[[scenario]] <<- .loadScenario(scenario, dired=op[[scenario]]$names$dir)
+           .updateGUIStamps()
+           alarm() # Sound an alarm to notify user that runs are finished
          },
          "runAllRetros" = {
            .runAllRetros()
@@ -787,13 +792,23 @@ iscam <- function(reloadScenarios      = FALSE,
   overwrite <- getYes(paste0("Warning, any retrospectives previously run for the '",op[[scenario]]$names$scenario,
                              "' scenario will be deleted if they exist. Continue?"),title="Proceed?",icon="question")
   if(!overwrite){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Aborting retrospective run.\n")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Aborting retrospective runs.\n")
     return(NULL)
+  }
+  # Delete all retrospective directories recursively
+  for(retro in 1:retroYears){
+    destDir <- file.path(srcDir,paste0(.RETRO_DIR_BASE,retro))
+    browser()
+    #tryCatch({
+      unlink(destDir, recursive = TRUE, force = TRUE)
+    #}, warning = function(war){
+    #}, error = function(err){
+    #})
   }
   for(retro in 1:retroYears){
     # Copy the current model's directory 'retroYears' times, with
     #  each new directory being the number of years subtracted
-    destDir <- file.path(srcDir,paste0("retro",retro))
+    destDir <- file.path(srcDir,paste0(.RETRO_DIR_BASE,retro))
     files <- dir(srcDir)
     for(ind in 1:length(.OUTPUT_FILES)){
       # Remove any output files from the copy source so as not to mess up the retro directory
@@ -831,12 +846,15 @@ iscam <- function(reloadScenarios      = FALSE,
   }
 
   # Save the rscripts directory so we can get back to it
-  rscriptsDir <- getwd()
+  currDir <- getwd()
 
-  # change to this scenario's directory
-  setwd(op[[scenario]]$names$dir)
-
+  cat(.PROJECT_NAME,"->",currFuncName,"'",op[[scenario]]$names$scenario,"' scenario retrospective runs started.\n\n",sep="")
+  cat("Don't touch the GUI - wait until a message appears stating the retrospective runs have finished.\n\n")
+  tcl("update") # updates window text
   for(retro in 1:retroYears){
+    retroDir <- file.path(currDir, op[[scenario]]$names$dir, paste0(.RETRO_DIR_BASE,retro))
+    # change to this scenario's directory
+    setwd(retroDir)
     modelCall <- .EXE_FILE_NAME
     if(.OS == "Linux" || .OS == "Darwin"){
       modelCall <- paste0("./",modelCall)
@@ -845,10 +863,12 @@ iscam <- function(reloadScenarios      = FALSE,
     modelCall <- paste(modelCall, .DOS_PIPE_TO_LOG)
 
     cat0(.PROJECT_NAME,"->",currFuncName,"Running retrospective\nScenario: ",
-         op[[scenario]]$names$scenario,"\nRetroyear: ",retro,"\n")
+         op[[scenario]]$names$scenario,"\nRetroyear: -",retro,"\n")
     shell(modelCall)
   }
-  setwd(rscriptsDir)
+  cat0(.PROJECT_NAME,"->",currFuncName,"'",op[[scenario]]$names$scenario,
+      "' scenario retrospective runs finished.\nCheck the logfile for command line output.\n")
+  setwd(currDir)
 }
 
 .buildModelCall <- function(scenario, silent = .SILENT){

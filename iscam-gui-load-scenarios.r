@@ -301,7 +301,7 @@
   }
   # Make sure the figures and tables directories exist in the main (non-subdirectories), if not, create them
   dirList <- list.dirs(dired, recursive = FALSE)
-  # Remove instances of the tables, figures, and biodata directories to avoid troubles with SSsummarize
+  # Remove instances of the tables, figures, and biodata directories
   baseList <- basename(dirList)
   ind <- match(.FIGURES_DIR_NAME,baseList)
   if(!is.na(ind)){
@@ -317,7 +317,6 @@
   if(!is.na(ind)){
     dirList <- dirList[-ind]
   }
-  # Summarize the retrospectives along with thier base for this scenario
   if(length(dirList) > 0){
     tmp$outputs$retros <- .loadScenarios(dired = dired)
     tmp$outputs$retroSummary <- NULL
@@ -326,14 +325,13 @@
     for(retro in 1:length(tmp$outputs$retros)){
       modelList[[retro+1]] <- tmp$outputs$retros[[retro]]$outputs$mpd
     }
-    tmp$outputs$retrosSummary <- paste0(currFunc,"NEED TO IMPLEMENT retro loading, was SSsummarize!")
+    #tmp$outputs$retrosSummary <- paste0(currFuncName,"NEED TO IMPLEMENT retro loading, was SSsummarize!")
   }
 
   tmpFdFigures <- file.path(dired,.FIGURES_DIR_NAME)
   tmpFdTables  <- file.path(dired,.TABLES_DIR_NAME)
   dir.create(tmpFdFigures,showWarnings=!silent)
   dir.create(tmpFdTables,showWarnings=!silent)
-
   return(tmp)
 }
 
