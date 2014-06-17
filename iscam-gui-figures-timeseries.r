@@ -435,30 +435,29 @@ plotRecruitmentMPD <- function(out       = NULL,
 
   yUpper <- max(rt)
   for(model in 1:length(out)){
-    tmprt     <- out[[model]]$mpd$rt
+    tmprt  <- out[[model]]$mpd$rt
     yUpper <- max(yUpper, tmprt)
   }
-
-   #RF - need to get xlim in case time series lengths differ
-   Xlim <- c(min(ryr), max(ryr))
-    if(length(out)>1){
-	   for(model in 1:length(out)){
-		   tmpsage <- out[[model]]$mpd$sage
-		   tmpryr     <- out[[model]]$mpd$yr[(1+sage):nyear]
-		   minx <- min(min(tmpryr), min(Xlim)) 
-		   maxx <- max(max(tmpryr), max(Xlim))  
-		    Xlim <- c(minx, maxx)
-		}
+  xlim <- c(min(ryr), max(ryr))
+  if(length(out)>1){
+    for(model in 1:length(out)){
+      tmpsage  <- out[[model]]$mpd$sage
+      tmpnyear <- length(out[[model]]$mpd$yr)
+      tmpryr   <- out[[model]]$mpd$ryr[(1+tmpsage):nyear]
+      minx     <- min(min(tmpryr), min(xlim))
+      maxx     <- max(max(tmpryr), max(xlim))
+      xlim     <- c(minx, maxx)
     }
+  }
 
-  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2,ylim=c(0,yUpper),xlim=Xlim, ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), xlim=xlim,
+       ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       sage <- out[[line]]$mpd$sage
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
-   
       lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }

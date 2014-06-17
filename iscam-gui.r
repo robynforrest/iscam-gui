@@ -334,8 +334,8 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
-           "sRetroD"                                = {},
-           "sRetroRec"                              = {},
+           "sRetroD"                                = {plotTS(s,3,png,"RetroDepletion",retros=TRUE,index=ind,ps=ps,leg=leg)},
+           "sRetroRec"                              = {plotTS(s,5,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
            "sRetroSquid"                            = {plotTS(plotNum=99,retros=TRUE,
                                                               endyrvec = val$entryEndyr:val$entryStartyr,
                                                               cohorts = val$entryFirstCohort:val$entryLastCohort,
@@ -777,11 +777,10 @@ iscam <- function(reloadScenarios      = FALSE,
 }
 
 .runRetros <- function(scenario = val$entryScenario, silent = .SILENT){
-  # Steps:
-  # 1. Save the current REP file by copying using file.copy
-  # 2. Run the scenario using a system call for MLE retro, 1 for each retro year.
-  # 3. Rename each of these runs' REP files to RET* where * is a number.
-  # 4. Use file.copy to restore the original REP file
+  # Run retrospectives for the given scenario.
+  # First you must agree to delete any old ones
+  # Subdirectories 'RestrospectiveXX' will be created where XX is the number
+  #  of years subtracted.
 
   val <- getWinVal()
   retroYears <- val$entryRetro
