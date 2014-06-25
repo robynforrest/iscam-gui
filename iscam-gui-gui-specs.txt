@@ -362,17 +362,17 @@ grid 3 1 padx=10 pady=5 sticky=W
          entry  name=entryBioDataFile width=30 pady=5 value="" entryfont="10" sticky=NEWS mode=character
          null
 
-         label text="Areas (blank for all)" font="bold 10" sticky=NEWS
+         label text="Areas (blank for all)" font="bold 10" sticky=E
          entry name=entryAreas width=30 pady=5 value="3C,3D" entryfont="10" sticky=NEWS mode=character
          null
 
-         label text="Ages (blank for all)" font="bold 10" sticky=NEWS
+         label text="Ages (blank for all)" font="bold 10" sticky=E
          entry name=entryAges width=30 pady=5 value="1:25" entryfont="10" sticky=NEWS mode=character
          null
 
+         label text="Surveys (codes)" font="bold 10" sticky=E
+         entry name=entrySurveys width=30 pady=5 value=3,4 sticky=NEWS mode=character
          button name=showSurveyList function=.subView action="showSurveyList" width=15 padx=5 pady=5 text="Show surveys" sticky=NEWS fg="blue"
-         droplist name=dlSurveyList function=.subView action="selectSurvey" width=30 sticky=NEWS choices=surveyValues pady=5
-         null
 
          radio name=sexType  value=sSplit    text="Split sex"    font="bold 10" function=.subView mode=character sticky=W
          radio name=sexType  value=sCombined text="Combined sex" font="bold 10" function=.subView mode=character sticky=W

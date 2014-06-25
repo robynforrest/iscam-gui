@@ -603,8 +603,9 @@ iscam <- function(reloadScenarios      = FALSE,
            scenario <- val$entryScenario
            ages  <- .parseAges(val$entryAges)
            areas <- .parseAreas(val$entryAreas)
+           surveys <- .parseSurveys(val$entrySurveys)
            # Assumes surveyKeys exists globally!
-           survey <- surveyKeys[val$dlSurveyList.id]
+           #survey <- surveyKeys[val$dlSurveyList.id]
            splitSex <- FALSE
            if(val$sexType == "sSplit"){
              splitSex <- TRUE
@@ -620,7 +621,7 @@ iscam <- function(reloadScenarios      = FALSE,
              model <- 3
            }
            .runBioModel(model = model, ages = ages,
-                        areas = areas, splitSex = splitSex, survey = survey,
+                        areas = areas, splitSex = splitSex, surveys = surveys,
                         multLen = val$entryLengthMult,
                         multWt  = val$entryWeightMult)
          },

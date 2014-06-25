@@ -7,7 +7,7 @@
 # Development Date  : June 2014 - Present
 #**********************************************************************************
 
-.runBioModel <- function(model, ages, areas, splitSex, survey,
+.runBioModel <- function(model, ages, areas, splitSex, surveys,
                          multLen = 1, multWt = 1){
   # Run a model after extracting the given ages and areas,
   # model = 1 is length/weight model
@@ -17,7 +17,7 @@
   # areas is a vector of areas i.e. 3C, 3D, etc
   # and split the sexes if splitSex=TRUE.
   # multLen and multWt are multipliers for the length and weight for unit conversion.
-  # survey is a key number from the global surveyKeys declared at the bottom of this file.
+  # surveys is a vector of codes (key number) from the global surveyKeys declared at the bottom of this file.
   currDir <- getwd()
   dir <- .BIODATA_DIR_NAME
   ## switch(model,
@@ -40,7 +40,6 @@
   if(!exists("bio", envir = .GlobalEnv)){
     bio <<- NULL
   }
-
   if(model == 1){
     # Check that executable exists
     exe <- file.path(dir, .LW_EXE_FILE_NAME)
@@ -50,7 +49,9 @@
     }
     if(splitSex){
       for(sex in 1:2){
-        createLengthWeightDatafile(areas, sex, survey, multLen, multWt)
+        if(!createLengthWeightDatafile(areas, sex, surveys, multLen, multWt)){
+          return(NULL)
+        }
         # Change to the directory to run the model
         setwd(dir)
         tryCatch({
@@ -70,7 +71,9 @@
         bio$lw[[sex]] <<- readModelOutput(dir, .LW_EXE_BASE_NAME)
       }
     }else{
-      createLengthWeightDatafile(areas, 3, survey, multLen, multWt)
+      if(!createLengthWeightDatafile(areas, 3, surveys, multLen, multWt)){
+        return(NULL)
+      }
       # Change to the directory to run the model
       setwd(dir)
       tryCatch({
@@ -100,7 +103,9 @@
     }
     if(splitSex){
       for(sex in 1:2){
-        createVonbDatafile(areas, sex, ages, survey, multLen)
+        if(!createVonbDatafile(areas, sex, ages, surveys, multLen)){
+          return(NULL)
+        }
         # Change to the directory to run the model
         setwd(dir)
         tryCatch({
@@ -120,7 +125,9 @@
         bio$vonb[[sex]] <<- readModelOutput(dir, .VONB_EXE_BASE_NAME)
       }
     }else{
-      createVonbDatafile(areas, 3, ages, survey, multLen)
+      if(!createVonbDatafile(areas, 3, ages, surveys, multLen)){
+        return(NULL)
+      }
       # Change to the directory to run the model
       setwd(dir)
       tryCatch({
@@ -150,7 +157,9 @@
     }
     if(splitSex){
       for(sex in 1:2){
-        createMaturityAgeDatafile(areas, sex, survey, multLen)
+        if(!createMaturityAgeDatafile(areas, sex, surveys, multLen)){
+          return(NULL)
+        }
         # Change to the directory to run the model
         setwd(dir)
         tryCatch({
@@ -170,7 +179,9 @@
         bio$ma[[sex]] <<- readModelOutput(dir, .MA_EXE_BASE_NAME)
       }
     }else{
-      createMaturityAgeDatafile(areas, 3, survey, multLen)
+      if(!createMaturityAgeDatafile(areas, 3, surveys, multLen)){
+        return(NULL)
+      }
       # Change to the directory to run the model
       setwd(dir)
       tryCatch({
@@ -212,7 +223,7 @@ readModelOutput <- function(dir, name){
   return(out)
 }
 
-getLW <- function(sex, areas, survey){
+getLW <- function(sex, areas, surveys){
   # Extract all non-null length/weight data
   # return a data frame with all lengthed and weighted fish for the years and areas given
   # sex is the sex to extract data for, 1=male, 2=female, anything else=combined
@@ -220,7 +231,15 @@ getLW <- function(sex, areas, survey){
 
   d <- biodata
   out <- d[d$PMFC %in% areas,]
-  out <- out[out$SSID == survey,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There areas you chose so not exist in the data.\n")
+    return(NULL)
+  }
+  out <- out[out$SSID %in% surveys,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There surveys you chose so not exist in the data.\n")
+    return(NULL)
+  }
   if(sex == 1 || sex == 2){
     out <- out[out$sex == sex,]
   } # else don't bother with sex discrimination
@@ -229,7 +248,7 @@ getLW <- function(sex, areas, survey){
   return(out)
 }
 
-getMA <- function(sex, areas, survey, matlevel = 3){
+getMA <- function(sex, areas, surveys, matlevel = 3){
   # Extract all non-null maturity and age data
   # return a data frame with all fish with length and proportion mature
   #  for the years and areas given
@@ -239,7 +258,15 @@ getMA <- function(sex, areas, survey, matlevel = 3){
   #  out <- d[d$year %in% years,]
   d <- biodata
   out <- d[d$PMFC %in% areas,]
-  out <- out[out$SSID == survey,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There areas you chose so not exist in the data.\n")
+    return(NULL)
+  }
+  out <- out[out$SSID %in% surveys,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There surveys you chose so not exist in the data.\n")
+    return(NULL)
+  }
   if(sex == 1 || sex == 2){
     out <- out[out$sex == sex,]
   } # else don't bother with sex discrimination
@@ -257,14 +284,22 @@ getMA <- function(sex, areas, survey, matlevel = 3){
   return(as.data.frame(out))
 }
 
-getLA <- function(sex, areas, ages, survey){
+getLA <- function(sex, areas, ages, surveys){
   # Extract all non-null length/age data
   # return a data frame with all lengthed and aged fish
   # sex is the sex to extract data for, 1=male, 2=female, anything else=combined
   #  out <- d[d$year %in% years,]
   d <- biodata
   out <- d[d$PMFC %in% areas,]
-  out <- out[out$SSID == survey,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There areas you chose so not exist in the data.\n")
+    return(NULL)
+  }
+  out <- out[out$SSID %in% surveys,]
+  if(nrow(out) == 0){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - There surveys you chose so not exist in the data.\n")
+    return(NULL)
+  }
   if(sex == 1 || sex == 2){
     out <- out[out$sex == sex,]
   } # else don't bother with sex discrimination
@@ -283,6 +318,9 @@ createVonbDatafile <- function(areas, sex, ages, survey,
   # multLen is a multiplier for the length for unit conversion.
   # survey is a key number from the global surveyKeys declared at the bottom of this file.
   la <- getLA(sex, areas, ages, survey)
+  if(is.null(la)){
+    return(FALSE)
+  }
   nobs <- nrow(la)
   lengths <- la$len * as.numeric(multLen)
   ages <- la$age
@@ -304,16 +342,20 @@ createVonbDatafile <- function(areas, sex, ages, survey,
   write(ages, fn, ncolumns = 1, append=TRUE)
   write("\n999\n", fn, ncolumns = 1, append = TRUE)
   cat0("Wrote the file ",fn," to disk.\n")
+  return(TRUE)
 }
 
-createLengthWeightDatafile <- function(areas, sex, survey,
+createLengthWeightDatafile <- function(areas, sex, surveys,
                                        multLen = 1, multWt = 1){
   # Extract all non-null length/weight data and write to the data file.
   # areas is a vector of areas i.e. 3C, 3D, etc
   # sex=1 is male, sex=2 is femal, anything else=combined
   # multLen and multWt are multipliers for the length and weight for unit conversion.
   # survey is a key number from the global surveyKeys declared at the bottom of this file.
-  lw <- getLW(sex, areas, survey)
+  lw <- getLW(sex, areas, surveys)
+  if(is.null(lw)){
+    return(FALSE)
+  }
   nobs <- nrow(lw)
   lengths <- lw$len * as.numeric(multLen)
   weights <- lw$wt * as.numeric(multWt)
@@ -336,9 +378,10 @@ createLengthWeightDatafile <- function(areas, sex, survey,
   write(weights, fn, ncolumns = 1, append=TRUE)
   write("\n999\n", fn, ncolumns = 1, append = TRUE)
   cat0("Wrote the file ",fn," to disk.\n")
+  return(TRUE)
 }
 
-createMaturityAgeDatafile <- function(areas, sex, survey, multLen = 1){
+createMaturityAgeDatafile <- function(areas, sex, surveys, multLen = 1){
   # Extract all non-null maturity and age data and write to the data file.
   # areas is a vector of areas i.e. 3C, 3D, etc
   # sex=1 is male, sex=2 is female, anything else=combined
@@ -346,7 +389,10 @@ createMaturityAgeDatafile <- function(areas, sex, survey, multLen = 1){
   # survey is a key number from the global surveyKeys declared at the bottom of this file.
 
   #lm <- getLM(sex, areas, survey)
-  ma <- getMA(sex, areas, survey)
+  ma <- getMA(sex, areas, surveys)
+  if(is.null(ma)){
+    return(FALSE)
+  }
   nobs <- nrow(ma)
   #lengths <- lm$len * as.numeric(multLen)
   ages <- ma$age
@@ -370,6 +416,7 @@ createMaturityAgeDatafile <- function(areas, sex, survey, multLen = 1){
   write(maturities, fn, ncolumns = 1, append=TRUE)
   write("\n999\n", fn, ncolumns = 1, append = TRUE)
   cat0("Wrote the file ",fn," to disk.\n")
+  return(TRUE)
 }
 
 .loadBiodata <- function(){
@@ -387,13 +434,13 @@ createMaturityAgeDatafile <- function(areas, sex, survey, multLen = 1){
   return(NULL)
 }
 
-getAgedData <- function(d, years, areas, surv=0){
+getAgedData <- function(d, years, areas, surveys=0){
   # return a data frame with all aged fish for the dataset for the years and PMFC areas given
   # years is assumed to be a vector
   # If surv == 0, commercial ages will be returned, if it is anything else, it is the ssid (survey series id)
   out <- d[d$year %in% years,]
   out <- out[out$PMFC %in% areas,]
-  out <- out[out$SSID==surv,]
+  out <- out[out$SSID %in% surveys,]
   out <- out[!is.na(out$age),]
   return(out)
 }
@@ -439,14 +486,14 @@ getAgeData <- function(dat, minAge=1, maxAge=25, gear=NULL){
 getIscamAgeData <- function(){
   # This copies the age data into the clipboard for easy pasting into iscam data file.
   # This is split sex only at the moment.
-  wcviSurvAges <- getAgedData(d, years, areas, surv=4) # surv=4 is WCVI Synoptic
+  wcviSurvAges <- getAgedData(d, years, areas, surveys=4) # surv=4 is WCVI Synoptic
   wcviSurvAgeData <- getAgeData(list(wcviSurvAges), minAge=1, maxAge=25, gear=2)
 
   # No ages for shrimp trawl survey, this will break of you try it with no age data
-  #wcviShrimpSurvAges <- getAgedData(d, years, areas, surv=7) # surv=7 is WCVI Shrimp trawl
+  #wcviShrimpSurvAges <- getAgedData(d, years, areas, surveys=7) # surv=7 is WCVI Shrimp trawl
   #wcviShrimpSurvAgeData <- getAgeData(list(wcviShrimpSurvAges), minAge=1, maxAge=25, gear=3)
 
-  commAges <- getAgedData(d, years, areas, surv=0)
+  commAges <- getAgedData(d, years, areas, surveys=0)
   commAgeData <- getAgeData(list(commAges), minAge=1, maxAge=25, gear=1)
 
   names(commAgeData) <- names(wcviSurvAgeData)
@@ -458,7 +505,7 @@ getIscamAgeData <- function(){
   # HECATE STRAIT SURVEY AND COMMERCIAL AGES
   # Need to add this once the aging is complete
   #years <- c(2005,2007,2009,2011,2013)
-  #hecaSurvAges <- getAgedData(d, years, areas, surv=3)
+  #hecaSurvAges <- getAgedData(d, years, areas, surveys=3)
   #hecaSurvAges <- getSurveyAges(d, 3)
 }
 
@@ -535,6 +582,40 @@ getIscamAgeData <- function(){
     return(NULL)
   }
   return(areas)
+}
+
+.parseSurveys <- function(surveyStr){
+  # parse the surveyStr string which is a comma-seperated list of
+  # survey key codes (surveyKeys object)
+  # Return a vector of surveys listed in the surveyStr string
+  # If surveyStr has an error in it, an error message will be shown and
+  # NULL will be returned.
+  # If surveyStr is a null string (""), NULL will be returned
+  # If one or more of the values in surveyStr is not in surveyKeys,
+  #  an error message will be printed out and NULL will be returned
+  currFuncName <- getCurrFunc()
+
+  tryCatch({
+    surveys <- strsplit(surveyStr,",")[[1]]
+  }, warning = function(war){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - problem with your surveys list.")
+    cat0(.PROJECT_NAME,"->",currFuncName,war$message)
+    return(NULL)
+  }, error = function(err){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Error - problem with your surveys list.")
+    cat0(.PROJECT_NAME,"->",currFuncName,err$message)
+    return(NULL)
+  })
+  # Remove empty strings, in case there were multiple commas in a row
+  surveys <- surveys[surveys!=""]
+  if(length(surveys) == 0){
+    return(NULL)
+  }
+  if(!all(surveys %in% surveyKeys)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Warning - not all of your survey codes are in surveyKeys object.")
+    return(NULL)
+  }
+  return(as.numeric(surveys))
 }
 
 surveyKeys <<- c(0,1,2,3,4,5,6,7,8,9,10,
