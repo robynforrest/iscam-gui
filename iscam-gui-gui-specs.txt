@@ -133,7 +133,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 2 sticky=N pady=10
-          grid 8 1 sticky=N relief=raised
+          grid 9 1 sticky=N relief=raised
                label text="Biology" font="bold 10" sticky=N
                radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
@@ -142,6 +142,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sBiologyCompositionResid    text="Composition residuals" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyLW                  text="Length/Weight relationship" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyVONB                text="Length/Age relationship (VonB)" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyMA                  text="Maturity/Age relationship" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyFecundity          text="Fecundity" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyFecundityWeight    text="Fecundity as a function of weight" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyFecundityLength    text="Fecundity as a function of length" function=.subView sticky=W mode=character
@@ -356,35 +357,44 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--                      Notebook Tab: BioTool                     --#
 #--------------------------------------------------------------------#
      grid 2 1
-       grid 9 2
-         button name=openBioDataFile function=.subView action="openBioDataFile" width=15 padx=5 pady=5 text="Open Biodata File" sticky=E fg="blue"
-         entry  name=entryBioDataFile width=60 pady=5 value="" entryfont="10" sticky=W
+       grid 9 3
+         button name=openBioDataFile function=.subView action="openBioDataFile" width=15 padx=5 pady=5 text="Open Biodata File" sticky=NEWS fg="blue"
+         entry  name=entryBioDataFile width=30 pady=5 value="" entryfont="10" sticky=NEWS mode=character
+         null
 
-         label text="Areas (blank for all)" font="bold 10" sticky=E
-         entry name=entryAreas width=60 pady=5 value="3C,3D" entryfont="10" sticky=W mode=character
+         label text="Areas (blank for all)" font="bold 10" sticky=NEWS
+         entry name=entryAreas width=30 pady=5 value="3C,3D" entryfont="10" sticky=NEWS mode=character
+         null
 
-         label text="Ages (blank for all)" font="bold 10" sticky=E
-         entry name=entryAges width=60 pady=5 value="1:25" entryfont="10" sticky=W mode=character
+         label text="Ages (blank for all)" font="bold 10" sticky=NEWS
+         entry name=entryAges width=30 pady=5 value="1:25" entryfont="10" sticky=NEWS mode=character
+         null
 
-         button name=showSurveyList function=.subView action="showSurveyList" width=15 padx=5 pady=5 text="Show surveys" sticky=E fg="blue"
-         droplist name=dlSurveyList function=.subView action="selectSurvey" width=60 sticky=WE choices=surveyValues
+         button name=showSurveyList function=.subView action="showSurveyList" width=15 padx=5 pady=5 text="Show surveys" sticky=NEWS fg="blue"
+         droplist name=dlSurveyList function=.subView action="selectSurvey" width=30 sticky=NEWS choices=surveyValues pady=5
+         null
 
          radio name=sexType  value=sSplit    text="Split sex"    font="bold 10" function=.subView mode=character sticky=W
          radio name=sexType  value=sCombined text="Combined sex" font="bold 10" function=.subView mode=character sticky=W
+         null
 
-         radio name=lwvType value=sLW text="Length/Weight model"          font="bold 10" function=.subView mode=character sticky=W
-         radio name=lwvType value=sVB text="Von Bertalannfy Growth model" font="bold 10" function=.subView mode=character sticky=W
+         radio name=lwvType value=sLW text="Length/Weight model"   font="bold 10" function=.subView mode=character sticky=W
+         radio name=lwvType value=sVB text="Von Bertalannfy model" font="bold 10" function=.subView mode=character sticky=W
+         radio name=lwvType value=sMA text="Maturity/Age model"    font="bold 10" function=.subView mode=character sticky=W
 
-         button name=editLWTPL   function=.subView action="editLWTPL"   width=15 padx=5 pady=5 text="Edit LW TPL" sticky=W fg="blue"
-         button name=editVONBTPL function=.subView action="editVONBTPL" width=15 padx=5 pady=5 text="Edit VONB TPL" sticky=W fg="blue"
+         button name=editLWTPL   function=.subView action="editLWTPL"   width=15 padx=5 pady=5 text="Edit LW TPL" sticky=NEWS fg="blue"
+         button name=editVONBTPL function=.subView action="editVONBTPL" width=15 padx=5 pady=5 text="Edit VONB TPL" sticky=NEWS fg="blue"
+         button name=editMATPL   function=.subView action="editMATPL"   width=15 padx=5 pady=5 text="Edit MA TPL" sticky=NEWS fg="blue"
 
-         label text="Length mult(must be mm)" font="bold 10" sticky=E
-         entry name=entryLengthMult width=60 pady=5 value="10" entryfont="10" sticky=W mode=character
+         label text="Length mult(must be mm)" font="bold 10" sticky=NEWS
+         entry name=entryLengthMult width=30 pady=5 value="10" entryfont="10" sticky=NEWS mode=character
+         null
 
-         label text="Weight mult(must be grams)" font="bold 10" sticky=E
-         entry name=entryWeightMult width=60 pady=5 value="1000" entryfont="10" sticky=W mode=character
+         label text="Weight mult(must be grams)" font="bold 10" sticky=NEWS
+         entry name=entryWeightMult width=30 pady=5 value="1000" entryfont="10" sticky=NEWS mode=character
+         null
 
-      button name=runBio function=.subView action="runBio" width=40 padx=5 pady=5 text="Run Bio Model" fg="blue"
+      button name=runBio function=.subView action="runBio" width=40 padx=5 pady=5 text="Run Bio Model" fg="blue" sticky=NEWS
 
 #--------------------------------------------------------------------#
 #--                  Plot specifications for Footer                 -#

@@ -17,7 +17,7 @@
 #**********************************************************************************
 
 # TODO:
-# Fix retrospective plotting and model running, need an mcmc buttton as weel for retros
+# Fix retrospective plotting and model running, need an mcmc buttton as well for retros
 # Implement the order changes by sorting the op list, etc
 # Fix the sensitivity changnig so that it can't go past limits
 # Change the radios to check boxes for plotting, with all checked appearing in a table, i.e. mfrow, mfcol
@@ -27,19 +27,18 @@
 # Remove all references to assignGlobals()
 
 removeAllExcept <- function(vars  = c("op","sens","bio")){
-  # removeAllExcept()
   # Removes everything in the workspace except for what is in the vars list.
   # Upon finishing, the workspace will contain whatever is in the vars list,
-  # plus the objects 'removeAllExcept' (this function) and 'modelLoaded'.
+  #  plus the objects 'removeAllExcept' (this function) and 'modelLoaded'.
   # That tells the software that the model has already been loaded.
-  # - vars - A list of objects to keep, typically just 'op'.
+  # - vars - A list of objects to keep.
 
   vars <- c(vars, "removeAllExcept")
-  keep <- match(x = vars, table = ls(all = T, envir = .GlobalEnv))
+  keep <- match(x = vars, table = ls(all = TRUE, envir = .GlobalEnv))
   if(any(is.na(keep))){
     modelLoaded <<- FALSE
   }else{
-    rm(list=ls(all = T, envir = .GlobalEnv)[-keep], envir = .GlobalEnv)
+    rm(list=ls(all = TRUE, envir = .GlobalEnv)[-keep], envir = .GlobalEnv)
     modelLoaded <<- TRUE
   }
 }
@@ -47,7 +46,7 @@ removeAllExcept()
 
 require(PBSmodelling)
 require(coda)
-require(ggplot2)
+require(ggplot2) # Only used for Observed landings plot.
 require(reshape2)
 
 options(stringsAsFactors = FALSE)
@@ -78,7 +77,6 @@ source(.FIGURES_MCMC_SOURCE)
 iscam <- function(reloadScenarios      = FALSE,
                   copyModelExecutables = FALSE,
                   silent               = TRUE){
-  # iscam()
   # loads model outputs and launches the main iscam-gui GUI.
   # - reloadScenarios TRUE/FALSE - reload the data from all model output files in all scenarios.
   # - copyADMBExecutables TRUE/FALSE copy the admb executable from admb folder to each scenario folder.
@@ -280,6 +278,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sBiologyCompositionResid"               = {plotBiology(13,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyLW"                             = {plotBiology(14,png,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyVONB"                           = {plotBiology(15,png,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMA"                             = {plotBiology(16,png,"BiologyMaturityAgeRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-selectivities.r
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -591,7 +590,16 @@ iscam <- function(reloadScenarios      = FALSE,
            editCall <- paste(.EDITOR, fn)
            shell(editCall, wait=F)
          },
+         "editMATPL" = {
+           fn <- file.path(.BIODATA_DIR_NAME, .MA_TPL_FILE_NAME)
+           editCall <- paste(.EDITOR, fn)
+           shell(editCall, wait=F)
+         },
          "runBio" = {
+           if(!exists("biodata", envir = .GlobalEnv)){
+             cat0(.PROJECT_NAME,"->",getCurrFunc(),"Global object 'biodata' does not exist. Load a datafile and try again.")
+             return(NULL)
+           }
            scenario <- val$entryScenario
            ages  <- .parseAges(val$entryAges)
            areas <- .parseAreas(val$entryAreas)
@@ -607,8 +615,12 @@ iscam <- function(reloadScenarios      = FALSE,
              # model = 2 means it is a vonB model
              model <- 2
            }
+           if(val$lwvType == "sMA"){
+             # model = 3 means it is a maturity/age model
+             model <- 3
+           }
            .runBioModel(model = model, ages = ages,
-                        areas=areas, splitSex = splitSex, survey = survey,
+                        areas = areas, splitSex = splitSex, survey = survey,
                         multLen = val$entryLengthMult,
                         multWt  = val$entryWeightMult)
          },

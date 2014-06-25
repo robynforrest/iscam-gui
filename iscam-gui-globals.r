@@ -49,18 +49,21 @@ if(.OS == "Darwin"){
 # GUI definition files (see PBSModelling package)
 .MAIN_GUI_DEF_FILE               <- paste0(.PROJECT_NAME,"-gui-specs.txt")
 
-# iScam, lengthweight, and vonB model executables location
+# iScam, lengthweight, vonB, and maturityage model executables location
 .EXE_BASE_NAME                   <- "iscam"
 .LW_EXE_BASE_NAME                <- "lengthweight"
 .VONB_EXE_BASE_NAME              <- "vonb"
+.MA_EXE_BASE_NAME                <- "maturityage"
 if(.OS == "Linux" || .OS == "Darwin"){
   .EXE_FILE_NAME                 <- .EXE_BASE_NAME
   .LW_EXE_FILE_NAME              <- .LW_EXE_BASE_NAME
   .VONB_EXE_FILE_NAME            <- .VONB_EXE_BASE_NAME
+  .MA_EXE_FILE_NAME              <- .MA_EXE_BASE_NAME
 }else{
   .EXE_FILE_NAME                 <- paste0(.EXE_BASE_NAME,".exe")
   .LW_EXE_FILE_NAME              <- paste0(.LW_EXE_BASE_NAME,".exe")
   .VONB_EXE_FILE_NAME            <- paste0(.VONB_EXE_BASE_NAME,".exe")
+  .MA_EXE_FILE_NAME              <- paste0(.MA_EXE_BASE_NAME,".exe")
 }
 .EXE_FILE_NAME_FULL_PATH         <- file.path("..","iSCAM","src","admb-code",.EXE_FILE_NAME)
 
@@ -78,6 +81,9 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .VONB_DAT_FILE_NAME              <- paste0(.VONB_EXE_BASE_NAME,".dat")
 .VONB_TPL_FILE_NAME              <- paste0(.VONB_EXE_BASE_NAME,".tpl")
 .VONB_REP_FILE_NAME              <- paste0(.VONB_EXE_BASE_NAME,".rep")
+.MA_DAT_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".dat")
+.MA_TPL_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".tpl")
+.MA_REP_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".rep")
 
 # Sensitivity file name (for grouping sensitivities together on plots)
 .SCENARIO_INFO_FILE_NAME         <- "ScenarioInfo.txt"

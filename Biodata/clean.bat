@@ -1,6 +1,7 @@
 echo off
 del variance /Q /F
 del eigv.rpt /Q /F
+del *.dat /Q /F
 del *.bar /Q /F
 del *.cov /Q /F
 del *.cor /Q /F

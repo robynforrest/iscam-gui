@@ -12,21 +12,35 @@
   # Run a model after extracting the given ages and areas,
   # model = 1 is length/weight model
   # model = 2 is a vonB model
+  # model = 3 is a maturity/age model
   # ages is a vector of ages for query
   # areas is a vector of areas i.e. 3C, 3D, etc
   # and split the sexes if splitSex=TRUE.
   # multLen and multWt are multipliers for the length and weight for unit conversion.
   # survey is a key number from the global surveyKeys declared at the bottom of this file.
-  if(!exists("biodata")){
-    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Global object 'biodata' does not exist. Load a datafile and try again.")
-    return(NULL)
-  }
   currDir <- getwd()
   dir <- .BIODATA_DIR_NAME
+  ## switch(model,
+  ##        1 = {
+  ##          exe <- file.path(dir, .LW_EXE_FILE_NAME)
+  ##          if(splitSex){
+  ##            for(sex in 1:2){
+  ##              createLengthWeightDatafile(areas, sex, survey, multLen, multWt)
+  ##            }
+  ##          }
+  ##        },
+  ##        2 = {
+  ##        },
+  ##        3 = {
+  ##        },
+  ##        {
+  ##          # default
+  ##        }
+  ## }
   if(!exists("bio", envir = .GlobalEnv)){
     bio <<- NULL
   }
-  # Warning! If bio does exist, the values within it will be overwritten
+
   if(model == 1){
     # Check that executable exists
     exe <- file.path(dir, .LW_EXE_FILE_NAME)
@@ -127,6 +141,56 @@
       bio$vonb[[2]] <<- NULL # In case there was a previous split-sex run
     }
   }
+  if(model == 3){
+    # Check that executable exists
+    exe <- file.path(dir, .MA_EXE_FILE_NAME)
+    if(!file.exists(exe)){
+      cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - '",exe,"' does not exist. Compile it and try again.")
+      return(NULL)
+    }
+    if(splitSex){
+      for(sex in 1:2){
+        createMaturityAgeDatafile(areas, sex, survey, multLen)
+        # Change to the directory to run the model
+        setwd(dir)
+        tryCatch({
+          shell(.MA_EXE_FILE_NAME)
+        }, error = function(err){
+          cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error running model.",
+               "Check that '",exe,"' exists and was compiled properly.")
+          setwd(currDir)
+          return(NULL)
+        }, error = function(err){
+          cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error running model.",
+               "Check that '",exe,"' exists and was compiled properly.")
+          setwd(currDir)
+          return(NULL)
+        })
+        setwd(currDir)
+        bio$ma[[sex]] <<- readModelOutput(dir, .MA_EXE_BASE_NAME)
+      }
+    }else{
+      createMaturityAgeDatafile(areas, 3, survey, multLen)
+      # Change to the directory to run the model
+      setwd(dir)
+      tryCatch({
+        shell(.MA_EXE_FILE_NAME)
+      }, error = function(err){
+        cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error running model.",
+             "Check that '",exe,"' exists and was compiled properly.")
+        setwd(currDir)
+        return(NULL)
+      }, error = function(err){
+        cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error running model.",
+             "Check that '",exe,"' exists and was compiled properly.")
+        setwd(currDir)
+        return(NULL)
+      })
+      setwd(currDir)
+      bio$ma[[1]] <<- readModelOutput(dir, .MA_EXE_BASE_NAME)
+      bio$ma[[2]] <<- NULL # In case there was a previous split-sex run
+    }
+  }
 }
 
 readModelOutput <- function(dir, name){
@@ -153,6 +217,7 @@ getLW <- function(sex, areas, survey){
   # return a data frame with all lengthed and weighted fish for the years and areas given
   # sex is the sex to extract data for, 1=male, 2=female, anything else=combined
   #  out <- d[d$year %in% years,]
+
   d <- biodata
   out <- d[d$PMFC %in% areas,]
   out <- out[out$SSID == survey,]
@@ -162,6 +227,34 @@ getLW <- function(sex, areas, survey){
   out <- out[!is.na(out$len),]
   out <- out[!is.na(out$wt),]
   return(out)
+}
+
+getMA <- function(sex, areas, survey, matlevel = 3){
+  # Extract all non-null maturity and age data
+  # return a data frame with all fish with length and proportion mature
+  #  for the years and areas given
+  # sex is the sex to extract data for, 1=male, 2=female, anything else=combined
+  # matlevel is the maturity level to consider mature,
+  #  this value and higher will be considered mature.
+  #  out <- d[d$year %in% years,]
+  d <- biodata
+  out <- d[d$PMFC %in% areas,]
+  out <- out[out$SSID == survey,]
+  if(sex == 1 || sex == 2){
+    out <- out[out$sex == sex,]
+  } # else don't bother with sex discrimination
+  out <- out[!is.na(out$age),]
+  out <- out[!is.na(out$mat),]
+  # Now calculate the proportion at each length which are mature
+  dtf <- out$mat >= matlevel
+  df <- table(out$age, dtf)
+  df <- addmargins(df, 2)          # add row sums for TRUE/FALSE counts
+  df <- cbind(df, df[,2] / df[,3]) # add proportions which are TRUE (mature)
+
+  # Bind together the lengths and their proportion mature
+  out <- cbind(as.numeric(rownames(df)), df[,4])
+  colnames(out) <- c("age","mat")
+  return(as.data.frame(out))
 }
 
 getLA <- function(sex, areas, ages, survey){
@@ -241,6 +334,40 @@ createLengthWeightDatafile <- function(areas, sex, survey,
   write(lengths, fn, ncolumns = 1, append=TRUE)
   write("\n# Observed weights (g)\n", fn, ncolumns = 1, append = TRUE)
   write(weights, fn, ncolumns = 1, append=TRUE)
+  write("\n999\n", fn, ncolumns = 1, append = TRUE)
+  cat0("Wrote the file ",fn," to disk.\n")
+}
+
+createMaturityAgeDatafile <- function(areas, sex, survey, multLen = 1){
+  # Extract all non-null maturity and age data and write to the data file.
+  # areas is a vector of areas i.e. 3C, 3D, etc
+  # sex=1 is male, sex=2 is female, anything else=combined
+  # multLen is a multiplier for the length for unit conversion.
+  # survey is a key number from the global surveyKeys declared at the bottom of this file.
+
+  #lm <- getLM(sex, areas, survey)
+  ma <- getMA(sex, areas, survey)
+  nobs <- nrow(ma)
+  #lengths <- lm$len * as.numeric(multLen)
+  ages <- ma$age
+  maturities <- ma$mat
+  #data <- rbind(nobs, lengths, weights, 999)
+  fn <- file.path(.BIODATA_DIR_NAME, .MA_DAT_FILE_NAME)
+  if(sex == 1){
+    sexStr <- "males"
+  }else if(sex == 2){
+    sexStr <- "females"
+  }else{
+    sexStr <- "combined sexes"
+  }
+  # Write the datafile
+  write(paste0("# Maturity-at-age data file for ",sexStr), fn, ncolumns = 1)
+  write("# Number of observations", fn, ncolumns = 1, append = TRUE)
+  write(nobs, fn, ncolumns = 1, append = TRUE)
+  write("\n# Observed ages", fn, ncolumns = 1, append = TRUE)
+  write(ages, fn, ncolumns = 1, append=TRUE)
+  write("\n# Observed maturities\n", fn, ncolumns = 1, append = TRUE)
+  write(maturities, fn, ncolumns = 1, append=TRUE)
   write("\n999\n", fn, ncolumns = 1, append = TRUE)
   cat0("Wrote the file ",fn," to disk.\n")
 }
@@ -475,26 +602,3 @@ surveyValues <<- c("Individual survey without a series",
                    "WCHG Synoptic For Longnose Skate Assessment")
 surveyList <<- data.frame(key = surveyKeys, value = surveyValues)
 colnames(surveyList) <- c("SURVEY_SERIES_ID", "SURVEY_SERIES_DESC")
-
-plotLW <- function(data){
-  # First column of 'data' assumed to be fork length (mm), second is round weight (g)
-  lw <- data[[1]]
-  l <- lw[,1]/10.0 # divide by ten to go from mm->cm
-  w <- lw[,2]
-  plot(l,w,xlab="Length (cm)",ylab="Weight (g)")
-  a <- data[[2]][1,]
-  b <- data[[2]][2,]
-  curve(a*x^b,col="red",lwd=2,add=T)
-}
-
-plotVonb <- function(data){
-  # First column of 'data' assumed to be fork length (mm), second is age
-  lage <- data[[1]]
-  l <- lage[,1]/10.0 # divide by ten to go from mm->cm
-  age <- lage[,2]
-  plot(age,l,ylab="Length (cm)",xlab="Age",xlim=c(0,20),pch=1)
-  linf <- data[[2]][1,]
-  k <- data[[2]][2,]
-  curve(linf*(1-exp(-k*x)),col="red",add=T)
-}
-

@@ -3,7 +3,7 @@
 # This file contains the code to load ADMB 'REP' files
 #
 # Author            : Chris Grandin
-# Development Date  : June 2014 - Present
+# Development Date  : June 2013 - Present
 #**********************************************************************************
 
 reptoRlist <- function(fn){
