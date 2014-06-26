@@ -12,15 +12,18 @@ DATA_SECTION
 PARAMETER_SECTION
   init_bounded_number K(0.00001,1.0);
   init_bounded_number Linf(1.0,1000.0);
+  init_bounded_number tt0(-10.0,1.0,1);
+  !! tt0 = 0.0;
 
   vector Lpred(1,nobs);
   objective_function_value f;
   sdreport_number dummy;
 
 PROCEDURE_SECTION
-  Lpred = Linf*(1.0 - exp(-K*age));
+  Lpred = Linf*(1.0 - exp(-K*(age - tt0)));
   f = (norm2(Lpred-L));
 
 REPORT_SECTION
   report<<"#Linf"<<endl<<Linf<<endl;
   report<<"#K"<<endl<<K<<endl;
+  report<<"#tt0"<<endl<<tt0<<endl;

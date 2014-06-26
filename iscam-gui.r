@@ -581,17 +581,17 @@ iscam <- function(reloadScenarios      = FALSE,
            print(surveyList)
          },
          "editLWTPL" = {
-           fn <- file.path(.BIODATA_DIR_NAME, .LW_TPL_FILE_NAME)
+           fn <- file.path(.BIODATA_DIR_NAME, .LW_EXE_BASE_NAME, .LW_TPL_FILE_NAME)
            editCall <- paste(.EDITOR, fn)
            shell(editCall, wait=F)
          },
          "editVONBTPL" = {
-           fn <- file.path(.BIODATA_DIR_NAME, .VONB_TPL_FILE_NAME)
+           fn <- file.path(.BIODATA_DIR_NAME, .VONB_EXE_BASE_NAME, .VONB_TPL_FILE_NAME)
            editCall <- paste(.EDITOR, fn)
            shell(editCall, wait=F)
          },
          "editMATPL" = {
-           fn <- file.path(.BIODATA_DIR_NAME, .MA_TPL_FILE_NAME)
+           fn <- file.path(.BIODATA_DIR_NAME, .MA_EXE_BASE_NAME, .MA_TPL_FILE_NAME)
            editCall <- paste(.EDITOR, fn)
            shell(editCall, wait=F)
          },

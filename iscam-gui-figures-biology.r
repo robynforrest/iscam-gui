@@ -194,14 +194,14 @@ plotMA <- function(leg  = NULL){
         shade <- .getShade(col, 80)
         points(a, m, col=shade, pch=1, xlab="Age", ylab="Proportion mature")
       }
-      C <- data[[sex]][[2]][1,]
-      K <- data[[sex]][[2]][2,]
-      curve(1/(1+exp(-K*(x-C))), col=col, lwd=3, add=TRUE)
+      a50 <- data[[sex]][[2]][1,]
+      sigma_a50 <- data[[sex]][[2]][2,]
+      curve(1/(1+exp(-(x-a50)/sigma_a50)), col=col, lwd=3, add=TRUE)
       legCols <- c(legCols, col)
       if(sex == 1){
-        legNames <- c(legNames, paste0("Male A50% = ",C,"\n K = ",K,"\n"))
+        legNames <- c(legNames, paste0("Male A50% = ",a50,"\n std50% = ",sigma_a50,"\n"))
       }else{
-        legNames <- c(legNames, paste0("Female A50% = ",C,"\n K = ",K,"\n"))
+        legNames <- c(legNames, paste0("Female A50% = ",a50,"\n std50% = ",sigma_a50,"\n"))
       }
     }
   }else{
@@ -213,11 +213,11 @@ plotMA <- function(leg  = NULL){
     col <- "blue"
     shade <- .getShade(col, 80)
     plot(a, m, col=shade, xlim=xlim, xlab="Age", ylab="Proportion mature")
-    C <- data[[1]][[2]][1,]
-    K <- data[[1]][[2]][2,]
-    curve(1/(1+exp(-K*(x-C))), col=col, lwd=3, add=TRUE)
+    a50 <- data[[1]][[2]][1,]
+    sigma_a50 <- data[[1]][[2]][2,]
+    curve(1/(1+exp(-(x-a50)/sigma_a50)), col=col, lwd=3, add=TRUE)
     legCols <- c(legCols, col)
-    legNames <- c(legNames, paste0("Combined sexes A50% = ",C,"\n K = ",K))
+    legNames <- c(legNames, paste0("Combined sexes A50% = ",a50,"\n std50% = ",sigma_a50))
   }
   if(!is.null(leg)){
     legend(leg, legend=legNames, col=legCols, lty=1, lwd=2)
@@ -247,8 +247,8 @@ plotGrowth <- function(leg){
     # Split sexes
     for(sex in 1:2){
       la <- data[[sex]][[1]]
-      l <- la[,1]/10.0 # divide by ten to go from mm->cm
-      a <- la[,2]
+      l  <- la[,1]/10.0 # divide by ten to go from mm->cm
+      a  <- la[,2]
       if(sex == 1){
         col <- "blue"
         shade <- .getShade(col, 20)
@@ -259,27 +259,29 @@ plotGrowth <- function(leg){
         points(a, l, col=shade, pch=1, xlab="Age", ylab="Length (cm)")
       }
       linf <- data[[sex]][[2]][1,]
-      k <- data[[sex]][[2]][2,]
+      k    <- data[[sex]][[2]][2,]
+      tt0  <- data[[sex]][[2]][3,]
       curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
       legCols <- c(legCols, col)
       if(sex == 1){
-        legNames <- c(legNames, paste0("Male Linf = ",linf,"\n k = ",k,"\n"))
+        legNames <- c(legNames, paste0("Male Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
       }else{
-        legNames <- c(legNames, paste0("Female Linf = ",linf,"\n k = ",k,"\n"))
+        legNames <- c(legNames, paste0("Female Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
       }
     }
   }else{
     # Combined sexes
-    la <- data[[1]][[1]]
-    l <- la[,1]/10.0 # divide by ten to go from mm->cm
-    a <- la[,2]
+    la  <- data[[1]][[1]]
+    l   <- la[,1]/10.0 # divide by ten to go from mm->cm
+    a   <- la[,2]
     col <- "blue"
     plot(a, l, col=col, xlab="Age", ylab="Length (cm)")
     linf <- data[[1]][[2]][1,]
-    k <- data[[1]][[2]][2,]
+    k    <- data[[1]][[2]][2,]
+    tt0  <- data[[sex]][[2]][3,]
     curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
     legCols <- c(legCols, col)
-    legNames <- c(legNames, paste0("Combined sexes Linf = ",linf,"\n k = ",k,"\n"))
+    legNames <- c(legNames, paste0("Combined sexes Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
   }
   if(!is.null(leg)){
     legend(leg, legend=legNames, col=legCols, lty=1, lwd=2)

@@ -422,9 +422,9 @@ grid 3 1 padx=10 pady=5 sticky=W
         label text="Resolution" font="bold 10" sticky=W
         entry name=entryResolution width=5 padx=5 value=300 entryfont="10" sticky=W
         label text="Width" font="bold 10" sticky=W
-        entry name=entryWidth width=5 padx=5 value=6.5 entryfont="10" sticky=W
+        entry name=entryWidth width=5 padx=5 value=10 entryfont="10" sticky=W
         label text="Height" font="bold 10" sticky=W
-        entry name=entryHeight width=5 padx=5 value=3.25 entryfont="10" sticky=W
+        entry name=entryHeight width=5 padx=5 value=7 entryfont="10" sticky=W
 
    grid 1 6
       label text="Legend location" font="bold 10" sticky=W

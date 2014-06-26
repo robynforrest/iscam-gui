@@ -42,6 +42,7 @@
   }
   if(model == 1){
     # Check that executable exists
+    dir <- file.path(.BIODATA_DIR_NAME, .LW_EXE_BASE_NAME)
     exe <- file.path(dir, .LW_EXE_FILE_NAME)
     if(!file.exists(exe)){
       cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - '",exe,"' does not exist. Compile it and try again.")
@@ -96,6 +97,7 @@
   }
   if(model == 2){
     # Check that executable exists
+    dir <- file.path(.BIODATA_DIR_NAME, .VONB_EXE_BASE_NAME)
     exe <- file.path(dir, .VONB_EXE_FILE_NAME)
     if(!file.exists(exe)){
       cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - '",exe,"' does not exist. Compile it and try again.")
@@ -150,6 +152,7 @@
   }
   if(model == 3){
     # Check that executable exists
+    dir <- file.path(.BIODATA_DIR_NAME, .MA_EXE_BASE_NAME)
     exe <- file.path(dir, .MA_EXE_FILE_NAME)
     if(!file.exists(exe)){
       cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - '",exe,"' does not exist. Compile it and try again.")
@@ -324,7 +327,7 @@ createVonbDatafile <- function(areas, sex, ages, survey,
   nobs <- nrow(la)
   lengths <- la$len * as.numeric(multLen)
   ages <- la$age
-  fn <- file.path(.BIODATA_DIR_NAME, .VONB_DAT_FILE_NAME)
+  fn <- file.path(.BIODATA_DIR_NAME, .VONB_EXE_BASE_NAME, .VONB_DAT_FILE_NAME)
   if(sex == 1){
     sexStr <- "males"
   }else if(sex == 2){
@@ -360,7 +363,7 @@ createLengthWeightDatafile <- function(areas, sex, surveys,
   lengths <- lw$len * as.numeric(multLen)
   weights <- lw$wt * as.numeric(multWt)
   #data <- rbind(nobs, lengths, weights, 999)
-  fn <- file.path(.BIODATA_DIR_NAME, .LW_DAT_FILE_NAME)
+  fn <- file.path(.BIODATA_DIR_NAME, .LW_EXE_BASE_NAME, .LW_DAT_FILE_NAME)
   if(sex == 1){
     sexStr <- "males"
   }else if(sex == 2){
@@ -398,7 +401,7 @@ createMaturityAgeDatafile <- function(areas, sex, surveys, multLen = 1){
   ages <- ma$age
   maturities <- ma$mat
   #data <- rbind(nobs, lengths, weights, 999)
-  fn <- file.path(.BIODATA_DIR_NAME, .MA_DAT_FILE_NAME)
+  fn <- file.path(.BIODATA_DIR_NAME, .MA_EXE_BASE_NAME, .MA_DAT_FILE_NAME)
   if(sex == 1){
     sexStr <- "males"
   }else if(sex == 2){
