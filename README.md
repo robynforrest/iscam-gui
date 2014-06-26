@@ -75,7 +75,7 @@ Thanks to the following people involved in the development of this software:
   - **sens** - This is a list of *Sensitivity Group*, one for each unique *Sensitivity Group*.  names(sens) will return NULL
 since the groups are nameless.
   - **bio** - This is a list of length two, containing the input data and output parameter estimates for the
-length-weight and VonB realationships.
+length-weight, maturity-at-age, and VonB relationships.
 
 
 - There are three objects containing the valid surveys. These are used by functions in iscam-gui-load-biodata.r. They are:
@@ -228,7 +228,7 @@ See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see 
         op[[N]]$outputs$par$retros                  - List of Retrospectives (with filenames as $name) - REP file contents. If NULL, no retros
     sens[[M]] - each unique sensitivity group number M contains the following
       sens[[M]][1] - A vector of the indicies within the op list of the Scenarios that are currently in sensitivity group M
-    bio - Contains length/weight and VonB data and parameter estimates for the species of concern.
+    bio - Contains length/weight, maturity-at-age, and VonB data and parameter estimates for the species of concern.
       bio$lw[[1]] - Length/weight data and parameter estimates for males or combined if there is no second element.
         bio$lw[[1]][[1]] - Two-column matrix of length in mm (column 1) and weight in g (column 2).
         bio$lw[[1]][[2]] - Vector of the two parameter estimates for this sex.
@@ -239,6 +239,14 @@ See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see 
         bio$vonb[[1]][[1]] - Two-column matrix of length in mm (column 1) and age (column 2).
         bio$vonb[[1]][[2]] - Vector of the two parameter estimates for this sex.
       bio$vonb[[2]] - Length/weight data and parameter estimates for females (optional).
+        bio$vonb[[2]][[1]] - Two-column matrix of length in mm (column 1) and age (column 2).
+        bio$vonb[[2]][[2]] - Vector of the three parameter estimates for this sex.
+      bio$ma[[1]] - Maturity/age data and parameter estimates for males or combined if there is no second element.
+        bio$ma[[1]][[1]] - Two-column matrix of age (column 1) and proportion mature (column 2).
+        bio$ma[[1]][[2]] - Vector of the two parameter estimates for this sex.
+      bio$ma[[2]] - Maturity/age data and parameter estimates for females (optional).
+        bio$ma[[2]][[1]] - Two-column matrix of age (column 1) and proportion mature (column 2).
+        bio$ma[[2]][[2]] - Vector of the two parameter estimates for this sex.
 
 ---
 
