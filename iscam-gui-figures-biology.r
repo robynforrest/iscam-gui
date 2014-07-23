@@ -116,6 +116,14 @@ plotLW <- function(leg){
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - element 'lw' of object 'bio' does not exist. Run the length/weight model from the Biotool tab.")
     return(NULL)
   }
+  # For alpha and beta as greek letters in plots
+  greek <- c("alpha", "beta")
+  cnames <- paste(LETTERS[1:2], letters[1:2])
+  legendExp <- sapply(1:2, function(i) {
+    as.expression(substitute(A (B),
+        list(A = as.name(cnames[i]), B = as.name(greek[i]))))
+  })
+
   if(length(data) == 2){
     # Split sexes
     for(sex in 1:2){
@@ -136,9 +144,9 @@ plotLW <- function(leg){
       curve(a*x^b, col=col, lwd=3, add=T)
       legCols <- c(legCols, col)
       if(sex == 1){
-        legNames <- c(legNames, paste0("Male alpha = ",a,"\n beta = ",b,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Male  ", alpha, "=", a, " ", beta,"=", b, "\n"))))
       }else{
-        legNames <- c(legNames, paste0("Female alpha = ",a,"\n beta = ",b,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Female  ", alpha, "=", a, " ", beta,"=", b, "\n"))))
       }
     }
   }else{
@@ -152,7 +160,7 @@ plotLW <- function(leg){
     b <- data[[1]][[2]][2,]
     curve(a*x^b, col=col, lwd=3, add=T)
     legCols <- c(legCols, col)
-    legNames <- c(legNames, paste0("Combined sexes alpha = ",a,"\n beta = ",b,"\n"))
+    legNames <- c(legNames, as.expression(substitute(paste("Combined sexes  ", alpha, "=", a, " ", beta,"=", b, "\n"))))
   }
   if(!is.null(leg)){
     legend(leg, legend=legNames, col=legCols, lty=1, lwd=2)
@@ -199,9 +207,9 @@ plotMA <- function(leg  = NULL){
       curve(1/(1+exp(-(x-a50)/sigma_a50)), col=col, lwd=3, add=TRUE)
       legCols <- c(legCols, col)
       if(sex == 1){
-        legNames <- c(legNames, paste0("Male A50% = ",a50,"\n std50% = ",sigma_a50,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Male  a"["50%"], " = ", a50, " std"["50%"], "  = ", sigma_a50, "\n"))))
       }else{
-        legNames <- c(legNames, paste0("Female A50% = ",a50,"\n std50% = ",sigma_a50,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Female  a"["50%"], " = ", a50, " std"["50%"], "  = ", sigma_a50, "\n"))))
       }
     }
   }else{
@@ -217,7 +225,7 @@ plotMA <- function(leg  = NULL){
     sigma_a50 <- data[[1]][[2]][2,]
     curve(1/(1+exp(-(x-a50)/sigma_a50)), col=col, lwd=3, add=TRUE)
     legCols <- c(legCols, col)
-    legNames <- c(legNames, paste0("Combined sexes A50% = ",a50,"\n std50% = ",sigma_a50))
+    legNames <- c(legNames, as.expression(substitute(paste("Combined sexes a"["50%"], " = ", a50, " std"["50%"], "  = ", sigma_a50, "\n"))))
   }
   if(!is.null(leg)){
     legend(leg, legend=legNames, col=legCols, lty=1, lwd=2)
@@ -264,9 +272,9 @@ plotGrowth <- function(leg){
       curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
       legCols <- c(legCols, col)
       if(sex == 1){
-        legNames <- c(legNames, paste0("Male Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Male  L"[infinity], " = ", linf, " ", kappa, " = ", k, " tt"[0], " = ", tt0, "\n"))))
       }else{
-        legNames <- c(legNames, paste0("Female Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
+        legNames <- c(legNames, as.expression(substitute(paste("Female  L"[infinity], " = ", linf, " ", kappa, " = ", k, " tt"[0], " = ", tt0, "\n"))))
       }
     }
   }else{
@@ -278,11 +286,11 @@ plotGrowth <- function(leg){
     plot(a, l, col=col, xlab="Age", ylab="Length (cm)")
     linf <- data[[1]][[2]][1,]
     k    <- data[[1]][[2]][2,]
-    tt0  <- data[[sex]][[2]][3,]
+    tt0  <- data[[1]][[2]][3,]
     curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
     legCols <- c(legCols, col)
-    legNames <- c(legNames, paste0("Combined sexes Linf = ",linf,"\n k = ",k,"\n tt0 = ",tt0,"\n"))
-  }
+    legNames <- c(legNames, as.expression(substitute(paste("Combined sexes  L"[infinity], " = ", linf, " ", kappa, " = ", k, " tt"[0], " = ", tt0, "\n"))))
+   }
   if(!is.null(leg)){
     legend(leg, legend=legNames, col=legCols, lty=1, lwd=2)
   }
