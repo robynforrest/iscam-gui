@@ -279,7 +279,6 @@ plotBiomassMCMC <- function(out       = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-
   drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass", xlab="Year", main="Biomass", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
