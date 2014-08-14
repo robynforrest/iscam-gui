@@ -275,7 +275,7 @@ getMA <- function(sex, areas, surveys, matlevel = 3){
   } # else don't bother with sex discrimination
   out <- out[!is.na(out$age),]
   out <- out[!is.na(out$mat),]
-  # Now calculate the proportion at each length which are mature
+  # Now calculate the proportion at each age which are mature
   dtf <- out$mat >= matlevel
   df <- table(out$age, dtf)
   df <- addmargins(df, 2)          # add row sums for TRUE/FALSE counts
