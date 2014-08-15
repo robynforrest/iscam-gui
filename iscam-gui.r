@@ -475,8 +475,8 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "nextGroup" = {
            nextGroup <- val$entryIndex + 1
-           if(nextGroup > max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)){
-             nextGroup <- max(op[[val$entrySensitivityGroup]]$inputs$data$ngear)
+           if(nextGroup > length(op[[scenario]]$inputs$data$indices)){
+             nextGroup <- length(op[[scenario]]$inputs$data$indices)
            }
            setWinVal(c(entryIndex=nextGroup))
          },
