@@ -331,7 +331,7 @@ plotComposition <- function(scenario, index, leg){
       nyr <- yrs[length(yrs)]
 
       if(nSex == 2){
-        par(mfrow=c(1,2), oma=c(0,0,2,0), mar=c(5,4,1,2))
+        par(mfrow=c(1,2), oma=c(0,0,2,0), mar=c(5,4,1.5,2))
       }
       for(sex in 1:nSex){
         # Extract the data for the given sex
@@ -343,8 +343,15 @@ plotComposition <- function(scenario, index, leg){
         Prop <- matrix(nrow=nrow(compdat), ncol=ncol(compdat))
         for(ii in 1:nrow(compdat)) Prop[ii,] <-  as.numeric(compdat[ii,]/sum(compdat[ii,]) )
 
+        if(sex==1){
+          sexstr <- "Male"
+        }else if(sex==2){
+          sexstr <- "Female"
+        }else{
+          sexstr <- "Combined sexes"
+        }
         plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=TRUE, size=0.1, powr=0.5,
-                    xlab="Year", ylab=Ylab, las=1, xaxt="n")
+                    xlab="Year", main=sexstr, ylab=Ylab, las=1, xaxt="n")
         axis(1, at=yrs, labels=yrs, las=2)
         legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
       }
