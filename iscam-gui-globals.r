@@ -42,6 +42,7 @@ if(.OS == "Darwin"){
 .FIGURES_TIMESERIES_SOURCE       <- paste0(.PROJECT_NAME,"-figures-timeseries.r")
 .FIGURES_CATCH_SOURCE            <- paste0(.PROJECT_NAME,"-figures-catch.r")
 .FIGURES_MCMC_SOURCE             <- paste0(.PROJECT_NAME,"-figures-mcmc-diagnostics.r")
+.FIGURES_RETROSPECTIVES_SOURCE   <- paste0(.PROJECT_NAME,"-figures-retrospectives.r")
 
 # Plotting theme (ggplot). Only used in observed catch plot at this point.
 .PLOT_THEME                      <- theme_bw(11)

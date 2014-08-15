@@ -73,6 +73,7 @@ source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
 source(.FIGURES_MCMC_SOURCE)
+source(.FIGURES_RETROSPECTIVES_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
                   copyModelExecutables = FALSE,
@@ -335,10 +336,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sRetroSB"                               = {plotTS(s,1,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
            "sRetroD"                                = {plotTS(s,3,png,"RetroDepletion",retros=TRUE,index=ind,ps=ps,leg=leg)},
            "sRetroRec"                              = {plotTS(s,5,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
-           "sRetroSquid"                            = {plotTS(plotNum=99,retros=TRUE,
-                                                              endyrvec = val$entryEndyr:val$entryStartyr,
-                                                              cohorts = val$entryFirstCohort:val$entryLastCohort,
-                                                              png=png,fileText="RetroSquid")},
+           "sRetroSquid"                            = {plotCohorts(s,png=png,fileText="RetroSquid",ps=ps,leg=leg)},
            # Plot runtime values returned from ADMB
            "sObjFuncVal"                            = {plotConvergence(1,png,"ObjectiveFunctionValue")},
            "sMaxGrad"                               = {plotConvergence(2,png,"MaximumGradient")},

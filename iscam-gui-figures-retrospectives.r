@@ -1,191 +1,99 @@
 #**********************************************************************************
 # ss-explore-figures-retrospectives.r
-# This file contains the code necessary to plot Retrospectives.
-#
-# Assumes the opList has been built and has retrospective data in position 5,
-# i.e. opList[[scenario]][[5]] contains a list of the retrospective outputs
+# This file contains the code necessary to plot Retrospective cohort (squid) plots
 #
 # Author            : Chris Grandin
-# Development Date  : December 2011 - 2014
+# Development Date  : August 2014
 #
 #**********************************************************************************
 
-plotRetros <- function(whichPlot="biomass",ylimit=6,useMaxYlim=T,lty=1,lwd=2,pch=20,scenario){
-  # plots Spawning stock biomiass, depletion, and recruitment retrospectives
-  # whichPlot can be:
-  # 1. "biomass"
-  # 2. "depletion"
-  # 3. "recruits"
-  # Assumes that opList[[1]] is populated (i.e. there is at least one scenario)
-  try(dev.off(),silent=T)
-  op	<- par(no.readonly=T)
-  val <- getWinVal()
+plotCohorts <- function(scenario   = 1,         # Scenario number
+                        png        = .PNG,      # TRUE/FALSE for PNG image output
+                        fileText   = "Default", # Name of the file if png==TRUE
+                        ylim       = c(-3,3),   # Limits for the recdevs
+                        # PlotSpecs: Width, height, and resolution of screen and file
+                        ps         = list(pngres = .RESOLUTION,
+                                          pngw   = .WIDTH,
+                                          pngh   = .HEIGHT,
+                                          res    = .RESOLUTION,
+                                          w      = .WIDTH,
+                                          h      = .HEIGHT),
+                        leg        = "topright",# Legend location. If NULL, none will be drawn
+                        units      = .UNITS,    # Units to use in plotting
+                        silent     = .SILENT){
 
-  baseRunName <- strsplit(opList[[scenario]][[1]],"/")[[1]][3] # Gets the run's folder name out of the reletive path
-  runNames <- baseRunName
-  baseRep <- opList[[scenario]][[4]]
-  base <- 1
-  color <- 1
-  colors <- color
-  # Base run is loaded, now plot it and add the retrospectives to the plot
+  currFuncName <- getCurrFunc()
 
-  # *************************************** RECRUITMENT RETROSPECTIVE ******************************************
-  if(whichPlot == "recruits"){
-    if(opList[[scenario]][[6]]){ # if MPD results are loaded
-      if(length(opList[[scenario]][[5]]) > 0){
-        if(useMaxYlim){
-          # get max of all retros first
-          yUpperLimit <- max(baseRep$rt)
-          for(retro in 1:length(opList[[scenario]][[5]])){
-            yUpperLimit <- max(yUpperLimit,opList[[scenario]][[5]][[retro]]$rt)
-          }
-        }else{
-          yUpperLimit <- ylimit
-        }
+  retroDat     <- op[[scenario]]$outputs$retros
+  numRetros    <- length(retroDat) + 1 # The +1 is to include the base model run
+  ages         <- 0:(numRetros - 1)
+  numYears     <- op[[scenario]]$inputs$data$nyr - op[[scenario]]$inputs$data$syr + 1
+  years        <- op[[scenario]]$inputs$data$nyr:(op[[scenario]]$inputs$data$nyr - numRetros + 1)
+  scenarioName <- op[[scenario]]$names$scenario
 
-        plot(baseRep$yr[1:(length(baseRep$yr)-1)],
-             baseRep$rt,
-             type="b",
-             ylab="Age-1 recruits",
-             ylim=c(0,yUpperLimit),
-             xlab="Year",
-             pch=pch,
-             col=color,
-             lwd=lwd,
-             lty=lty)
-        for(retro in 1:length(opList[[scenario]][[5]])){ # number of retrospectives
-          color <- color + 1
-          colors <- c(colors,color)
-          lines(opList[[scenario]][[5]][[retro]]$yr[1:(length(opList[[scenario]][[5]][[retro]]$yr)-1)],
-                opList[[scenario]][[5]][[retro]]$rt,
-                lty=lty,
-                col=color,
-                lwd=lwd,
-                ylim=c(0,yUpperLimit),
-                type="b",
-                xaxt="n")
-          runNames <- c(runNames,paste(baseRunName," - ",retro))
-        }
-        legend("topright",runNames,lty=lty,col=colors,bty="n",lwd=lwd)
-        filename <- paste("Retrospective_Scenario",scenario,"_Recruits",sep="")
-        saveFig(filename)
-      }else{
-        cat(paste("Error plotting 'Recruitment Retrospectives' figure.  There are no retrospective outputs loaded for scenario",scenario,", rerun retrospectives.\n\n"))
-      }
+  # Set up a square matrix to hold the line cohort data
+  # It will end up being an right lower triangular matrix
+  # Rows are the ages 0-N for which an assessment was run in descending order, columns are the years in descending order
+  recdevmat <- matrix(data = NA, nrow = numRetros, ncol = numRetros)
+
+  # Get recruitment deviations for the main run, and a check to make sure it is the right length
+  recdevs <- op[[scenario]]$outputs$par$log_rec_devs
+  if(length(recdevs) != numYears){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The number of recdevs is not equal to the number of years. Turn projections off and re-run the model and retrospectives.")
+    return(NULL)
+  }
+
+  # Fill in the last row of the matrix with the main run's output
+  recdevmat[numRetros,] <- op[[scenario]]$outputs$par$log_rec_devs[numYears:(numYears - numRetros +1)]
+
+  # Fill in the rest of the matrix with the retrospective data
+  for(retro in 1:(numRetros-1)){
+    numYears <- numYears - 1
+    devvec <- op[[scenario]]$outputs$retros[[retro]]$outputs$par$log_rec_devs[numYears:(numYears - (numRetros - retro) + 1)]
+    # Pad with NA's to make lower triangular
+    devvec <- c(rep(NA,retro),devvec)
+    recdevmat[numRetros-retro,] <- devvec
+  }
+
+  # plot each column as a line and label as the year
+  figDir       <- op[[scenario]]$names$figDir
+  filename     <- file.path(figDir,paste0(fileText,".png"))
+  res          <- ps$pngres
+  width        <- ps$pngw
+  height       <- ps$pngh
+  resScreen    <- ps$res
+  widthScreen  <- ps$w
+  heightScreen <- ps$h
+
+  if(png){
+    graphics.off()
+    png(filename,res=res,width=width,height=height,units=units)
+  }else{
+    windows(width=widthScreen,height=heightScreen)
+  }
+
+  for(year in length(years):1){
+    # Remove the NAs so plotting starts at age 0
+    recdevs <- recdevmat[,year][!is.na(recdevmat[,year])]
+    agevec  <- ages[1:year]
+    if(year == length(years)){
+      xlabel <- paste0("Age in ",years[1])
+      plot(agevec, recdevs, type="o", pch=20, lty=1, lwd=3, col=year,
+           xlim=c(-1,max(ages)+1), ylim=ylim, ,ylab="Recruitment deviation", xlab=xlabel, axes=FALSE)
+      abline(h=0, col="grey")
+      text(agevec[length(agevec)] + 0.25, recdevs[length(recdevs)], years[year], col=year, cex=0.75)
+      axis(1, at=ages, labels=ages)
+      axis(2, at=ylim[1]:ylim[2], labels=ylim[1]:ylim[2], las=2)
+      box()
     }else{
-      cat(paste("Error plotting 'Recruitment Retrospectives' figure.  There are no MPD outputs loaded scenario (",scenario,")\n\n"))
-    }
-  # *************************************** BIOMASS RETROSPECTIVE ******************************************
-  }else if(whichPlot == "biomass"){
-    if(opList[[scenario]][[6]]){ # if MPD results are loaded
-      if(length(opList[[scenario]][[5]]) > 0){
-        if(useMaxYlim){
-          yUpperLimit <- max(baseRep$sbt)
-          for(retro in 1:length(opList[[scenario]][[5]])){
-            yUpperLimit <- max(yUpperLimit,opList[[scenario]][[5]][[retro]]$sbt)
-          }
-        }else{
-          yUpperLimit <- ylimit
-        }
-        plot(baseRep$yrs,
-             baseRep$sbt,
-             type="l",
-             col=color,
-             lty=lty,
-             lwd=lwd,
-             ylim=c(0,yUpperLimit),
-             xlab="Year",
-             ylab="Spawning biomass",
-             main="Spawning biomass",
-             las=1)
-
-        points(baseRep$yrs[1]-0.8,
-               baseRep$sbo,
-               col=color,
-               pch=pch,
-               lwd=lwd)
-        for(retro in 1:length(opList[[scenario]][[5]])){ # number of retrospectives
-          color <- color + 1
-          colors <- c(colors,color)
-          lines(opList[[scenario]][[5]][[retro]]$yrs,
-                opList[[scenario]][[5]][[retro]]$sbt,
-                type="l",
-                col=color,
-                lty=lty,
-                lwd=lwd,
-                ylim=c(0,yUpperLimit),
-                xlab="",
-                ylab="",
-                las=1,
-                xaxt="n")
-          points(opList[[scenario]][[5]][[retro]]$yrs[1]-0.8,
-                 opList[[scenario]][[5]][[retro]]$sbo,
-                 col=color,
-                 pch=pch,
-                 lwd=lwd)
-          runNames <- c(runNames,paste(baseRunName," - ",retro))
-        }
-        legend("topright",runNames,lty=lty,col=colors,bty="n", lwd=lwd)
-        filename <- paste("Retrospective_Scenario",scenario,"_Biomass",sep="")
-        saveFig(filename)
-      }else{
-        cat(paste("Error plotting 'Spawning Biomass Retrospectives' figure.  There are no retrospective outputs loaded for scenario",scenario,", rerun retrospectives.\n\n"))
-      }
-    }else{
-      cat(paste("Error plotting 'Spawning Biomass Retrospectives' figure.  There are no MPD outputs loaded for scenario (",scenario,")\n\n"))
-    }
-  # *************************************** DEPLETION RETROSPECTIVE ******************************************
-  }else if(whichPlot == "depletion"){
-    if(opList[[scenario]][[6]]){ # if MPD results are loaded
-      if(length(opList[[scenario]][[5]]) > 0){
-        if(useMaxYlim){
-          yUpperLimit <- max(baseRep$sbt/baseRep$sbo)
-          for(retro in 1:length(opList[[scenario]][[5]])){
-            yUpperLimit <- max(yUpperLimit,opList[[scenario]][[5]][[retro]]$sbt/opList[[scenario]][[5]][[retro]]$sbo)
-          }
-        }else{
-          yUpperLimit <- ylimit
-        }
-        plot(baseRep$yrs,
-             baseRep$sbt/baseRep$sbo,
-             type="l",
-             col=color,
-             lty=lty,
-             lwd=lwd,
-             ylim=c(0,yUpperLimit),
-             xlab="Year",
-             ylab="Spawning Depletion",
-             main="Spawning Depletion",
-             las=1)
-        abline(h=0.40, lwd=mtLineWidth, lty=mtLineType, col=mtLineColor)
-        for(retro in 1:length(opList[[scenario]][[5]])){ # number of retrospectives
-          color <- color + 1
-          colors <- c(colors,color)
-          lines(opList[[scenario]][[5]][[retro]]$yrs,
-                opList[[scenario]][[5]][[retro]]$sbt/opList[[scenario]][[5]][[retro]]$sbo,
-                type="l",
-                col=color,
-                lty=lty,
-                lwd=lwd,
-                ylim=c(0,yUpperLimit),
-                xlab="",
-                ylab="",
-                las=1,
-                xaxt="n")
-          runNames <- c(runNames,paste(baseRunName," - ",retro))
-        }
-        lty <- c(rep(1,(length(runNames))),mtLineType)
-        lwd <- c(rep(2,(length(runNames))),mtLineWidth)
-        colors <- c(colors,mtLineColor)
-        legend("topright",c(runNames,"Management target"),lty=lty,col=colors,bty="n", lwd=lwd) 
-        filename <- paste("Retrospective_Scenario",scenario,"_Depletion",sep="")
-        saveFig(filename)
-      }else{
-        cat(paste("Error plotting 'Recruitment Retrospectives' figure.  There are no retrospective outputs loaded for scenario",scenario,", rerun retrospectives.\n\n"))
-      }
-    }else{
-      cat(paste("Error plotting 'Recruitment Retrospectives' figure.  There are no MPD outputs loaded for scenario (",scenario,")\n\n"))
+      lines(agevec, recdevs, type="o", pch=20, lty=1, lwd=3, col=year, ylim=ylim)
+      text(agevec[length(agevec)] + 0.25, recdevs[length(recdevs)], years[year], col=year, cex=0.75)
     }
   }
-  par(op)
+
+  if(png){
+    cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
+    dev.off()
+  }
+  return(TRUE)
 }
