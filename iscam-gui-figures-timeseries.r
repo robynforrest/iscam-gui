@@ -449,7 +449,7 @@ plotRecruitmentMPD <- function(out       = NULL,
     }
   }
 
-  plot(ryr, rt, type = "b", col=colors[[1]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), xlim=xlim,
+  plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), xlim=xlim,
        ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -457,7 +457,7 @@ plotRecruitmentMPD <- function(out       = NULL,
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
-      lines(ryr, rt, type="b",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
+      lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
   if(!is.null(leg)){
