@@ -1,5 +1,5 @@
 #**********************************************************************************
-# ss-explore-figures-retrospectives.r
+# iscam-gui-figures-retrospectives.r
 # This file contains the code necessary to plot Retrospective cohort (squid) plots
 #
 # Author            : Chris Grandin

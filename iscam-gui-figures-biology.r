@@ -14,7 +14,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         ci         = NULL,      # confidence interval in % (0-100)
                         multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
                         sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
-                        index      = 1,
+                        index      = 1,         # Index/gear to plot
                         # PlotSpecs: Width, height, and resolution of screen and file
                         ps         = list(pngres = .RESOLUTION,
                                           pngw   = .WIDTH,
@@ -36,7 +36,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   # 8  Time-varying natural mortality (only plotted if growthdatF$M vector contains different values)
   # 9  Perspective plot of time-varying growth (only plotted if growthvaries and growthseries are non-NULL)
   # 10 Contour plot of time-varying growth (only plotted if growthvaries and growthseries are non-NULL)
-  # 11 Bubble plot of composition data
+  # 11 Bubble plot of composition data, two-paned if it is a two-sex model.
   # 12 Bar plot of composition fits
   # 13 Bubble plot of composition residuals
   # 14 LW relationship with fit a parameter estimates
@@ -80,7 +80,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==7)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==8)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
-  if(plotNum==10)  cat("No Plot Yet -- Coming Soon!!\n")
+  if(plotNum==10) cat("No Plot Yet -- Coming Soon!!\n")
 
   # Composition data
   if(plotNum==11) plotComposition(scenario, index, leg)
@@ -297,16 +297,19 @@ plotGrowth <- function(leg){
 }
 
 plotComposition <- function(scenario, index, leg){
+  # Plot the age composition for the given index (gear).
+  # If the model is two-sex, a two-paneled plot will be drawn.
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  nSex <- op[[scenario]]$inputs$data$nsex
   nAgears <-  op[[scenario]]$input$data$nagears
   nAgearsobs <- op[[scenario]]$input$data$nagearsvec
-  Flags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
+  Flags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data, if two-sex model this will be length 2 vector
 
   if(nAgearsobs[1] > 0){
-    compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A) #Get the composition data
+    compData <-  as.data.frame(op[[scenario]]$outputs$mpd$d3_A) #Get the composition data
     gears <- unique(compData[,2])
 
     if(is.element(index, gears)){
@@ -327,16 +330,25 @@ plotComposition <- function(scenario, index, leg){
       syr <- yrs[1]
       nyr <- yrs[length(yrs)]
 
-      compData <- compData[, 6:ncol(compData)]
-      compData <- compData[, 1:nages]  #remove NAs from ragged array
+      if(nSex == 2){
+        par(mfrow=c(1,2), oma=c(0,0,2,0), mar=c(5,4,1,2))
+      }
+      for(sex in 1:nSex){
+        # Extract the data for the given sex
+        compdat <- compData[compData[,5] == sex,]
+        yrs <- compdat[,1]
+        compdat <- compdat[, 6:ncol(compdat)]
+        compdat <- compdat[, 1:nages]  #remove NAs from ragged array
 
-      Prop <- matrix(nrow=nrow(compData), ncol=ncol(compData))
-      for(ii in 1:nrow(compData)) Prop[ii,] <-  as.numeric(compData[ii,]/sum(compData[ii,]) )
+        Prop <- matrix(nrow=nrow(compdat), ncol=ncol(compdat))
+        for(ii in 1:nrow(compdat)) Prop[ii,] <-  as.numeric(compdat[ii,]/sum(compdat[ii,]) )
 
-      plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1, powr=0.5, xlab="Year", ylab=Ylab, main=paste("Gear", index), las=1)
-      legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
-
-      #bubble.plot(syr:nyr,sage:nage,Prop,scale=0.3,xlab="Year",ylab=Ylab,add=F,log.scale=T, main=paste("Gear", index), las=1)
+        plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=TRUE, size=0.1, powr=0.5,
+                    xlab="Year", ylab=Ylab, las=1, xaxt="n")
+        axis(1, at=yrs, labels=yrs, las=2)
+        legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
+      }
+      title(paste("Gear", index), outer=TRUE)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
     }
