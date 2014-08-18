@@ -1021,7 +1021,6 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$rt     <- extractGroupMatrices(rt, prefix = "rt")
   ft         <- read.csv(mcmcftfn)
   tmp$ft     <- extractAreaSexMatrices(ft, prefix = "ft")
-
   return(tmp)
 }
 

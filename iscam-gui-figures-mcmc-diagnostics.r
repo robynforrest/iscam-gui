@@ -58,6 +58,10 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
     windows(width=widthScreen,height=heightScreen)
   }
   mcmcData <- mcmcOut$params
+  # If you are trying to show more than one group or area's parameters,
+  # comment the next line below out
+  mcmcData <- stripAreasGroups(mcmcData)
+
   if(plotNum == 1){
     plotTraces(mcmcData, burnthin=burnthin)
   }
@@ -82,6 +86,26 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   }
   return(TRUE)
 }
+
+stripAreasGroups <- function(dat){
+  # This is a hack function to remove the area and group prefixes for the mcmc data 'dat'
+  # The reason is that for now we are just working with a single group and area, and
+  # the extra text in the parameter names are confusing, eg. 'ro_gr1' will become just 'ro'
+  # If you make a model with more than one group or area this will need to be revisited.
+  # ALSO this removes 'f' which is assumed to be the objective function value
+  # Note than q1, q2, q3... will stay the same and m1 and m2 will remain if the model was two-sex.
+
+  pnames <- names(dat)
+  pnames <- gsub("m_gs1","m1",pnames)
+  pnames <- gsub("m_gs2","m2",pnames)
+  pnames <- gsub("msy1","msy",pnames)
+  pnames <- gsub("fmsy1","fmsy",pnames)
+  pnames <- gsub("SSB1","ssb",pnames)
+  names(dat) <- gsub("_+.*","",pnames)
+  dat <- dat[,names(dat) != "f"]
+  return(dat)
+}
+
 
 plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200){
   # Traceplots for an mcmc matrix, mcmcData
