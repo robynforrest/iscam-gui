@@ -77,7 +77,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 16){
       plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
-  }
+ }
 
   if(png){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -151,41 +151,38 @@ plotExpVsObsCatch<-function(inp,
 
 }
 
-
-#RF added this function -- only works in branch FitMeanWt
 plotExpVsObsAnnualMeanWt<-function(inp,
                                 out,
                                 scenarioName,
                                 verbose = FALSE,
                                 leg = "topright",
                                 col = 1){
+  nmeanwtObs <- inp$data$nmeanwtobs
+  if( nmeanwtObs > 0){
+		  meanwtData <- inp$data$meanwtdata
+		  years <- meanwtData[,"year"]
+		  obsMeanWt <- meanwtData[,"meanwt"]
+		  gear <-meanwtData[,"gear"]
+		  gearList<-unique(gear)
+		  ngear<-length(gearList)	 #only plot for gears with data
+		  predMeanWt <-out$annual_mean_weight
 
-  meanwtData <- inp$data$meanwtdata
-  years <- meanwtData[,"year"]
-  obsMeanWt <- meanwtData[,"meanwt"]
-  gear <-meanwtData[,"gear"]
-  gearList<-unique(gear)
-  ngear<-length(gearList)	 #only plot for gears with data
-  predMeanWt <-out$annual_mean_weight
+		  if (ngear==1) par(mfrow=c(1,1),mar=c(5,4,2,2))
+		  if (ngear == 2) par(mfrow=c(2,1),mar=c(4,4,2,2))
+		  if (ngear == 3 | ngear == 4) par(mfrow=c(2,2),mar=c(3,3,2,2))
+		  if (ngear == 5 | ngear == 6) par(mfrow=c(3,2),mar=c(2,2,2,2))
 
-  if (ngear==1) par(mfrow=c(1,1),mar=c(5,4,2,2))
-  if (ngear == 2) par(mfrow=c(2,1),mar=c(4,4,2,2))
-  if (ngear == 3 | ngear == 4) par(mfrow=c(2,2),mar=c(3,3,2,2))
-  if (ngear == 5 | ngear == 6) par(mfrow=c(3,2),mar=c(2,2,2,2))
+		  for (i in 1:ngear) {
+		      # Set-up plot area
+		      xLim <- range(years)
+		      yLim <- c(0,(max(obsMeanWt[gear==gearList[i]],predMeanWt[gear==gearList[i]])*1.1))
 
-  for (i in 1:ngear) {
-      # Set-up plot area
-      xLim <- range(years)
-      yLim <- c(0,(max(obsMeanWt[gear==gearList[i]],predMeanWt[gear==gearList[i]])*1.1))
+		      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Mean Weight in Catch")
 
-      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Mean Weight in Catch")
-
-      points(years[gear==gearList[i]], obsMeanWt[gear==gearList[i]], pch=19)
-      lines(years[gear==gearList[i]], predMeanWt[gear==gearList[i]], col="red")
-      box()
-
-  }
-
-  par(mfrow=c(1,1),mar=c(5,4,2,2))
-
+		      points(years[gear==gearList[i]], obsMeanWt[gear==gearList[i]], pch=19)
+		      lines(years[gear==gearList[i]], predMeanWt[gear==gearList[i]], col="red")
+		      box()
+		  }
+		  par(mfrow=c(1,1),mar=c(5,4,2,2))
+	}else cat("WARNING: No Annual Mean Weight Data")
 }

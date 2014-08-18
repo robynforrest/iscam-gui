@@ -659,6 +659,7 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$sage   <- as.numeric(dat[ind <- ind + 1])
   tmp$nage   <- as.numeric(dat[ind <- ind + 1])
   tmp$ngear  <- as.numeric(dat[ind <- ind + 1])
+ 
   # Gear allocation
   tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   # Age-schedule and population parameters
@@ -674,6 +675,7 @@ readData <- function(file = NULL, verbose = FALSE){
   # Catch data
   tmp$nctobs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch  <- matrix(NA, nrow = tmp$nctobs, ncol = 7)
+  
   for(row in 1:tmp$nctobs){
     tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
@@ -728,17 +730,21 @@ readData <- function(file = NULL, verbose = FALSE){
     for(row in 1:nrows){
       tmp$waa[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
     }
-    colnames(tmp$indices) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
-    # Annual Mean Weight data
+    colnames(tmp$waa) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
+   }
+     
+   # Annual Mean Weight data
     # Catch data
     tmp$nmeanwt <- as.numeric(dat[ind <- ind + 1])
     tmp$nmeanwtobs <- as.numeric(dat[ind <- ind + 1])
-    tmp$meanwtdata  <- matrix(NA, nrow = sum(tmp$nmeanwtobs), ncol = 7)
-    for(row in 1:sum(tmp$nmeanwtobs)){
-      tmp$meanwtdata[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-    }
-    colnames(tmp$meanwtdata) <- c("year","meanwt","gear","area","group","sex","timing")
-  }
+        
+    if(tmp$nmeanwtobs >0){
+	    tmp$meanwtdata  <- matrix(NA, nrow = sum(tmp$nmeanwtobs), ncol = 7)
+	    for(row in 1:sum(tmp$nmeanwtobs)){
+	      tmp$meanwtdata[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+	    }
+	    colnames(tmp$meanwtdata) <- c("year","meanwt","gear","area","group","sex","timing")
+   }
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
 
   return(tmp)

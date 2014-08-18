@@ -333,36 +333,40 @@ plotComposition <- function(scenario, index, leg){
       if(nSex == 2){
         par(mfrow=c(1,2), oma=c(0,0,2,0), mar=c(5,4,1.5,2))
       }
-      for(sex in 1:nSex){
+      for(sex in 0:2){
         # Extract the data for the given sex
         compdat <- compData[compData[,5] == sex,]
-        yrs <- compdat[,1]
-        compdat <- compdat[, 6:ncol(compdat)]
-        compdat <- compdat[, 1:nages]  #remove NAs from ragged array
+	if(length(compdat[,1]) > 0){	
+		yrs <- compdat[,1]
+		compdat <- compdat[, 6:ncol(compdat)]
+		compdat <- compdat[, 1:nages]  #remove NAs from ragged array
 
-        Prop <- matrix(nrow=nrow(compdat), ncol=ncol(compdat))
-        for(ii in 1:nrow(compdat)) Prop[ii,] <-  as.numeric(compdat[ii,]/sum(compdat[ii,]) )
+		Prop <- matrix(nrow=nrow(compdat), ncol=ncol(compdat))
+		for(ii in 1:nrow(compdat)) Prop[ii,] <-  as.numeric(compdat[ii,]/sum(compdat[ii,]) )
 
-        if(sex==1){
-          sexstr <- "Male"
-        }else if(sex==2){
-          sexstr <- "Female"
-        }else{
-          sexstr <- "Combined sexes"
-        }
-        plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=TRUE, size=0.1, powr=0.5,
-                    xlab="Year", main=sexstr, ylab=Ylab, las=1, xaxt="n")
-        axis(1, at=yrs, labels=yrs, las=2)
-        legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
-      }
-      title(paste("Gear", index), outer=TRUE)
+		if(sex==1){
+		  sexstr <- "Male"
+		}else if(sex==2){
+		  sexstr <- "Female"
+		}else{
+		  sexstr <- "Combined sexes"
+		}
+		plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=TRUE, size=0.1, powr=0.5,
+			    xlab="Year", main=sexstr, ylab=Ylab, las=1, xaxt="n")
+		axis(1, at=yrs, labels=yrs, las=2)
+		legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
+		 title(paste("Gear", index), outer=TRUE)
+	  }#end if		
+     } #end for
+      
+     
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
     }
   }else{
      cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this scenario.")
   }
-}
+}#end function
 
 plotCompositionFit <- function(scenario, index,leg){
   currFuncName <- getCurrFunc()
