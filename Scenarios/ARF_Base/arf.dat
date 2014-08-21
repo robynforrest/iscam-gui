@@ -25,9 +25,10 @@
 ## ------------------------------------------------------------------------- ##
 ## Allocation for each gear in (ngear), use 0 for survey gears.              ##
 ## One column for each gear:                                                 ##
-## Gears 1:Fishery, 2:WCVIS, 3:WCVI Shrimp trawl, 4:QCSS, 5:HSMSAssemblage   ##
 ## ------------------------------------------------------------------------- ##
 1 0 0 0 0
+## If you want your gears to have names in the plots, follow the format below
+## Fears: Trawl Fishery, WCVI Synoptic, WCVI Shrimp trawl, QCS Synoptic, HS Multispecies Assemblage
 ##
 ## ------------------------------------------------------------------------- ##
 ##

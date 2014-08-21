@@ -633,6 +633,17 @@ readData <- function(file = NULL, verbose = FALSE){
   # remove preceeding whitespace if it exists
   data <- gsub("^[[:blank:]]+","",data)
 
+  # Get the element number for the "Gears" names if present
+  dat <- grep("^#.*Gears:.+",data)
+  hasGearNames <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    gearNamesStr <- gsub("^#.*Gears:(.+)","\\1",data[dat])
+    gearNames <- strsplit(gearNamesStr,",")[[1]]
+    gearNames <- gsub("^[[:blank:]]+","",gearNames)
+    hasGearNames <- TRUE
+  }
+
   # Get the element numbers which start with #.
   dat <- grep("^#.*",data)
   # remove the lines that start with #.
@@ -659,9 +670,14 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$sage   <- as.numeric(dat[ind <- ind + 1])
   tmp$nage   <- as.numeric(dat[ind <- ind + 1])
   tmp$ngear  <- as.numeric(dat[ind <- ind + 1])
- 
+
   # Gear allocation
   tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  browser()
+  if(!hasGearNames){
+    gearNames <- 1:length(tmp$alloc)
+  }
+
   # Age-schedule and population parameters
   tmp$linf   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$k      <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -675,7 +691,7 @@ readData <- function(file = NULL, verbose = FALSE){
   # Catch data
   tmp$nctobs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch  <- matrix(NA, nrow = tmp$nctobs, ncol = 7)
-  
+
   for(row in 1:tmp$nctobs){
     tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
