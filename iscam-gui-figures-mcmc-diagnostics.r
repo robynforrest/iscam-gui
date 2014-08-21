@@ -61,6 +61,8 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   # If you are trying to show more than one group or area's parameters,
   # comment the next line below out
   mcmcData <- stripAreasGroups(mcmcData)
+  # We only want to see estimated parameters, so this call strips the static params.
+  mcmcData <- stripStaticParams(scenario, mcmcData)
 
   if(plotNum == 1){
     plotTraces(mcmcData, burnthin=burnthin)
@@ -106,6 +108,30 @@ stripAreasGroups <- function(dat){
   return(dat)
 }
 
+stripStaticParams <- function(scenario, dat){
+  # Strip out the static (non-estimated) parameters from the mcmc output data
+  # for the given scenario.
+  # We only need to see estimated parameters on the diagnostic plots!
+
+  # Check the control file to see which parameters were static
+  inp <- as.data.frame(op[[scenario]]$inputs$control$param)
+  static <- inp[inp$phz <= 0,]
+  snames <- rownames(static)
+
+  # Now remove those from the mcmc data
+  pnames <- names(dat)
+  # remove the log_ stuff from the input parameter names
+  snames <- gsub("log_","",snames)
+  # There will be either one "m" or "m1" and "m2" in pnames.
+  # If "m" is in snames, remove the "m1", and "m2" from pnames
+  if("m" %in% snames){
+    ms <- c("m1","m2")
+    pnames <- pnames[!(pnames %in% ms)]
+  }
+  # The following also removes "m" in a combined sex model
+  dat <- dat[,!(pnames %in% snames)]
+  return(dat)
+}
 
 plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200){
   # Traceplots for an mcmc matrix, mcmcData
@@ -231,7 +257,7 @@ plotPairs <- function(mcmcData = NULL, burnthin = c(0,1)){
     h      <- hist(x, plot = FALSE)
     breaks <- h$breaks; nB <- length(breaks)
     y      <- h$counts; y <- y/max(y)
-    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
+    rect(breaks[-nB], 0, breaks[-1], y, col="wheat", cex=0.75, ...)
   }
 
   numParams <- ncol(mcmcData)

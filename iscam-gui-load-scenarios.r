@@ -790,13 +790,13 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   npar <- as.numeric(dat1)
   paramNames <- vector()
   # Lazy matching with # so that the first instance matches, not any other
-  pattern <- "^.*#[[:blank:]]*([[:alnum:]]+_*[[:alnum:]]*) +.*"
+  #pattern <- "^.*#[[:blank:]]*([[:alnum:]]+_*[[:alnum:]]*) +.*"
+  pattern <- "^.*#([[:alnum:]]+_*[[:alnum:]]*).*"
   for(paramName in 1:npar){
     # Each parameter line in dat which starts at index 2,
     # retrieve the parameter name for that line
     paramNames[paramName] <- sub(pattern,"\\1",dat[paramName+1])
   }
-
   # Now that parameter names are stored, parse the file.
   # remove comments which come at the end of a line
   dat <- gsub("#.*","",dat)
