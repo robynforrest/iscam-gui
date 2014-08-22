@@ -626,6 +626,8 @@ readData <- function(file = NULL, verbose = FALSE){
   # And returns a list of the contents
 
   data <- readLines(file, warn=FALSE)
+  tmp <- list()
+  ind <- 0
 
   # Remove any empty lines
   data <- data[data != ""]
@@ -635,13 +637,13 @@ readData <- function(file = NULL, verbose = FALSE){
 
   # Get the element number for the "Gears" names if present
   dat <- grep("^#.*Gears:.+",data)
-  hasGearNames <- FALSE
+  tmp$hasGearNames <- FALSE
   if(length(dat >0)){
     # The gear names were in the file
     gearNamesStr <- gsub("^#.*Gears:(.+)","\\1",data[dat])
     gearNames <- strsplit(gearNamesStr,",")[[1]]
-    gearNames <- gsub("^[[:blank:]]+","",gearNames)
-    hasGearNames <- TRUE
+    tmp$gearNames <- gsub("^[[:blank:]]+","",gearNames)
+    tmp$hasGearNames <- TRUE
   }
 
   # Get the element numbers which start with #.
@@ -660,8 +662,6 @@ readData <- function(file = NULL, verbose = FALSE){
   # Here we parse them into a list structure
   # This is dependent on the current format of the DAT file and needs to
   # be updated whenever the DAT file changes format
-  tmp <- list()
-  ind <- 0
   tmp$narea  <- as.numeric(dat[ind <- ind + 1])
   tmp$ngroup <- as.numeric(dat[ind <- ind + 1])
   tmp$nsex   <- as.numeric(dat[ind <- ind + 1])
@@ -673,9 +673,8 @@ readData <- function(file = NULL, verbose = FALSE){
 
   # Gear allocation
   tmp$alloc  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  browser()
-  if(!hasGearNames){
-    gearNames <- 1:length(tmp$alloc)
+  if(!tmp$hasGearNames){
+    tmp$gearNames <- 1:length(tmp$alloc)
   }
 
   # Age-schedule and population parameters

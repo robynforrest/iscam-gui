@@ -153,7 +153,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(plotMCMC){
       plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
     }else{
-      plotIndexMPD(out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
+      plotIndexMPD(scenario, out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 8){
@@ -556,7 +556,8 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
 }
 
-plotIndexMPD <- function(out       = NULL,
+plotIndexMPD <- function(scenario  = NULL,
+                         out       = NULL,
                          colors    = NULL,
                          names     = NULL,
                          inputs    = NULL,
@@ -567,7 +568,12 @@ plotIndexMPD <- function(out       = NULL,
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
+  # ASSUMPTIONS: The gears with indices come after the gears without indices in the gear list
   currFuncName <- getCurrFunc()
+  if(is.null(scenario)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
+    return(NULL)
+  }
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
     return(NULL)
@@ -599,33 +605,47 @@ plotIndexMPD <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  # Get the plotting limits by looking through the input lists and outputs of indices
-  inputindices <- inputs[[1]]$indices[[index]]
+  # Get the number of gears with indices
+  nits <- op[[scenario]]$inputs$control$nits
 
-  yUpper <- max(inputindices[,2] + inputindices[,2]*(1/inputindices[,7]))  # it column (index value) - NOTE 2 is hardwired (it). If this function breaks look here!
-  minYear <- min(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
-  maxYear <- max(inputindices[,1]) # yr column - NOTE 1 is hardwired (it). If this function breaks look here!
+  # Get the plotting limits by looking through the input lists and outputs of indices
+  inputindices <- as.data.frame(inputs[[1]]$indices[[index]])
+
+  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt))
+  minYear <- min(inputindices$iyr)
+  maxYear <- max(inputindices$iyr)
   for(model in 1:length(out)){
-    inputindices <- inputs[[model]]$indices[[index]]
+    tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
     outputit <- out[[model]]$mpd$it_hat[index,]
-    inputit  <- inputindices[,2] # NOTE 2 is hardwired (it). If this function breaks look here!
-    yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE) # NA is removed here because surveys have different years, and missing ones are NA
-    minYear1 <- min(inputindices[,1]) # yr column
-    maxYear1 <- max(inputindices[,1] ) # yr column
-    minYear  <- min(minYear,  minYear1)
+    inputit  <- tmpindices$it
+    # NA is removed here because surveys have different years, and missing ones are NA
+    yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE)
+    minYear1 <- min(tmpindices$iyr)
+    maxYear1 <- max(tmpindices$iyr)
+    minYear  <- min(minYear, minYear1)
     maxYear  <- max(maxYear, maxYear1)
   }
   dat <- out[[1]]$mpd$it_hat[index,]
-  yrs <- inputs[[1]]$indices[[index]][,1]
-  CV <-  1./inputs[[1]]$indices[[index]][,7]    #RF added CVs
+  yrs <- inputindices$iyr
+
+  cv <- 1/inputindices$wt
   dat <- dat[!is.na(dat)]
-  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=paste0("Index fit gear ",index), las=1)
-  points(yrs, inputindices[,2], pch=3)
-  arrows(yrs,inputindices[,2]+CV*inputindices[,2] ,yrs,inputindices[,2]-CV*inputindices[,2],code=3,angle=90,length=0.01, col=colors[[1]]) #RF added error bars
+
+  # Remove non-index gear names from all gear names
+  gearNames <- inputs[[1]]$gearNames[(length(inputs[[1]]$gearNames) - nits + 1):(nits+1)]
+  if(inputs[[1]]$hasGearNames){
+    titleText <- gearNames[index]
+  }else{
+    titleText <- paste0("Gear ",gearNames[index])
+  }
+  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=titleText, las=1)
+  points(yrs,inputindices$it, pch=3)
+  arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
   if(length(out) > 1){
     for(model in 2:length(out)){
       dat <- out[[model]]$mpd$it_hat[index,]
-      yrs <- inputs[[model]]$indices[[index]][,1]
+      tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
+      yrs <- tmpindices$iyr
       dat <- dat[!is.na(dat)]
       lines(yrs, dat,  type="l", col=colors[[model]], lty=1, lwd=2)
     }
