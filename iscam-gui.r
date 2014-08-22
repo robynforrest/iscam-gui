@@ -262,7 +262,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSIndex"                               = {plotTS(s,7,png,"Index",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sSPRRatio"                              = {plotTS(s,8,png,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # Only MPD for Fishing mortality
-           "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,leg=leg)},
+           "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},

@@ -658,7 +658,7 @@ plotIndexMPD <- function(scenario  = NULL,
 plotFMPD <- function(out       = NULL,
                      colors    = NULL,
                      names     = NULL,
-                     pch       = 19,
+                     pch       = 20,
                      pointSize = 0.2,
                      verbose   = FALSE,
                      leg = "topright"){
@@ -696,8 +696,8 @@ plotFMPD <- function(out       = NULL,
   # by the number of sexes. So for a 3-gear, 2 sex model, there will be 6 rows in f with main grouping
   # by gear, i.e. two, three-row groupings.
   numModels <- length(out)
-  f      <- out[[1]]$mpd$ft
-  yUpper <- max(f)
+  f         <- out[[1]]$mpd$ft
+  yUpper    <- max(f)
   for(model in 1:length(out)){
     yUpper <- max(yUpper, out[[model]]$mpd$ft)
   }
@@ -718,9 +718,9 @@ plotFMPD <- function(out       = NULL,
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
-          plot(yrs, meanF, type = "b", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
+          plot(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
         }else{
-          lines(yrs, meanF, type = "b", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2)
+          lines(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2)
         }
         if(sex == 1){
           legendNames <- c(legendNames, paste0(names[[1]]," gear ",gear," - Female"))
@@ -760,7 +760,7 @@ plotFMPD <- function(out       = NULL,
           if(all(meanF == 0)){
             cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
-            lines(yrs, meanF, type = "b", col=colors[[line]], pch=pch, cex=pointSize, lty=sex, lwd=2)
+            lines(yrs, meanF, type = "o", col=colors[[line]], pch=pch, cex=pointSize, lty=sex, lwd=2)
             if(sex == 1){
               legendNames <- c(legendNames, paste0(names[[line]]," gear ",gear," - Female"))
             }else{
