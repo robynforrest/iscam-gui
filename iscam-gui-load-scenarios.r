@@ -646,6 +646,17 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$hasGearNames <- TRUE
   }
 
+  # Get the element number for the "Agegears" names if present
+  dat <- grep("^#.*AgeGears:.+",data)
+  tmp$hasAgeGearNames <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    ageGearNamesStr <- gsub("^#.*AgeGears:(.+)","\\1",data[dat])
+    ageGearNames <- strsplit(ageGearNamesStr,",")[[1]]
+    tmp$ageGearNames <- gsub("^[[:blank:]]+","",ageGearNames)
+    tmp$hasAgeGearNames <- TRUE
+  }
+
   # Get the element numbers which start with #.
   dat <- grep("^#.*",data)
   # remove the lines that start with #.

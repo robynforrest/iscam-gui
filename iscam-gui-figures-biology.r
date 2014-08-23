@@ -299,7 +299,9 @@ plotGrowth <- function(leg){
 plotComposition <- function(scenario, index, leg){
   # Plot the age composition for the given index (gear).
   # If the model is two-sex, a two-paneled plot will be drawn.
+
   currFuncName <- getCurrFunc()
+
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
@@ -336,7 +338,7 @@ plotComposition <- function(scenario, index, leg){
       for(sex in 0:2){
         # Extract the data for the given sex
         compdat <- compData[compData[,5] == sex,]
-	if(length(compdat[,1]) > 0){	
+	if(length(compdat[,1]) > 0){
 		yrs <- compdat[,1]
 		compdat <- compdat[, 6:ncol(compdat)]
 		compdat <- compdat[, 1:nages]  #remove NAs from ragged array
