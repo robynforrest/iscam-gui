@@ -646,7 +646,7 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$hasGearNames <- TRUE
   }
 
-  # Get the element number for the "Agegears" names if present
+  # Get the element number for the "AgeGears" names if present (gears with age comp data)
   dat <- grep("^#.*AgeGears:.+",data)
   tmp$hasAgeGearNames <- FALSE
   if(length(dat >0)){
@@ -723,6 +723,9 @@ readData <- function(file = NULL, verbose = FALSE){
   }
   # Age composition data are a ragged object and are stored as a list of matrices
   tmp$nagears     <- as.numeric(dat[ind <- ind + 1])
+  if(!tmp$hasAgeGearNames){
+    tmp$ageGearNames <- 1:length(tmp$nagears)
+  }
   tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])

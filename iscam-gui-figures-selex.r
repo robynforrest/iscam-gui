@@ -97,6 +97,13 @@ plotLogisticSel	<-	function(scenario, index){
 
   currFuncName <- getCurrFunc()
 
+  gearNames <- op[[scenario]]$inputs$data$ageGearNames
+  if(op[[scenario]]$inputs$data$hasAgeGearNames){
+    titleText <- gearNames[index]
+  }else{
+    titleText <- paste0("Gear ",gearNames[index])
+  }
+browser()
   aflag <- 0 #flag to set age or length
  	ngear <-  op[[scenario]]$inputs$data$ngear
 	if(index <= ngear){
@@ -143,7 +150,7 @@ plotLogisticSel	<-	function(scenario, index){
       }
       if(aflag==2){
         Xlab <- "Length-at-Age"
-        plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=paste("Gear",index),ylim=c(0,1.1))
+        plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=titleText, ylim=c(0,1.1))
         if(selBlocks>1){
 					for(i in 2:selBlocks){
 						lines(Len, selData[,i], lty=i, col=i, lwd=2)

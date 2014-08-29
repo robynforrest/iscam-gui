@@ -48,6 +48,7 @@ require(PBSmodelling)
 require(coda)
 require(ggplot2) # Only used for Observed landings plot.
 require(reshape2)
+require(Hmisc)
 
 options(stringsAsFactors = FALSE)
 options(warn = -1)
@@ -218,6 +219,11 @@ iscam <- function(reloadScenarios      = FALSE,
 
   val <- getWinVal()
   s   <- val$entryScenario
+  if(val$compFitSex == "sCompFitSexF"){
+    compFitSex <- 2
+  }else{
+    compFitSex <- 1
+  }
   sgr <- val$entrySensitivityGroup
   ind <- val$entryIndex
   plotMCMC  <- val$plotMCMC
@@ -250,7 +256,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
   if(.checkEntries()){
 
-    switch(pType,
+   switch(pType,
            # From iscam-gui-figures-timeseries.r
            "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,png,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sTSSpawningBiomassByArea"               = {plotTS(s,2,png,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
@@ -264,22 +270,22 @@ iscam <- function(reloadScenarios      = FALSE,
            # Only MPD for Fishing mortality
            "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-biology.r
-           "sBiologyMeanWtAtAge"                    = {plotBiology(1,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyMaturityAtAge"                  = {plotBiology(2,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundity"                      = {plotBiology(3,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundityWeight"                = {plotBiology(4,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundityLength"                = {plotBiology(5,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologySpawnOutputLength"              = {plotBiology(6,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyExpectedGrowth"                 = {plotBiology(7,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVM"                            = {plotBiology(8,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVGrowthPersp"                  = {plotBiology(9,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVGrowthContour"                = {plotBiology(10,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyComposition"                    = {plotBiology(11,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyCompositionFit"                 = {plotBiology(12,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyCompositionResid"               = {plotBiology(13,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyLW"                             = {plotBiology(14,png,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyVONB"                           = {plotBiology(15,png,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyMA"                             = {plotBiology(16,png,"BiologyMaturityAgeRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+            "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundity"                      = {plotBiology(3,compFitSex,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundityWeight"                = {plotBiology(4,compFitSex,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyFecundityLength"                = {plotBiology(5,compFitSex,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologySpawnOutputLength"              = {plotBiology(6,compFitSex,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyExpectedGrowth"                 = {plotBiology(7,compFitSex,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVM"                            = {plotBiology(8,compFitSex,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVGrowthPersp"                  = {plotBiology(9,compFitSex,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyTVGrowthContour"                = {plotBiology(10,compFitSex,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyComposition"                    = {plotBiology(11,compFitSex,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyLW"                             = {plotBiology(14,compFitSex,png,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyVONB"                           = {plotBiology(15,compFitSex,png,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMA"                             = {plotBiology(16,compFitSex,png,"BiologyMaturityAgeRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-selectivities.r
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},

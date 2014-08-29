@@ -8,6 +8,7 @@
 #**********************************************************************************
 
 plotBiology <- function(plotNum    = 1,         # Plot code number
+                        compFitSex = 1,         # Composition plots sex to plot (1=M/Both, 2=F)
                         png        = .PNG,      # TRUE/FALSE for PNG image output
                         fileText   = "Default", # Name of the file if png==TRUE
                         plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
@@ -82,10 +83,11 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==10) cat("No Plot Yet -- Coming Soon!!\n")
 
-  # Composition data
-  if(plotNum==11) plotComposition(scenario, index, leg)
-  if(plotNum==12) plotCompositionFit(scenario, index, leg)
-  if(plotNum==13) plotCompositionResid(scenario, index, leg)
+  # Composition plots
+  if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg)
+  if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg)
+  if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg)
+  # Biological plots
   if(plotNum==14) plotLW(leg)
   if(plotNum==15) plotGrowth(leg)
   if(plotNum==16) plotMA(leg)
@@ -296,9 +298,14 @@ plotGrowth <- function(leg){
   }
 }
 
-plotComposition <- function(scenario, index, leg){
-  # Plot the age composition for the given index (gear).
+plotComps <- function(plotnum = 1, sex, scenario, index, leg){
+  # Plot the age or length compositions for the given index (gear).
   # If the model is two-sex, a two-paneled plot will be drawn.
+  # plotnum:
+  # 1 = composition
+  # 2 = composition fits
+  # 3 = compostion residuals
+  # sex 0=Combined, 1=M, 2=F
 
   currFuncName <- getCurrFunc()
 
@@ -308,10 +315,20 @@ plotComposition <- function(scenario, index, leg){
   nSex <- op[[scenario]]$inputs$data$nsex
   nAgears <-  op[[scenario]]$input$data$nagears
   nAgearsobs <- op[[scenario]]$input$data$nagearsvec
-  Flags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data, if two-sex model this will be length 2 vector
+  # ageLengthFlags, 0 = length data 1= age data, if two-sex model this will be length 2 vector
+  ageLengthFlags <- op[[scenario]]$input$data$agecompflag
+
+  gearNames <- op[[scenario]]$inputs$data$ageGearNames
+  if(op[[scenario]]$inputs$data$hasAgeGearNames){
+    titleText <- gearNames[index]
+  }else{
+    titleText <- paste0("Gear ",gearNames[index])
+  }
 
   if(nAgearsobs[1] > 0){
-    compData <-  as.data.frame(op[[scenario]]$outputs$mpd$d3_A) #Get the composition data
+    compData <-  as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
+    fitData <- as.data.frame(op[[scenario]]$output$mpd$A_hat)
+    residData <- as.data.frame(op[[scenario]]$output$mpd$A_nu)
     gears <- unique(compData[,2])
 
     if(is.element(index, gears)){
@@ -319,141 +336,136 @@ plotComposition <- function(scenario, index, leg){
       # For example, if the two gears with data are 1 and 3, when the user selects index 3 on the GUI,
       #  sage and nage are the SECOND elements of n_A_sage and n_A_nage
       gearindex <- which(gears==index)
-      sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]  #Need to match the gear number to the correct element of n_A_sage
-      nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]  #Need to match the gear number to the correct element of n_A_nage
+      sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]  # Need to match the gear number to the correct element of n_A_sage
+      nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]  # Need to match the gear number to the correct element of n_A_nage
       nages <- length(sage:nage)
-      flag <- Flags[gearindex]
-      if(flag==0) Ylab="Length"
-      if(flag==1) Ylab="Age"
+      flag <- ageLengthFlags[gearindex]
+      if(flag == 0){
+        ylab="Length"
+      }
+      if(flag == 1){
+        ylab="Age"
+      }
 
-      compData <- compData[which(compData[,2]==index) ,]   #Get only the composition data for the current index
+      compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
 
       yrs <- compData[,1]
+      iyr <- length(yrs)
       syr <- yrs[1]
       nyr <- yrs[length(yrs)]
 
-      if(nSex == 2){
-        par(mfrow=c(1,2), oma=c(0,0,2,0), mar=c(5,4,1.5,2))
+      # Extract the data for the given sex (column 5)
+      compdat <- compData[compData[,5] == sex,]
+      if(length(compdat[,1]) > 0){
+        yrs <- compdat[,1]
+        # Remove header columns from data
+        compdat <- compdat[, 6:ncol(compdat)]
+        # Remove NAs from ragged array if they exist
+        compdat <- compdat[, 1:nages]
+
+        # Extract the fit data for the given sex, odd or even rows.
+        if(sex > 0){
+          fitdat <- fitData[seq(sex,nrow(fitData),2),]
+        }else{
+          fitdat <- fitData
+        }
+        # Get row proportions from composition data
+        prop <- apply(compdat, 1, function(x){x/sum(x)})
+        if(sex == 1){
+          sexstr <- "Male"
+        }else if(sex == 2){
+          sexstr <- "Female"
+        }else{
+          sexstr <- "Combined sexes"
+        }
+        if(plotnum == 1){
+          plotCompositions(prop, yrs, sage:nage, sexstr, titleText, leg, ylab)
+        }
+        if(plotnum == 2){
+          plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
+        }
+        if(plotnum == 3){
+          plotCompositionsResids()
+        }
+        #title(titleText, outer=TRUE)
       }
-      for(sex in 0:2){
-        # Extract the data for the given sex
-        compdat <- compData[compData[,5] == sex,]
-	if(length(compdat[,1]) > 0){
-		yrs <- compdat[,1]
-		compdat <- compdat[, 6:ncol(compdat)]
-		compdat <- compdat[, 1:nages]  #remove NAs from ragged array
-
-		Prop <- matrix(nrow=nrow(compdat), ncol=ncol(compdat))
-		for(ii in 1:nrow(compdat)) Prop[ii,] <-  as.numeric(compdat[ii,]/sum(compdat[ii,]) )
-
-		if(sex==1){
-		  sexstr <- "Male"
-		}else if(sex==2){
-		  sexstr <- "Female"
-		}else{
-		  sexstr <- "Combined sexes"
-		}
-		plotBubbles(t(Prop), xval=yrs,yval=sage:nage, prettyaxis=TRUE, size=0.1, powr=0.5,
-			    xlab="Year", main=sexstr, ylab=Ylab, las=1, xaxt="n")
-		axis(1, at=yrs, labels=yrs, las=2)
-		legend(leg, legend=c("Positive", "Zero"), col=c("black","blue"), pch=1, bty="n", cex=1.25)
-		 title(paste("Gear", index), outer=TRUE)
-	  }#end if		
-     } #end for
-      
-     
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
     }
   }else{
-     cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this scenario.")
+    cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this scenario.")
   }
-}#end function
+}
 
-plotCompositionFit <- function(scenario, index,leg){
+plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+                             las = 1, leglabels = c("Positive","Zero"),
+                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
+  # Plot the age or length compositions given in prop
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  nAgears <-  op[[scenario]]$input$data$nagears
-  nAgearsobs <- op[[scenario]]$input$data$nagearsvec
-  Flags <-   op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
-  if(nAgearsobs[1] > 0){
-    compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A ) # Get the composition data - need this because there is no gear information with A_hat
-    fitData  <-  as.data.frame(op[[scenario]]$output$mpd$A_hat) # Get the fitted data
-    gears <- unique(compData[,2])
+  plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, xaxt="n")
+  axis(1, at=yrs, labels=yrs, las=2)
+  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
+}
 
-    if(is.element(index, gears)){
-      # Get the index for the gear associated with the index number so the correct sage and nage can be extracted
-      # For example, if the two gears with data are 1 and 3, when the user selects index 3 on the GUI, sage and nage are the SECOND elements of n_A_sage and n_A_nage
-      gearindex <- which(gears==index)
-      sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]  #Need to match the gear number to the correct element of n_A_sage
-      nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]  #Need to match the gear number to the correct element of n_A_nage
-      nages <- length(sage:nage)
-      flag <- Flags[gearindex]
-      if(flag==0) Ylab="Length"
-      if(flag==1) Ylab="Age"
+plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+                                las = 1, leglabels = c("Positive","Zero"),
+                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
+  # Plot the age or length composition fits
+  # Set the number of panels per plot - no more than 16 per page
+  # sex, 1=M/Both, 2=F
 
-      xx <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
-      yrs <- xx[,1]
-      syr <- yrs[1]
-      iyr<- length(yrs)
-      nyr <- yrs[iyr]
-      fitData <- fitData[which(compData[,2]==index) ,1:nages]   #Use the composition dataframe to get the right rowsfor the fitted data (i.e.,for the current index)
-      #Observed data
-      xx<- xx[, 6:ncol(xx)]
-      xx <- xx[, 1:nages]  #remove NAs from ragged array
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
 
-      Prop <- matrix(nrow=nrow(xx), ncol=ncol(xx))
-      for(ii in 1:nrow(xx)){
-        Prop[ii,] <-  as.numeric(xx[ii,]/sum(xx[ii,]) )
-      }
-      # Set the number of panels per plot   - no more than 16 per page
-      if(nrow(Prop) < 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
-      if(nrow(Prop) < 5)   par(mfrow=c(2,2), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
-      if(nrow(Prop) >= 17) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))   #multiple graphs will be made
-
-      ii <- 1 #plot counter
-      for(i in 1:iyr){
-        year <- yrs[i]
-        obs <- Prop[i,]
-        est <- fitData[i,]
-        plot(sage:nage, obs, type="h", xlab="", ylab="", main=paste(year), las=1, ylim=c(0,max(rbind(obs,est))))
-        lines(sage:nage, est, lty=1, lwd=2, col=2)
-        if(ii==1){
-          legend(leg, legend=c("Obs", "Est"), lty=1, lwd=2, col=1:2, bty="n")
-        }
-        ii <- ii + 1
-        if(ii == 16){
-          mtext(paste(Ylab), side=1, line=0.5, cex=1.3, outer=T)
-          mtext("Proportion", side=2, line=0.6, cex=1.3, outer=T)
-          mtext(paste("Gear", index), side=3, line=-0.5, cex=1.3, outer=T)
-                                windows()
-          par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
-          ii <- 1
-        }
-        if(i == iyr){
-          mtext(paste(Ylab), side=1, line=0.5, cex=1.3, outer=T)
-          mtext("Proportion", side=2, line=0.6, cex=1.3, outer=T)
-          mtext(paste("Gear", index), side=3, line=-0.5, cex=1.3, outer=T)
-        }
-      }
-    }else{
-      cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
+  if(nrow(prop) <= 16) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
+  if(nrow(prop) <=  4) par(mfrow=c(2,2), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
+  if(nrow(prop) >  16) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
+  plotCount <- 1
+  for(yr in 1:length(yrs)){
+    year <- yrs[yr]
+    obs  <- prop[yr,]
+    est  <- fit[yr,]
+    plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=1, ylim=c(0,max(rbind(obs,est))))
+    lines(ages, est, lty=1, lwd=2, col=2)
+    if(plotCount==1){
+      legend(leg, legend=c("Obs", "Est"), lty=1, lwd=2, col=1:2, bty="n")
     }
-   }else{
-     cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this scenario.")
-   }
- }
+    plotCount <- plotCount + 1
+    if(plotCount == 16){
+      mtext(paste(ylab), side=1, line=0.5, cex=1.3, outer=TRUE)
+      mtext("Proportion", side=2, line=0.6, cex=1.3, outer=TRUE)
+      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=1.3, outer=FALSE)
+      #par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
+      plotCount <- 1
+    }
+    if(yr == length(yrs)){
+      mtext(paste(ylab), side=1, line=0.5, cex=1.3, outer=TRUE)
+      mtext("Proportion", side=2, line=0.6, cex=1.3, outer=TRUE)
+      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=1.3, outer=TRUE)
+    }
+  }
+}
 
-plotCompositionResid <- function(scenario, index, leg){
+plotCompositionsResids1 <- function(scenario, index, leg){
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
   nAgears <- op[[scenario]]$input$data$nagears
-  Agearsobs <- op[[scenario]]$input$data$nagearsvec
-  Flags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
+  nAgearsobs <- op[[scenario]]$input$data$nagearsvec
+  ageLengthFlags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
+
+  gearNames <- op[[scenario]]$inputs$data$ageGearNames
+  if(op[[scenario]]$inputs$data$hasAgeGearNames){
+    titleText <- gearNames[index]
+  }else{
+    titleText <- paste0("Gear ",gearNames[index])
+  }
 
   if(nAgearsobs[1] > 0){
     compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A ) #Get the composition data - need this because there is no gear information with the residuals  
@@ -465,17 +477,22 @@ plotCompositionResid <- function(scenario, index, leg){
       gearindex <- which(gears==index)
       sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]  #Need to match the gear number to the correct element of n_A_sage
       nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]  #Need to match the gear number to the correct element of n_A_nage
-      flag <- Flags[gearindex]
-      if(flag==0) Ylab="Length"
-      if(flag==1) Ylab="Age"
+      flag <- ageLengthFlags[gearindex]
+      if(flag==0){
+        ylab="Length"
+      }
+      if(flag==1){
+        ylab="Age"
+      }
 
-      xx <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
-      yrs <- xx[,1]
-      syr <-yrs[1]
-      iyr<-length(yrs)
+      compData <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
+      yrs <- compData[,1]
+      syr <- yrs[1]
+      iyr <- length(yrs)
       nyr <- yrs[iyr]
       residData <- residData[which(compData[,2]==index) ,]   #Use the composition dataframe to get the right rowsfor the residuals (i.e.,for the current index)
-      plotBubbles(t(residData), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",ylab=Ylab,main=paste("Gear", index), las=1, cex.axis=0.75)
+      plotBubbles(t(residData), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",
+                  ylab=ylab,main=titleText, las=1, cex.axis=0.75)
       legend(leg, legend=c("Positive", "Negative", "Zero"), col=c("black","red","blue"), pch=1, bty="n", cex=1.25)
     }else{
           cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
