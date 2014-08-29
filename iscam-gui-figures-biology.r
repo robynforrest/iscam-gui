@@ -327,8 +327,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
 
   if(nAgearsobs[1] > 0){
     compData <-  as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
-    fitData <- as.data.frame(op[[scenario]]$output$mpd$A_hat)
-    residData <- as.data.frame(op[[scenario]]$output$mpd$A_nu)
+    fitData <- as.data.frame(op[[scenario]]$outputs$mpd$A_hat)
+    residData <- as.data.frame(op[[scenario]]$outputs$mpd$A_nu)
     gears <- unique(compData[,2])
 
     if(is.element(index, gears)){
@@ -366,8 +366,10 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         # Extract the fit data for the given sex, odd or even rows.
         if(sex > 0){
           fitdat <- fitData[seq(sex,nrow(fitData),2),]
+          residdat <- residData[seq(sex,nrow(residData),2),]
         }else{
           fitdat <- fitData
+          residdat <- residData
         }
         # Get row proportions from composition data
         prop <- apply(compdat, 1, function(x){x/sum(x)})
@@ -385,9 +387,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 3){
-          plotCompositionsResids()
+          plotCompositionsResids(t(residdat), yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
         }
-        #title(titleText, outer=TRUE)
       }
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
@@ -404,10 +405,9 @@ plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
-
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, xaxt="n")
-  axis(1, at=yrs, labels=yrs, las=2)
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
+  axis(1, at=yrs, labels=yrs, las=las)
   legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
@@ -430,74 +430,31 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
     year <- yrs[yr]
     obs  <- prop[yr,]
     est  <- fit[yr,]
-    plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=1, ylim=c(0,max(rbind(obs,est))))
+    plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=las, ylim=c(0,max(rbind(obs,est))))
     lines(ages, est, lty=1, lwd=2, col=2)
     if(plotCount==1){
       legend(leg, legend=c("Obs", "Est"), lty=1, lwd=2, col=1:2, bty="n")
     }
     plotCount <- plotCount + 1
     if(plotCount == 16){
-      mtext(paste(ylab), side=1, line=0.5, cex=1.3, outer=TRUE)
-      mtext("Proportion", side=2, line=0.6, cex=1.3, outer=TRUE)
-      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=1.3, outer=FALSE)
-      #par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
+      mtext(paste(ylab), side=1, line=0.5, cex=cex, outer=TRUE)
+      mtext("Proportion", side=2, line=0.6, cex=cex, outer=TRUE)
+      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=FALSE)
       plotCount <- 1
     }
     if(yr == length(yrs)){
-      mtext(paste(ylab), side=1, line=0.5, cex=1.3, outer=TRUE)
-      mtext("Proportion", side=2, line=0.6, cex=1.3, outer=TRUE)
-      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=1.3, outer=TRUE)
+      mtext(paste(ylab), side=1, line=0.5, cex=cex, outer=TRUE)
+      mtext("Proportion", side=2, line=0.6, cex=cex, outer=TRUE)
+      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=TRUE)
     }
   }
 }
 
-plotCompositionsResids1 <- function(scenario, index, leg){
-  currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
-  nAgears <- op[[scenario]]$input$data$nagears
-  nAgearsobs <- op[[scenario]]$input$data$nagearsvec
-  ageLengthFlags <- op[[scenario]]$input$data$agecompflag  #0 = length data 1= age data
-
-  gearNames <- op[[scenario]]$inputs$data$ageGearNames
-  if(op[[scenario]]$inputs$data$hasAgeGearNames){
-    titleText <- gearNames[index]
-  }else{
-    titleText <- paste0("Gear ",gearNames[index])
-  }
-
-  if(nAgearsobs[1] > 0){
-    compData <-  as.data.frame(op[[scenario]]$output$mpd$d3_A ) #Get the composition data - need this because there is no gear information with the residuals  
-    residData  <-  as.data.frame(op[[scenario]]$output$mpd$A_nu)  #Get the residual data
-    gears <- unique(compData[,2])
-    if(is.element(index, gears)){
-      #Get the index for the gear associated with the index number so the correct sage and nage can be extracted
-      #For example, if the two gears with data are 1 and 3, when the user selects index 3 on the GUI, sage and nage are the SECOND elements of n_A_sage and n_A_nage
-      gearindex <- which(gears==index)
-      sage <- op[[scenario]]$output$mpd$n_A_sage[gearindex]  #Need to match the gear number to the correct element of n_A_sage
-      nage <- op[[scenario]]$output$mpd$n_A_nage[gearindex]  #Need to match the gear number to the correct element of n_A_nage
-      flag <- ageLengthFlags[gearindex]
-      if(flag==0){
-        ylab="Length"
-      }
-      if(flag==1){
-        ylab="Age"
-      }
-
-      compData <- as.data.frame(compData[which(compData[,2]==index) ,] )  #Get only the composition data for the current index
-      yrs <- compData[,1]
-      syr <- yrs[1]
-      iyr <- length(yrs)
-      nyr <- yrs[iyr]
-      residData <- residData[which(compData[,2]==index) ,]   #Use the composition dataframe to get the right rowsfor the residuals (i.e.,for the current index)
-      plotBubbles(t(residData), xval=yrs,yval=sage:nage, prettyaxis=T, size=0.1,powr=0.5,xlab="Year",
-                  ylab=ylab,main=titleText, las=1, cex.axis=0.75)
-      legend(leg, legend=c("Positive", "Negative", "Zero"), col=c("black","red","blue"), pch=1, bty="n", cex=1.25)
-    }else{
-          cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this gear.")
-    }
-  }else{
-        cat0(.PROJECT_NAME,"->",currFuncName,"No composition data for this scenario.")
-  }
+plotCompositionsResids <- function(prop, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+                                  las = 1, leglabels = c("Positive","Negative"),
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
+  plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
+  axis(1, at=yrs, labels=yrs, las=las)
+  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
