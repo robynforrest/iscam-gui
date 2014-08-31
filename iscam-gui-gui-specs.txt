@@ -143,9 +143,10 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sBiologyComposition         text="Composition data" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyCompositionFit      text="Fit to composition data" function=.subView sticky=W mode=character
-               grid 1 2 relief=raised
-                 radio name=compFitSex value=sCompFitSexM                   text="M/Both" function=.subView sticky=W mode=character
-                 radio name=compFitSex value=sCompFitSexF                   text="F" function=.subView sticky=W mode=character
+               grid 1 3 relief=raised
+                 radio name=compFitSex value=sCompFitSexM                   text="M"   function=.subView sticky=W mode=character
+                 radio name=compFitSex value=sCompFitSexF                   text="F"   function=.subView sticky=W mode=character
+                 radio name=compFitSex value=sCompFitSexC                   text="M+F" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyCompositionResid    text="Composition residuals" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyLW                  text="Length/Weight relationship" function=.subView sticky=W mode=character

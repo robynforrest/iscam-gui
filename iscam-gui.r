@@ -12,7 +12,7 @@
 #
 # Source this file, then call iscam()
 #
-# iscam(reload=F, silent=TRUE, copyModelExecutables = FALSE)
+# iscam(reload=F, silent=TRUE)
 #
 #**********************************************************************************
 
@@ -77,11 +77,9 @@ source(.FIGURES_MCMC_SOURCE)
 source(.FIGURES_RETROSPECTIVES_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
-                  copyModelExecutables = FALSE,
                   silent               = TRUE){
   # loads model outputs and launches the main iscam-gui GUI.
   # - reloadScenarios TRUE/FALSE - reload the data from all model output files in all scenarios.
-  # - copyADMBExecutables TRUE/FALSE copy the admb executable from admb folder to each scenario folder.
   # - silent TRUE/FALSE - show messages on command line
 
   # Create a global variable which tells the program whether or not to be silent
@@ -90,8 +88,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
   graphics.off()  # Destroy graphics window if it exists
 
-  .loadData(reloadScenarios=reloadScenarios,
-            copyModelExecutables = copyModelExecutables)
+  .loadData(reloadScenarios = reloadScenarios)
 
   if(!exists("sens")){
     sens <<- .loadSensitivityGroups(op = op)
@@ -219,10 +216,14 @@ iscam <- function(reloadScenarios      = FALSE,
 
   val <- getWinVal()
   s   <- val$entryScenario
-  if(val$compFitSex == "sCompFitSexF"){
+  if(val$compFitSex == "sCompFixSexC"){
+    compFitSex <- 0
+  }else if(val$compFitSex == "sCompFitSexM"){
+    compFitSex <- 1
+  }else if(val$compFitSex == "sCompFitSexF"){
     compFitSex <- 2
   }else{
-    compFitSex <- 1
+    compFitSex <- 0
   }
   sgr <- val$entrySensitivityGroup
   ind <- val$entryIndex
@@ -270,7 +271,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # Only MPD for Fishing mortality
            "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            # From iscam-gui-figures-biology.r
-            "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyFecundity"                      = {plotBiology(3,compFitSex,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
            "sBiologyFecundityWeight"                = {plotBiology(4,compFitSex,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},

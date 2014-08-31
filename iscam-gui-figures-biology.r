@@ -387,7 +387,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 3){
-          plotCompositionsResids(t(residdat), yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
+          plotCompositionsResids(t(residdat), yrs, sage:nage, sexstr, titleText, leg, ylab)
         }
       }
     }else{
@@ -405,6 +405,15 @@ plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
+  plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
+  axis(1, at=yrs, labels=yrs, las=las)
+  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
+}
+
+plotCompositionsResids <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+                                  las = 1, leglabels = c("Positive","Negative"),
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
               xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
   axis(1, at=yrs, labels=yrs, las=las)
@@ -450,11 +459,3 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   }
 }
 
-plotCompositionsResids <- function(prop, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
-                                  las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
-  plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
-  axis(1, at=yrs, labels=yrs, las=las)
-  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
-}

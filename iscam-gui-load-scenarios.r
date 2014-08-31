@@ -7,9 +7,7 @@
 # Development Date  : August 2013 - Present
 #**********************************************************************************
 
-.loadData <- function(reloadScenarios      = TRUE,
-                      copyModelExecutables = FALSE,
-                      silent               = .SILENT){
+.loadData <- function(reloadScenarios      = TRUE){
   # .loadData()
   # loads all model output data from all scenarios.
   # - reloadScenarios TRUE/FALSE - reload the data from all model output files in all scenarios.
@@ -25,9 +23,6 @@
     modelLoaded <<- TRUE
   }else{
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(TRUE) to reload the Scenarios.\n")
-  }
-  if(copyModelExecutables){
-    .copyExecutableToScenariosDirectories()
   }
 }
 
@@ -145,8 +140,8 @@
                           sensitivityGroup  = FALSE,
                           lastCommandRun    = FALSE)
   tmp$outputs     <- list(mpd               = NULL, # Report file is loaded in here
-                          mcmc              = NULL,
-                          par               = NULL,
+                          mcmc              = NULL, # mcmc files are loaded in here
+                          par               = NULL, # par file loaded in here
                           retro             = NULL) # The retrospective plotting code looks at this.
   tmp$names$scenario       <- basename(dired)
   tmp$names$dir            <- dired
