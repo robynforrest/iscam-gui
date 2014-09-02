@@ -1,10 +1,9 @@
 #**********************************************************************************
 # iscam-gui.r
 # This file contains the code for a front end GUI controller for iscam-gui using
-# Tcl/Tk windows implemented using the R package 'PBSModelling'.  The data
-# structure used is an list, which is a list of lists, see iscam-gui-load-scenarios.r for
-# details on this structure. This file assumes that a list object called 'op'
-# exists and is of the correct format.
+# Tcl/Tk windows implemented using the R package 'PBSModelling'. The data
+# structure used is a list, which is a list of lists, see iscam-gui-load-scenarios.r for
+# details on this structure.
 #
 # Author            : Chris Grandin
 # Development Date  : August 2013 - Present
@@ -17,21 +16,16 @@
 #**********************************************************************************
 
 # TODO:
-# Fix retrospective plotting and model running, need an mcmc buttton as well for retros
 # Implement the order changes by sorting the op list, etc
-# Fix the sensitivity changnig so that it can't go past limits
-# Change the radios to check boxes for plotting, with all checked appearing in a table, i.e. mfrow, mfcol
-#  also there should be a radio button for "all side-by-side", "all top-bottom", or "as square as possible" etc
 # Add the ability to copy any one of the scenarios, at which time the gui will have to reload (how?)
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
 
 removeAllExcept <- function(vars  = c("op","sens","bio")){
-  # Removes everything in the workspace except for what is in the vars list.
+  # Removes everyobject in the workspace except for what is in the vars list.
   # Upon finishing, the workspace will contain whatever is in the vars list,
   #  plus the objects 'removeAllExcept' (this function) and 'modelLoaded'.
   # That tells the software that the model has already been loaded.
-  # - vars - A list of objects to keep.
 
   vars <- c(vars, "removeAllExcept")
   keep <- match(x = vars, table = ls(all = TRUE, envir = .GlobalEnv))
