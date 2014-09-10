@@ -11,12 +11,12 @@
 7
 ## ival   lb   ub     phz prior p1    p2    #parameter
    1.000  0.00 10.00  1   0     0.000 10.00 #log_ro
-   0.800  0.20  1.00  1   3     3.000  2.00 #h
+   0.800  0.20  1.00  2   3     3.000  2.00 #h
   -1.609 -3.00  2.00  1   1    -1.609  0.15 #log_m g&b
-   1.000  0.00 10.00 -1   0     0.000 10.00 #log_rbar
-   1.000  0.00 10.00 -1   0     0.000 10.00 #log_rinit
-   0.059  0.01  0.99 -4   3     3.000  5.00 #rho
-   1.471  0.01  5.00 -3   4     1.010  1.01 #vartheta
+   1.000  0.00 10.00  2   0     0.000 10.00 #log_rbar
+   1.000  0.00 10.00  1   0     0.000 10.00 #log_rinit
+   0.165  0.01  0.99 -4   3     3.000  5.00 #rho
+   1.031  0.01  5.00  3   4     1.010  1.01 #vartheta
 ## ------------------------------------------------------------------------- ##
 ##
 ## ------------------------------------------------------------------------- ##
@@ -30,15 +30,15 @@
 ##     -5 : logistic_normal, AR2
 ## ------------------------------------------------------------------------- ##
 ## Number of columns == na_gears. One column for each gear with age data
-   1       2     ## Gear Index
-   4       4     ## Likelihood type
-   0.0   0.0     ## Minimum proportion for aggregation & tail compression
-   0.0   0.0     ## Small constant to add to comps & renormalize
-   1       3     ## phase for log_age_tau2 estimation.
-   2       4     ## phase for phi1 estimation: bounded (-1,1) AR1
-  -2      -2     ## phase for phi2 estimation: bounded (0,1)  AR2
-  -2      -2     ## phase for degrees of freedom for student T.
-  -12345         ## int check (-12345), one value only, not one for each gear
+   1       2    3     4  ## Gear Index
+   4       4    4     4  ## Likelihood type
+   0.0   0.0  0.0   0.0  ## Minimum proportion for aggregation & tail compression
+   0.0   0.0  0.0   0.0  ## Small constant to add to comps & renormalize
+   1       2    3     4  ## phase for log_age_tau2 estimation.
+   2       2    2     2  ## phase for phi1 estimation: bounded (-1,1) AR1
+  -2      -2   -2    -2  ## phase for phi2 estimation: bounded (0,1)  AR2
+  -2      -2   -2    -2  ## phase for degrees of freedom for student T.
+  -12345                 ## int check (-12345), one value only, not one for each gear
 ## ------------------------------------------------------------------------- ##
 ##
 ## ------------------------------------------------------------------------- ##
@@ -58,23 +58,26 @@
 ##      sig=0.05 0.10 0.15 0.20 0.30 0.40 0.50                               ##
 ##      wt =200. 50.0 22.2 12.5 5.56 3.12 2.00                               ##
 ## ------------------------------------------------------------------------- ##
-  1     1     1    1     1     # 1  -selectivity type ivector(isel_type) for gear
-  3.5   3.5   3.5  3.5   3.5   # 2  -Age/length at 50% selectivity (logistic)
-  0.5   0.5   0.5  0.5   0.5   # 3  -STD at 50% selectivity (logistic)
-  7     7     7    7     7     # 4  -No. of age nodes for each gear (0=ignore)
- 12    12    12   12    12     # 5  -No. of year nodes for 2d spline(0=ignore)
-  3     3     3    3     3     # 6  -Phase of estimation (-1 for fixed) If neg number, it reflects a mirroring of another gear's selectivity.
-  2.0   2.0   2.0  2.0   2.0   # 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
-  2.0   2.0   2.0  2.0   2.0   # 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
- 12.5  12.5  12.5 12.5  12.5   # 9  -Penalty wt for time-varying selectivity
-  1     1     1    1     1     #10  -n_sel_blocks (number of selex blocks)
+  1    1    1    1    1    1    1    1   # 1  -selectivity type ivector(isel_type) for gear
+  3.5  3.5  3.5  3.5  3.5  3.5  3.5  3.5 # 2  -Age/length at 50% selectivity (logistic)
+  0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5 # 3  -STD at 50% selectivity (logistic)
+  7    7    7    7    7    7    7    7   # 4  -No. of age nodes for each gear (0=ignore)
+ 12   12   12   12   12   12   12   12   # 5  -No. of year nodes for 2d spline(0=ignore)
+  3    3    3    3    3    3    3    3   # 6  -Phase of estimation (-1 for fixed) If neg number, it reflects a mirroring of another gear's selectivity.
+  2.0  2.0  2.0  2.0  2.0  2.0  2.0  2.0 # 7  -Penalty wt for 2nd differences w=1/(2*sig^2)
+  2.0  2.0  2.0  2.0  2.0  2.0  2.0  2.0 # 8  -Penalty wt for dome-shaped w=1/(2*sig^2)
+ 12.5 12.5 12.5 12.5 12.5 12.5 12.5 12.5 # 9  -Penalty wt for time-varying selectivity
+  1    1    1    1    1    1    1    1   #10  -n_sel_blocks (number of selex blocks)
 ## ------------------------------------------------------------------------- ##
 ## Start year of each time block: 1 row for each gear
-1963
-1963
-1963
-1963
-1963
+1996
+1996
+1996
+1996
+1996
+1996
+1996
+1996
 ##
 ## ------------------------------------------------------------------------- ##
 ## PRIORS FOR SURVEY Q                                                       ##
@@ -84,12 +87,10 @@
 ##       2 - random walk in q                                                ##
 ## Need one column for each survey.                                          ##
 ## ------------------------------------------------------------------------- ##
-4                          # -number of surveys (nits)
-0      0      0      0     # -prior type (see legend above)
-#1.0    1.0    1.0    1.0   # -prior log(mean)
-#0.7    0.7    0.7    0.7   # -prior sd
-0      0      0      0     # -prior log(mean)
-0      0      0      0     # -prior sd
+7                                      # -number of surveys (nits)
+1    1     1     1    1     1     1    # -prior type (see legend above)
+0    0     0     0    0     0     0    # -prior log(mean)
+0.7  0.7   0.7   0.7  0.7   0.7   0.7  # -prior sd
 ## ------------------------------------------------------------------------- ##
 ##
 ## CONTROLS FOR FITTING TO MEAN WEIGHT DATA
@@ -103,17 +104,17 @@
 ## ------------------------------------------------------------------------- ##
   0          # 1  -verbose ADMB output (0=off, 1=on)
   1          # 2  -recruitment model (1=beverton-holt, 2=ricker)
-  0.100      # 3  -std in observed catches in first phase.
-  0.0707     # 4  -std in observed catches in last phase.
-  1          # 5  -Assume unfished equilibrium in first year (0=FALSE, 1=TRUE)
-  1.00       # 6  -Maternal effects mujltiplier
+  0.5        # 3  -std in observed catches in first phase.
+  0.2        # 4  -std in observed catches in last phase.
+  0          # 5  -Assume unfished equilibrium in first year (0=FALSE, 1=TRUE)
+  1.00       # 6  -Maternal effects multiplier
   0.20       # 7  -Mean fishing mortality for regularizing the estimates of Ft
-  0.10       # 8  -std in mean fishing mortality in first phase
+  0.40       # 8  -std in mean fishing mortality in first phase
   2.00       # 9  -std in mean fishing mortality in last phase
- -3          # 10 -phase for estimating m_deviations (use -1 to turn off mdevs)
+ -1          # 10 -phase for estimating m_deviations (use -1 to turn off mdevs)
   0.1        # 11 -std in deviations for natural mortality
  12          # 12 -number of estimated nodes for deviations in natural mortality
-  0.5        # 13 -fraction of total mortality that takes place prior to spawning
+  0.00       # 13 -fraction of total mortality that takes place prior to spawning
   0          # 14 -number of prospective years to start estimation from syr
   0          # 15 -switch for IFD distribution in selectivity simulations
 ##

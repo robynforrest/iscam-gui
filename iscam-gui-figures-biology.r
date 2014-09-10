@@ -346,8 +346,20 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       if(flag == 1){
         ylab="Age"
       }
-
       compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
+
+      nsex <- op[[scenario]]$inputs$data$nsex
+      startRowThisGear <- 1
+      if(index > 1){
+        # If index = 1, then we want it to start at row 1
+        for(ind in 1:index){
+          # Add all the gear's number of rows together to get the starting row for this gear
+          startRowThisGear <- startRowThisGear + op[[scenario]]$inputs$data$nagearsvec[ind]
+        }
+      }
+      nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
+      endRowThisGear <- startRowThisGear + nrowsThisGear - 1
+      residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
 
       yrs <- compData[,1]
       iyr <- length(yrs)
@@ -356,6 +368,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
 
       # Extract the data for the given sex (column 5)
       compdat <- compData[compData[,5] == sex,]
+
+      #residdat <- residData[residData[,5] == sex,]
       if(length(compdat[,1]) > 0){
         yrs <- compdat[,1]
         # Remove header columns from data
@@ -405,53 +419,70 @@ plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
+
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
+  axis(2, at=ages, labels=ages, las=las)
   legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
 plotCompositionsResids <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
                                   col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, xaxt="n")
+              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
+  axis(2, at=ages, labels=ages, las=las)
   legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
 plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                 las = 1, leglabels = c("Positive","Zero"),
-                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
-  # Plot the age or length composition fits
-  # Set the number of panels per plot - no more than 16 per page
+                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE){
+  # Plot the age or length composition fits, no more than 36 or this function will need to be modified.
   # sex, 1=M/Both, 2=F
 
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  if(nrow(prop) <= 16) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.3,0.3,0.3,0.2))
-  if(nrow(prop) <=  4) par(mfrow=c(2,2), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
-  if(nrow(prop) >  16) par(mfrow=c(4,4), oma=c(2,3,1,1), mai=c(0.2,0.2,0.2,0.2))
-  plotCount <- 1
+  nyrs <- nrow(prop)
+  if(nyrs <= 36 && nyrs > 25){
+    nside <- c(6,6)
+  }else if(nyrs <= 25 && nyrs > 16){
+    nside <- c(5,5)
+  }else if(nyrs <= 16 && nyrs > 9){
+    nside <- c(4,4)
+  }else if(nyrs <=  9 && nyrs > 4){
+    nside <- c(3,3)
+  }else if(nyrs <=  4 && nyrs > 1){
+    nside <- c(2,2)
+  }else{
+    nside <- c(1,1)
+  }
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
+
+  # Get max proportion so all plots can be scaled the same
+  maxY <- max(prop,as.matrix(fit))
+
   for(yr in 1:length(yrs)){
     year <- yrs[yr]
     obs  <- prop[yr,]
     est  <- fit[yr,]
-    plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=las, ylim=c(0,max(rbind(obs,est))))
+    if(scaleYaxis){
+      plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=las, ylim=c(0,maxY))
+    }else{
+      plot(ages, obs, type="h", xlab="", ylab="", main=paste(year), las=las, ylim=c(0,max(rbind(obs,est))))
+    }
     lines(ages, est, lty=1, lwd=2, col=2)
-    if(plotCount==1){
+    if(yr == 1){
       legend(leg, legend=c("Obs", "Est"), lty=1, lwd=2, col=1:2, bty="n")
     }
-    plotCount <- plotCount + 1
-    if(plotCount == 16){
-      mtext(paste(ylab), side=1, line=0.5, cex=cex, outer=TRUE)
-      mtext("Proportion", side=2, line=0.6, cex=cex, outer=TRUE)
-      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=FALSE)
-      plotCount <- 1
-    }
-    if(yr == length(yrs)){
+    if(yr == nyrs){
       mtext(paste(ylab), side=1, line=0.5, cex=cex, outer=TRUE)
       mtext("Proportion", side=2, line=0.6, cex=cex, outer=TRUE)
       mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=TRUE)
