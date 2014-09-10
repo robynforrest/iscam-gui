@@ -9,14 +9,15 @@
 #**********************************************************************************
 
 plotSelex <- function(plotNum    = 1,         # Plot code number
-                   png        = .PNG,      # TRUE/FALSE for PNG image output
-                   fileText   = "Default", # Name of the file if png==TRUE
-                   plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
-                   ci         = NULL,      # confidence interval in % (0-100)
-                   multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
-                   sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
-                   index      = 1         # Gear index to plot 
-                   ){
+                      compFitSex = 1,         # sex to plot (1=M/Both, 2=F)
+                      png        = .PNG,      # TRUE/FALSE for PNG image output
+                      fileText   = "Default", # Name of the file if png==TRUE
+                      plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
+                      ci         = NULL,      # confidence interval in % (0-100)
+                      multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
+                      sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
+                      index      = 1         # Gear index to plot 
+                      ){
 
   # plotNum must be one of:
   # 1 logistic selectivity - age or length based will be detected automatically
@@ -82,7 +83,7 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
     # plot mpd model runs
   }
 
-  if(plotNum==1)  plotLogisticSel(scenario, index)
+  if(plotNum==1)  plotLogisticSel(scenario, index, compFitSex)
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 
   if(png){
@@ -92,18 +93,25 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
   return(TRUE)
 }
 
-plotLogisticSel	<-	function(scenario, index){
+plotLogisticSel	<-	function(scenario, index, sex){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
 
   currFuncName <- getCurrFunc()
+  if(sex == 1){
+    sexstr <- "Male"
+  }else if(sex == 2){
+    sexstr <- "Female"
+  }else{
+    sexstr <- "Combined sexes"
+  }
 
   gearNames <- op[[scenario]]$inputs$data$ageGearNames
   if(op[[scenario]]$inputs$data$hasAgeGearNames){
-    titleText <- gearNames[index]
+    gearTitle <- paste0(gearNames[index]," - ",sexstr)
   }else{
-    titleText <- paste0("Gear ",gearNames[index])
+    gearTitle <- paste0("Gear ",gearNames[index]," - ",sexstr)
   }
-browser()
+
   aflag <- 0 #flag to set age or length
  	ngear <-  op[[scenario]]$inputs$data$ngear
 	if(index <= ngear){
@@ -139,7 +147,7 @@ browser()
 			}
       if(aflag==1){
         Xlab <- "Age"
-        plot(Age, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=paste("Gear",index), ylim=c(0,1.1))
+        plot(Age, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=gearTitle, ylim=c(0,1.1))
         if(selBlocks>1){
           for(i in 2:selBlocks) {
             lines(Age, selData[,i], lty=i, col=i, lwd=2)
@@ -150,7 +158,7 @@ browser()
       }
       if(aflag==2){
         Xlab <- "Length-at-Age"
-        plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1, main=titleText, ylim=c(0,1.1))
+        plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1,  main=gearTitle, ylim=c(0,1.1))
         if(selBlocks>1){
 					for(i in 2:selBlocks){
 						lines(Len, selData[,i], lty=i, col=i, lwd=2)
