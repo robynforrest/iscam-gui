@@ -30,8 +30,8 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   # Assumes that 'op' list exists and has been populated correctly.
   # plotNum must be one of:
   # 1  Landings
-  # 2  SPR status, or the spawning potential ratio:
-  #    (1-spr)/(1-spr.at.msy)
+  # 2
+  # 3  Observed vs Expected landings
   currFuncName <- getCurrFunc()
   scenarioName <- op[[scenario]]$names$scenario
   inp          <- op[[scenario]]$inputs$data
@@ -45,10 +45,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
-  if(plotNum < 1 || plotNum > 16){		  #RF changed 15 to 16
+  if(plotNum < 1 || plotNum > 4){
     return(FALSE)
   }
   isMCMC   <- op[[scenario]]$inputs$log$isMCMC
@@ -57,14 +54,12 @@ plotCatch <- function(scenario   = 1,         # Scenario number
 
   filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
   filename     <- file.path(figDir,filenameRaw)
+
   if(png){
     graphics.off()
     png(filename,res=res,width=width,height=height,units=units)
-  }
-  if(isMCMC){
-   # plot mcmc model runs
   }else{
-    # plot mpd model runs
+    windows(width=widthScreen,height=heightScreen)
   }
   if(plotNum == 1){
     plotCatches(inp = inputs, scenarioName, leg = leg, col = color)
@@ -75,7 +70,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   if(plotNum == 3){
     plotExpVsObsCatch(inp = inputs, out=out, scenarioName, leg = leg, col = color)
   }
-  if(plotNum == 16){
+  if(plotNum == 4){
       plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
  }
 
@@ -114,41 +109,30 @@ plotSPR <-  function(inp,
 
 
 plotExpVsObsCatch<-function(inp,
-                                out,
-                                scenarioName,
-                                verbose = FALSE,
-                                leg = "topright",
-                                col = 1){
+                            out,
+                            scenarioName,
+                            verbose = FALSE,
+                            leg = "topright",
+                            col = 1){
 
-  #ngear<-inp$data$ngear
-  ngear <- 1 #RF:: iscam only fits to one catch time series
-  catchData <- inp$data$catch
-  years <- catchData[,"year"]
-  obsCt <- catchData[,"value"]
-  gear <-catchData[,"gear"]
-  gearList<-unique(gear)
-  predCt <-out$ct
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
 
-  if (ngear==1) par(mfrow=c(1,1),mar=c(5,4,2,2))
-  if (ngear == 2) par(mfrow=c(2,1),mar=c(4,4,2,2))
-  if (ngear == 3 | ngear == 4) par(mfrow=c(2,2),mar=c(3,3,2,2))
-  if (ngear == 5 | ngear == 6) par(mfrow=c(3,2),mar=c(2,2,2,2))
+  catchData <- as.data.frame(inp$data$catch)
+  years <- catchData$year
+  obsCt <- catchData$value
+  gear <- catchData$gear
+  gearList <- unique(gear)
+  ngear <- length(gearList)
+  predCt <- out$ct
 
   for (i in 1:ngear) {
       # Set-up plot area
       xLim <- range(years)
       yLim <- c(0,(max(obsCt[gear==gearList[i]],predCt[gear==gearList[i]])*1.1))
-
-      plot(xLim, yLim, type="n", axes=TRUE, xlab="Year", ylab="Catch")
-
-      points(years[gear==gearList[i]], obsCt[gear==gearList[i]], pch=19)
+      plot(years[gear==gearList[i]], obsCt[gear==gearList[i]], pch=19, xlim=xLim, ylim=yLim, type="p", xlab="Year", ylab="Catch")
       lines(years[gear==gearList[i]], predCt[gear==gearList[i]], col="grey50")
-      box()
-
   }
-
-  par(mfrow=c(1,1),mar=c(5,4,2,2))
-
 }
 
 plotExpVsObsAnnualMeanWt<-function(inp,
