@@ -57,9 +57,9 @@ if(.OS == "Darwin"){
 .MA_EXE_BASE_NAME                <- "maturityage"
 if(.OS == "Linux" || .OS == "Darwin"){
   .EXE_FILE_NAME                 <- .EXE_BASE_NAME
-  .LW_EXE_FILE_NAME              <- .LW_EXE_BASE_NAME
-  .VONB_EXE_FILE_NAME            <- .VONB_EXE_BASE_NAME
-  .MA_EXE_FILE_NAME              <- .MA_EXE_BASE_NAME
+  .LW_EXE_FILE_NAME              <- paste0("./",.LW_EXE_BASE_NAME)
+  .VONB_EXE_FILE_NAME            <- paste0("./",.VONB_EXE_BASE_NAME)
+  .MA_EXE_FILE_NAME              <- paste0("./",.MA_EXE_BASE_NAME)
 }else{
   .EXE_FILE_NAME                 <- paste0(.EXE_BASE_NAME,".exe")
   .LW_EXE_FILE_NAME              <- paste0(.LW_EXE_BASE_NAME,".exe")
