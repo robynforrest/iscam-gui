@@ -617,12 +617,7 @@ plotIndexMPD <- function(scenario  = NULL,
   for(model in 1:length(out)){
     tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
     outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-#    if(is.null(nrow(out[[model]]$mpd$it_hat))){
-      # It is a vector, not a data frame
-      outputit <- outputitDF[index,]
-#    }else{
-#      outputit <- out[[model]]$mpd$it_hat[index,]
-#    }
+    outputit <- as.numeric(outputitDF[index,])
     inputit  <- tmpindices$it
     # NA is removed here because surveys have different years, and missing ones are NA
     yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE)
@@ -631,12 +626,12 @@ plotIndexMPD <- function(scenario  = NULL,
     minYear  <- min(minYear, minYear1)
     maxYear  <- max(maxYear, maxYear1)
   }
-  #if(is.null(nrow(out[[1]]$mpd$it_hat))){
   outputitDF <- as.data.frame(out[[1]]$mpd$it_hat)
-  dat <- outputitDF[index]
-  #}else{
-  #  dat <- out[[1]]$mpd$it_hat[index,]
-  #}
+  if((nrow(outputitDF) > ncol(outputitDF)) && (ncol(outputitDF) == 1)){
+    dat <- as.numeric(outputitDF[,index])
+  }else{
+    dat <- as.numeric(outputitDF[index,])
+  }
   yrs <- inputindices$iyr
 
   cv <- 1/inputindices$wt
@@ -655,8 +650,7 @@ plotIndexMPD <- function(scenario  = NULL,
   if(length(out) > 1){
     for(model in 2:length(out)){
       outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-      dat <- outputitDF[index,]
-      #dat <- out[[model]]$mpd$it_hat[index,]
+      dat <- as.numeric(outputitDF[index,])
       tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
       yrs <- tmpindices$iyr
       dat <- dat[!is.na(dat)]
