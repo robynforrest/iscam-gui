@@ -1,1 +1,0 @@
-#ALL FILES IN THIS FOLDER HAVE RESULTS PASTED FROM 0_5CD_Base (2013) so they are compatible with the new 2014 iscam
