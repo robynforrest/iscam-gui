@@ -9,7 +9,7 @@
 
 plotBiology <- function(plotNum    = 1,         # Plot code number
                         compFitSex = 1,         # Composition plots sex to plot (1=M/Both, 2=F)
-                        png        = .PNG,      # TRUE/FALSE for PNG image output
+                        savefig    = .SAVEFIG,      # TRUE/FALSE for PNG image output
                         fileText   = "Default", # Name of the file if png==TRUE
                         plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                         ci         = NULL,      # confidence interval in % (0-100)
@@ -23,7 +23,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                                           res    = .RESOLUTION,
                                           w      = .WIDTH,
                                           h      = .HEIGHT),
-                        leg        = "topright", # Legend location. If NULL, none will be drawn
+                        leg        = "topright",   # Legend location. If NULL, none will be drawn
+                        figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                         units      = .UNITS){
 
   # plotNum must be one of:
@@ -54,8 +55,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   figDir       <- op[[scenario]]$names$figDir
   out          <- op[[scenario]]$outputs$mpd
   outMCMC      <- op[[scenario]]$outputs$mcmc
-  #filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
-  filenameRaw  <- paste0(fileText,".png")
+  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
   filename     <- file.path(figDir,filenameRaw)
   # PlotSpecs: Width, height, and resolution of screen and file
   res          <- ps$pngres
@@ -65,9 +65,14 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(png){
+  if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
@@ -92,7 +97,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==15) plotGrowth(leg)
   if(plotNum==16) plotMA(leg)
 
-  if(png){
+  if(savefig){
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n")
     dev.off()
   }

@@ -1,3 +1,25 @@
+# Scenarios and Biodata folders
+Scenario*
+Biodata/lengthweight/fmin.log
+Biodata/lengthweight/lengthweight-error.log
+Biodata/lengthweight/lengthweight.dat
+Biodata/lengthweight/lengthweight.log
+Biodata/lengthweight/lengthweight.par
+Biodata/lengthweight/lengthweight.rep
+Biodata/maturityage/fmin.log
+Biodata/maturityage/maturityage-error.log
+Biodata/maturityage/maturityage.dat
+Biodata/maturityage/maturityage.log
+Biodata/maturityage/maturityage.par
+Biodata/maturityage/maturityage.rep
+Biodata/vonb/fmin.log
+Biodata/vonb/vonb-error.log
+Biodata/vonb/vonb.dat
+Biodata/vonb/vonb.log
+Biodata/vonb/vonb.par
+Biodata/vonb/vonb.rep
+
+
 # Any file with the word 'template' in its name.
 *template*
 

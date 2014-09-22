@@ -8,7 +8,7 @@
 #**********************************************************************************
 
 plotCohorts <- function(scenario   = 1,         # Scenario number
-                        png        = .PNG,      # TRUE/FALSE for PNG image output
+                        savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                         fileText   = "Default", # Name of the file if png==TRUE
                         ylim       = c(-3,3),   # Limits for the recdevs
                         # PlotSpecs: Width, height, and resolution of screen and file
@@ -19,6 +19,7 @@ plotCohorts <- function(scenario   = 1,         # Scenario number
                                           w      = .WIDTH,
                                           h      = .HEIGHT),
                         leg        = "topright",# Legend location. If NULL, none will be drawn
+                        figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                         units      = .UNITS,    # Units to use in plotting
                         silent     = .SILENT){
 
@@ -57,7 +58,7 @@ plotCohorts <- function(scenario   = 1,         # Scenario number
 
   # plot each column as a line and label as the year
   figDir       <- op[[scenario]]$names$figDir
-  filename     <- file.path(figDir,paste0(fileText,".png"))
+  filename     <- file.path(figDir,paste0(fileText,figtype))
   res          <- ps$pngres
   width        <- ps$pngw
   height       <- ps$pngh
@@ -65,9 +66,15 @@ plotCohorts <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(png){
+ if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      setEPS(horizontal=FALSE, onefile=FALSE, paper="special",width=width,height=height)
+      postscript(filename)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
@@ -91,7 +98,7 @@ plotCohorts <- function(scenario   = 1,         # Scenario number
     }
   }
 
-  if(png){
+  if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }

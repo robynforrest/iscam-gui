@@ -8,7 +8,7 @@
 
 plotConvergence <- function(scenario   = 1,         # Scenario number
                             plotNum    = 1,         # Plot code number
-                            png        = .PNG,      # TRUE/FALSE for PNG image output
+                            savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                             fileText   = "Default", # Name of the file if png==TRUE
                             # PlotSpecs: Width, height, and resolution of screen and file
                             ps         = list(pngres = .RESOLUTION,
@@ -17,6 +17,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                                               res    = .RESOLUTION,
                                               w      = .WIDTH,
                                               h      = .HEIGHT),
+                            figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                             burnthin   = list(0,1), # List of two elements, burnin and thinning
                             exFactor        = 1.5,
                             showEntirePrior = TRUE,
@@ -49,14 +50,21 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  filenameRaw  <- paste0(scenarioName,"_",fileText,".png")
+  filenameRaw  <- paste0(scenarioName,"_",fileText,figtype)
   filename     <- file.path(figDir,filenameRaw)
-  if(png){
+  if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      setEPS(horizontal=FALSE, onefile=FALSE, paper="special",width=width,height=height)
+      postscript(filename)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
+
   mcmcData <- mcmcOut$params
   # If you are trying to show more than one group or area's parameters,
   # comment the next line below out
@@ -82,7 +90,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   if(plotNum == 6){
     plotVariancePartitions(mcmcData, burnthin=burnthin)
   }
-  if(png){
+  if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }

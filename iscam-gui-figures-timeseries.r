@@ -9,7 +9,7 @@
 
 plotTS <- function(scenario   = 1,         # Scenario number
                    plotNum    = 1,         # Plot code number
-                   png        = .PNG,      # TRUE/FALSE for PNG image output
+                   savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                    fileText   = "Default", # Name of the file if png==TRUE
                    plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                    ci         = NULL,      # confidence interval in % (0-100)
@@ -24,11 +24,12 @@ plotTS <- function(scenario   = 1,         # Scenario number
                                      res    = .RESOLUTION,
                                      w      = .WIDTH,
                                      h      = .HEIGHT),
-                   leg        = "topright",# Legend location. If NULL, none will be drawn
-                   recrOffset = 0.1,       # Recruitment bar offset used if multiple==TRUE
-                   btarg      = 0.4,       # Biomass target line for depletion plots
-                   blim       = 0.25,      # Biomass limit line for depletion plots
-                   units      = .UNITS,    # Units to use in plotting
+                   leg        = "topright",   # Legend location. If NULL, none will be drawn
+                   figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                   recrOffset = 0.1,          # Recruitment bar offset used if multiple==TRUE
+                   btarg      = 0.4,          # Biomass target line for depletion plots
+                   blim       = 0.25,         # Biomass limit line for depletion plots
+                   units      = .UNITS,       # Units to use in plotting
                    silent     = .SILENT){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -112,19 +113,24 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(multiple || retros){
     if(retros){
-      filenameRaw  <- paste0("Retrospective_",op[[scenario]]$names$scenario,"_",fileText,".png")
+      filenameRaw  <- paste0("Retrospective_",op[[scenario]]$names$scenario,"_",fileText,figtype)
       filename     <- file.path(op[[scenario]]$names$dir,.FIGURES_DIR_NAME,filenameRaw)
     }else{
-      filenameRaw  <- paste0("SensitivityGroup_",sensGroup,"_",fileText,".png")
+      filenameRaw  <- paste0("SensitivityGroup_",sensGroup,"_",fileText,figtype)
       filename     <- file.path(.SENS_FIGURES_DIR_NAME,filenameRaw)
     }
   }else{
-    filenameRaw  <- paste0(scenarioName,"_",fileText,".png")
+    filenameRaw  <- paste0(scenarioName,"_",fileText,figtype)
     filename     <- file.path(figDir,filenameRaw)
   }
-  if(png){
+  if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
@@ -171,7 +177,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
     }
   }
 
-  if(png){
+  if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }

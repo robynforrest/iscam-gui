@@ -10,13 +10,14 @@
 
 plotSelex <- function(plotNum    = 1,         # Plot code number
                       compFitSex = 1,         # sex to plot (1=M/Both, 2=F)
-                      png        = .PNG,      # TRUE/FALSE for PNG image output
+                      savefig    = .SAVEFIG,  # TRUE/FALSE for PNG image output
                       fileText   = "Default", # Name of the file if png==TRUE
                       plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                       ci         = NULL,      # confidence interval in % (0-100)
                       multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
                       sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
-                      index      = 1         # Gear index to plot 
+                      index      = 1,         # Gear index to plot
+                      figtype    = .FIGURE_TYPE # The filetype of the figure with period, e.g. ".png"
                       ){
 
   # plotNum must be one of:
@@ -69,11 +70,16 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
   widthScreen  <- val$entryWidthScreen
   heightScreen <- val$entryHeightScreen
 
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
+  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
   filename     <- file.path(figDir,filenameRaw)
-  if(png){
+  if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
@@ -86,7 +92,7 @@ plotSelex <- function(plotNum    = 1,         # Plot code number
   if(plotNum==1)  plotLogisticSel(scenario, index, compFitSex)
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 
-  if(png){
+  if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }
