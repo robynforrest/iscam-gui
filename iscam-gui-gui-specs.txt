@@ -440,5 +440,9 @@ grid 3 1 padx=10 pady=5 sticky=W
       radio name=legendLoc value=sLegendBotright text="Bottom right" function=.subView mode=character sticky=W font="bold 10"
       radio name=legendLoc value=sLegendBotleft  text="Bottom left" function=.subView mode=character sticky=W font="bold 10"
       radio name=legendLoc value=sLegendNone     text="None" function=.subView mode=character sticky=W font="bold 10"
-    button name=saveFigure1 function=.subView action="saveCurrFigure" width=40 text="Save current figure to disk" fg="black" bg="grey" pady=5 font="bold 10"
+
+   grid 1 3
+       button name=saveFigure1 function=.subView action="saveCurrFigure" width=40 text="Save current figure to disk" fg="black" bg="grey" pady=5 font="bold 10"
+       radio name=figureType value=sEPS     text=".eps" function=.subView mode=character sticky=W font="bold 10"
+       radio name=figureType value=sPNG     text=".png" function=.subView mode=character sticky=W font="bold 10"
 

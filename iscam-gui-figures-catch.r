@@ -9,7 +9,7 @@
 
 plotCatch <- function(scenario   = 1,         # Scenario number
                       plotNum    = 1,         # Plot code number
-                      png        = .PNG,      # TRUE/FALSE for PNG image output
+                      savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                       fileText   = "Default", # Name of the file if png==TRUE
                       plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                       ci         = NULL,      # confidence interval in % (0-100)
@@ -24,8 +24,9 @@ plotCatch <- function(scenario   = 1,         # Scenario number
                                         w      = .WIDTH,
                                         h      = .HEIGHT),
                       leg        = "topright",# Legend location. If NULL, none will be drawn
-                      units    = .UNITS,
-                      silent   = .SILENT){
+                      figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                      units      = .UNITS,
+                      silent     = .SILENT){
 
   # Assumes that 'op' list exists and has been populated correctly.
   # plotNum must be one of:
@@ -52,15 +53,22 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   figDir   <- op[[scenario]]$names$figDir
   out      <- op[[scenario]]$outputs$mpd
 
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,".png")
+  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
   filename     <- file.path(figDir,filenameRaw)
 
-  if(png){
+ if(savefig){
     graphics.off()
-    png(filename,res=res,width=width,height=height,units=units)
+    if(figtype == .PNG_TYPE){
+      png(filename,res=res,width=width,height=height,units=units)
+    }
+    if(figtype == .EPS_TYPE){
+      setEPS(horizontal=FALSE, onefile=FALSE, paper="special",width=width,height=height)
+      postscript(filename)
+    }
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
+
   if(plotNum == 1){
     plotCatches(inp = inputs, scenarioName, leg = leg, col = color)
   }
@@ -74,7 +82,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
       plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
  }
 
-  if(png){
+  if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
   }

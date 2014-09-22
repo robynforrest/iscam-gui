@@ -158,7 +158,10 @@ if(.OS == "Linux" || .OS == "Darwin"){
                                   #.EXE_FILE_NAME  -- RF don't delete the executable!
                                   )
 # Figure types
-.PNG                             <- FALSE
+.PNG_TYPE                        <- ".png"
+.EPS_TYPE                        <- ".eps"
+.FIGURE_TYPE                     <- .EPS_TYPE # This must match the default radio entry
+.SAVEFIG                         <- FALSE
 .DEPLETION_FIGURE                <- 1
 
 # Plotting

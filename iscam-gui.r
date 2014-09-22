@@ -203,8 +203,8 @@ iscam <- function(reloadScenarios      = FALSE,
   assign("saveon",FALSE,envir=.GlobalEnv)
 }
 
-.doPlots <- function(png=TRUE){
-  # png = TRUE means save the plots, FALSE means display on Device.
+.doPlots <- function(savefig=.SAVEFIG){
+  # savefig = TRUE means save the plots, FALSE means display on screen.
   graphics.off()
   .PLOT_IS_LIVE <<- FALSE
 
@@ -232,6 +232,12 @@ iscam <- function(reloadScenarios      = FALSE,
              w = val$entryWidthScreen,
              h = val$entryHeightScreen)
   burnthin <- c(val$burn, val$thin)
+  if(val$figureType == "sEPS"){
+    figtype <- .EPS_TYPE
+  }
+  if(val$figureType == "sPNG"){
+    figtype <- .PNG_TYPE
+  }
 
   if(val$legendLoc == "sLegendTopright"){
     leg <- "topright"
@@ -253,107 +259,87 @@ iscam <- function(reloadScenarios      = FALSE,
 
    switch(pType,
            # From iscam-gui-figures-timeseries.r
-           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,png,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sTSSpawningBiomassByArea"               = {plotTS(s,2,png,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,png,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sTSSpawningDepletionByArea"             = {plotTS(s,4,png,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,png,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sTSRecruitmentByArea"                   = {plotTS(s,6,png,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            # Only MPD for Index
-           "sTSIndex"                               = {plotTS(s,7,png,"Index",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sSPRRatio"                              = {plotTS(s,8,png,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sTSIndex"                               = {plotTS(s,7,savefig,"Index",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            # Only MPD for Fishing mortality
-           "sFishingMortality"                      = {plotTS(s,9,png,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sFishingMortality"                      = {plotTS(s,9,savefig,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            # From iscam-gui-figures-biology.r
-           "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,png,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,png,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundity"                      = {plotBiology(3,compFitSex,png,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundityWeight"                = {plotBiology(4,compFitSex,png,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyFecundityLength"                = {plotBiology(5,compFitSex,png,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologySpawnOutputLength"              = {plotBiology(6,compFitSex,png,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyExpectedGrowth"                 = {plotBiology(7,compFitSex,png,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVM"                            = {plotBiology(8,compFitSex,png,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVGrowthPersp"                  = {plotBiology(9,compFitSex,png,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyTVGrowthContour"                = {plotBiology(10,compFitSex,png,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyComposition"                    = {plotBiology(11,compFitSex,png,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,png,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,png,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyLW"                             = {plotBiology(14,compFitSex,png,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyVONB"                           = {plotBiology(15,compFitSex,png,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sBiologyMA"                             = {plotBiology(16,compFitSex,png,"BiologyMaturityAgeRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
+           "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,savefig,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,savefig,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyFecundity"                      = {plotBiology(3,compFitSex,savefig,"BiologyFecundity",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyFecundityWeight"                = {plotBiology(4,compFitSex,savefig,"BiologyFecundityWeight",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyFecundityLength"                = {plotBiology(5,compFitSex,savefig,"BiologyFecundityLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologySpawnOutputLength"              = {plotBiology(6,compFitSex,savefig,"BiologySpawnOutputLength",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyExpectedGrowth"                 = {plotBiology(7,compFitSex,savefig,"BiologyExpectedGrowth",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyTVM"                            = {plotBiology(8,compFitSex,savefig,"BiologyTVM",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyTVGrowthPersp"                  = {plotBiology(9,compFitSex,savefig,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyTVGrowthContour"                = {plotBiology(10,compFitSex,savefig,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyComposition"                    = {plotBiology(11,compFitSex,savefig,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,savefig,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,savefig,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyLW"                             = {plotBiology(14,compFitSex,savefig,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyVONB"                           = {plotBiology(15,compFitSex,savefig,"BiologyVonBRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyMA"                             = {plotBiology(16,compFitSex,savefig,"BiologyMaturityAgeRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            # From iscam-gui-figures-selectivities.r
-           #"sSelexLengthBasedByFleet"               = {plotSelex(1,png,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexAgeBasedByFleet"                  = {plotSelex(2,png,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sSelexLogisticByFleet"                  = {plotSelex(1,compFitSex,png,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVAtLengthSurface"                = {plotSelex(3,png,"SelexTVAtLengthSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVAtLengthContour"                = {plotSelex(4,png,"SelexTVAtLengthContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVAtLenthRetentionSurface"        = {plotSelex(5,png,"SelexTVAtLenthRetentionSurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVAtLengthRetentionContour"       = {plotSelex(6,png,"SelexTVAtLengthRetentionContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVDiscardMortalitySurface"        = {plotSelex(7,png,"SelexTVDiscardMortalitySurface",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVDiscardMortalityContour"        = {plotSelex(8,png,"SelexTVDiscardMortalityContour",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexRetentionDiscardMortalityEndYear" = {plotSelex(9,png,"SelexRetentionDiscardMortalityEndYear",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sSelexTVAtAgeSurface"                   = {plotSelex(11,png,"SelexUncertainty",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sSelexLengthBasedByFleet"               = {plotSelex(1,savefig,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           #"sSelexAgeBasedByFleet"                  = {plotSelex(2,savefig,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sSelexLogisticByFleet"                  = {plotSelex(1,compFitSex,savefig,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind,figtype=figtype)},
            # From iscam-gui-figures-catch.r
-           "sCatchLandings"                         = {plotCatch(s,1,png,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           #"sCatchLandingsStacked"                  = {plotCatch(s,2,png,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,png,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           #"sCatchTotal"                            = {plotCatch(s,4,png,"CatchTotal",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchTotalStacked"                     = {plotCatch(s,5,png,"CatchTotalStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchDiscards"                         = {plotCatch(s,6,png,"CatchDiscards",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchDiscardsStacked"                  = {plotCatch(7,png,"CatchDiscardsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchDiscardFraction"                  = {plotCatch(8,png,"CatchDiscardFraction",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchHarvestRate"                      = {plotCatch(9,png,"CatchHarvestRate",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchLandingsSeasons"                  = {plotCatch(10,png,"CatchLandingsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchLandingsSeasonsStacked"           = {plotCatch(11,png,"CatchLandingsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchTotalSeasons"                     = {plotCatch(12,png,"CatchTotalSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchTotalSeasonsStacked"              = {plotCatch(13,png,"CatchTotalSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchDiscardsSeasons"                  = {plotCatch(14,png,"CatchDiscardsSeasons",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           #"sCatchDiscardsSeasonsStacked"           = {plotCatch(15,png,"CatchDiscardsSeasonsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sCatchAnnualMeanWt" 		                = {plotCatch(s,4,png,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sCatchLandings"                         = {plotCatch(s,1,savefig,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           #"sCatchLandingsStacked"                  = {plotCatch(s,2,savefig,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
+           "sCatchLandingsObsVsExpLandings"         = {plotCatch(s,3,savefig,"CatchLandingsObsVsExpLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sCatchAnnualMeanWt" 		                = {plotCatch(s,4,savefig,"CatchFitAnnualMeanWeight",plotMCMC,ci,sensGroup=sgr,index=ind,figtype=figtype)},
            # MCMC diagnostics, convergence, and parameter plots
            # From iscam-gui-figures-mcmc-convergence.r
-           "sMCMCTrace"                             = {plotConvergence(s,1,png,"Trace",ps=ps,burnthin=burnthin)},
-           "sMCMCAutocor"                           = {plotConvergence(s,2,png,"Autocor",ps=ps,burnthin=burnthin)},
-           "sMCMCDensity"                           = {plotConvergence(s,3,png,"Density",ps=ps,burnthin=burnthin)},
-           "sParameterPairs"                        = {plotConvergence(s,4,png,"Pairs",ps=ps,burnthin=burnthin)},
-           "sPriorsVsPosts"                         = {plotConvergence(s,5,png,"PriorsPosteriors",ps=ps,burnthin=burnthin,exFactor=1.5,showEntirePrior=T)},
-           "sVariancePartitions"                    = {plotConvergence(s,6,png,"VariancePartitions",ps=ps,burnthin=burnthin)},
+           "sMCMCTrace"                             = {plotConvergence(s,1,savefig,"Trace",ps=ps,burnthin=burnthin,figtype=figtype)},
+           "sMCMCAutocor"                           = {plotConvergence(s,2,savefig,"Autocor",ps=ps,burnthin=burnthin,figtype=figtype)},
+           "sMCMCDensity"                           = {plotConvergence(s,3,savefig,"Density",ps=ps,burnthin=burnthin,figtype=figtype)},
+           "sParameterPairs"                        = {plotConvergence(s,4,savefig,"Pairs",ps=ps,burnthin=burnthin,figtype=figtype)},
+           "sPriorsVsPosts"                         = {plotConvergence(s,5,savefig,"PriorsPosteriors",ps=ps,burnthin=burnthin,figtype=figtype,exFactor=1.5,showEntirePrior=T)},
+           "sVariancePartitions"                    = {plotConvergence(s,6,savefig,"VariancePartitions",ps=ps,burnthin=burnthin,figtype=figtype)},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
-           "sSensSB"                                = {plotTS(s,1,png,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sSensBRatio"                            = {plotTS(s,3,png,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           "sSensRecruit"                           = {plotTS(s,5,png,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,recrOffset=val$entryRecrOffset)},
+           "sSensSB"                                = {plotTS(s,1,savefig,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensBRatio"                            = {plotTS(s,3,savefig,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensRecruit"                           = {plotTS(s,5,savefig,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,recrOffset=val$entryRecrOffset)},
            # No sensitivity plot for MCMC Indices
-           "sSensIndex"                             = {plotTS(s,7,png,"Index",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           #"sSensSPRRatio"                          = {plotTS(7,png,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
-           #"sSensRecruitU"                          = {plotTS(8,png,"RecruitUncertainty",plotMCMC,ci,TRUE)},
+           "sSensIndex"                             = {plotTS(s,7,savefig,"Index",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           #"sSensRecruitU"                          = {plotTS(8,savefig,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
-           "sSensF"                                 = {plotTS(s,9,png,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg)},
-           #"sSensRecruitDev"                        = {plotTS(9,png,"RecruitmentDev",plotMCMC,ci,TRUE)},
-           #"sSensIndexLog"                          = {plotTS(12,png,"IndexLog",plotMCMC,ci,TRUE)},
-           #"sSensDensity"                           = {plotTS(13,png,"Density",plotMCMC,ci,TRUE)},
+           "sSensF"                                 = {plotTS(s,9,savefig,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           #"sSensRecruitDev"                        = {plotTS(9,savefig,"RecruitmentDev",plotMCMC,ci,TRUE)},
+           #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
+           #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
-           "sRetroSB"                               = {plotTS(s,1,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
-           "sRetroD"                                = {plotTS(s,3,png,"RetroDepletion",retros=TRUE,index=ind,ps=ps,leg=leg)},
-           "sRetroRec"                              = {plotTS(s,5,png,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg)},
-           "sRetroSquid"                            = {plotCohorts(s,png=png,fileText="RetroSquid",ps=ps,leg=leg)},
+           "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroD"                                = {plotTS(s,3,savefig,"RetroDepletion",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroRec"                              = {plotTS(s,5,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroSquid"                            = {plotCohorts(s,savefig=savefig,fileText="RetroSquid",ps=ps,leg=leg,figtype=figtype)},
            # Plot runtime values returned from ADMB
-           "sObjFuncVal"                            = {plotConvergence(1,png,"ObjectiveFunctionValue")},
-           "sMaxGrad"                               = {plotConvergence(2,png,"MaximumGradient")},
-           "sFuncEvals"                             = {plotConvergence(3,png,"FunctionEvaluations")},
-           "sHangCodes"                             = {plotConvergence(4,png,"HangCodes")},
-           "sExitCodes"                             = {plotConvergence(5,png,"ExitCodes")},
+           "sObjFuncVal"                            = {plotConvergence(1,savefig,"ObjectiveFunctionValue",figtype=figtype)},
+           "sMaxGrad"                               = {plotConvergence(2,savefig,"MaximumGradient",figtype=figtype)},
+           "sFuncEvals"                             = {plotConvergence(3,savefig,"FunctionEvaluations",figtype=figtype)},
+           "sHangCodes"                             = {plotConvergence(4,savefig,"HangCodes",figtype=figtype)},
+           "sExitCodes"                             = {plotConvergence(5,savefig,"ExitCodes",figtype=figtype)},
            {
              # Default
            }
-           ) # End switch
+           )
   }
   .PLOT_IS_LIVE <<- TRUE
   return(invisible())
 }
 
-.subView <- function(png=.PNG, silent = .SILENT){
+.subView <- function(savefig=.SAVEFIG, silent = .SILENT){
   act <- getWinAct()
   val <- getWinVal()
   triggerPlot <- TRUE # this triggers plotting upon completion of this call
@@ -558,13 +544,13 @@ iscam <- function(reloadScenarios      = FALSE,
            .runAllRetros()
          },
          "saveCurrFigure" = {
-           .doPlots(png=TRUE)
+           .doPlots(savefig=TRUE)
          },
          "changeBtarg" = {
-           .doPlots(png=png)
+           .doPlots(savefig=savefig)
          },
          "changeBlim" = {
-           .doPlots(png=png)
+           .doPlots(savefig=savefig)
          },
          "openBioDataFile" = {
            scenario <- val$entryScenario
@@ -632,7 +618,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
   # Whichever radio button is selected will now be plotted for the scenario
   if(triggerPlot || (!is.null(dev.list()))){
-    .doPlots(png=png)
+    .doPlots(savefig=savefig)
   }
 }
 
