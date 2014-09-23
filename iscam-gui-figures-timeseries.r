@@ -137,30 +137,31 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
+
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
     }else{
       plotBiomassMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
+      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
     }else{
       plotDepletionMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, offset=recrOffset, verbose = !silent, leg = leg)
+      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
     }else{
       plotRecruitmentMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 7){
     if(plotMCMC){
-      plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
     }else{
       plotIndexMPD(scenario, out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
     }
@@ -174,7 +175,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      cat(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
       plotFMPD(out, colors, names, verbose = !silent, leg = leg)
     }
@@ -183,12 +184,12 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(plotMCMC){
       plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent)
     }else{
-      cat(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
+      cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
   }
 
   if(savefig){
-    cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n",sep="")
     dev.off()
   }
   return(TRUE)
@@ -252,6 +253,7 @@ plotBiomassMCMC <- function(out       = NULL,
                             colors    = NULL,
                             names     = NULL,
                             ci        = NULL,
+                            burnthin  = list(0,1),
                             verbose   = FALSE,
                             leg = "topright"){
   # Biomass plot for an MCMC
@@ -284,10 +286,14 @@ plotBiomassMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    quants[[model]] <- getQuants(out[[model]]$mcmc$sbt[[1]], ci)
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(sbt, ci)
   }
   yUpper <- max(quants[[1]])
   for(model in 1:length(out)){
@@ -358,6 +364,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               colors    = NULL,
                               names     = NULL,
                               ci        = NULL,
+                              burnthin  = list(0,1),
                               verbose   = FALSE,
                               leg = "topright"){
   # Depletion plot for an MCMC
@@ -390,10 +397,15 @@ plotDepletionMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    depl <- out[[model]]$mcmc$sbt[[1]] / out[[model]]$mcmc$params$bo
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    bo <- as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin))
+    depl <- sbt / bo
     quants[[model]] <- getQuants(depl, ci)
   }
   yUpper <- max(quants[[1]])
@@ -485,6 +497,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 colors    = NULL,
                                 names     = NULL,
                                 ci        = NULL,
+                                burnthin  = list(0,1),
                                 offset    = 0.1,
                                 verbose   = FALSE,
                                 leg = "topright"){
@@ -521,11 +534,14 @@ plotRecruitmentMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
    #quants[[model]] <- getQuants(out[[model]]$mcmc$rt[[1]], ci)
-   rt <- out[[model]]$mcmc$rt[[1]]
+   rt <- window(mcmc(out[[model]]$mcmc$rt[[1]]), start=burn, thin=thin)
    quants[[model]] <- getQuants(rt, ci)
   }
   yUpper <- max(quants[[1]])
@@ -842,7 +858,6 @@ plotReferencePointsMCMC <- function(out       = NULL,
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
-  # Extract the reference points from the mcmc output matrix
 
   bo   <- as.vector(window(mcmc(out[[1]]$mcmc$params$bo), start=burn, thin=thin))
   bmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin))
