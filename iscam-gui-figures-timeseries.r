@@ -17,6 +17,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    retros     = FALSE,     # TRUE/FALSE to plot retropectives
                    sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
                    index      = 1,         # Survey index to plot if plotNum==7
+                   burnthin   = list(0,1), # List of two elements, burnin and thinning for mcmc plots
                    # PlotSpecs: Width, height, and resolution of screen and file
                    ps         = list(pngres = .RESOLUTION,
                                      pngw   = .WIDTH,
@@ -56,6 +57,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 7 Index fit
   # 8 SPR ratio
   # 9 Fishing mortality
+  #10 MSY
 
   currFuncName <- getCurrFunc()
 
@@ -108,7 +110,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 9){
+  if(plotNum < 1 || plotNum > 10){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
     return(FALSE)
   }
   if(multiple || retros){
@@ -171,9 +174,16 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMPD(out, colors, names, ci, verbose = !silent, leg = leg)
+      cat(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
       plotFMPD(out, colors, names, verbose = !silent, leg = leg)
+    }
+  }
+  if(plotNum == 10){
+    if(plotMCMC){
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent)
+    }else{
+      cat(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
   }
 
@@ -248,8 +258,8 @@ plotBiomassMCMC <- function(out       = NULL,
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  # TODO: These lists should be modified by the code so that only
-  #  MCMC models will be included on the plot and legend.
+  # ci is the confidence interval to use in percent, eg. 95
+
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -727,7 +737,7 @@ plotFMPD <- function(out       = NULL,
         color <- colors[[1]]
       }
       if(all(meanF == 0)){
-        cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+        #cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
@@ -789,4 +799,75 @@ plotFMPD <- function(out       = NULL,
   if(!is.null(leg)){
     legend(leg, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
+}
+
+plotReferencePointsMCMC <- function(out       = NULL,
+                                    colors    = NULL,
+                                    names     = NULL,
+                                    ci        = NULL,
+                                    burnthin  = list(0,1),
+                                    pch       = 20,
+                                    pointSize = 0.2,
+                                    verbose   = FALSE,
+                                    leg = "topright"){
+  # Reference points plot for an MCMC model
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+  # Extract the reference points from the mcmc output matrix
+
+  bo   <- as.vector(window(mcmc(out[[1]]$mcmc$params$bo), start=burn, thin=thin))
+  bmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin))
+  msy  <- as.vector(window(mcmc(out[[1]]$mcmc$params$msy1), start=burn, thin=thin))
+  fmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$fmsy1), start=burn, thin=thin))
+
+  if(length(out) > 1){
+    for(model in 2:length(out)){
+      bo   <- cbind(bo, as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)))
+      bmsy <- cbind(bmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$bmsy), start=burn, thin=thin)))
+      msy  <- cbind(msy, as.vector(window(mcmc(out[[model]]$mcmc$params$msy1), start=burn, thin=thin)))
+      fmsy <- cbind(fmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$fmsy1), start=burn, thin=thin)))
+    }
+  }
+
+  colors <- c(do.call("cbind",colors)) # Convert colors list to vector
+  names  <- c(do.call("cbind",names))
+
+  par(mfrow=c(2,2), mai=c(0.3,0.5,0.4,0.2), oma=c(1.,1.2,0.2,0.1))
+  ymax <- max(fmsy)
+  boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(msy)
+  boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(bo)
+  boxplot(bo, pch=pch, range = ci/100, names=names, border=colors, main="B0 (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(bmsy)
+  boxplot(bmsy, pch=pch, range = ci/100, names=names, border=colors, main="BMSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
 }
