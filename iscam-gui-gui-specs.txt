@@ -2,7 +2,7 @@ window name=mainGui title="iscam-gui v1.0"
 
 grid 3 1 padx=10 pady=5 sticky=W
      grid 3 1 relief=raised sticky=N
-          object name=scenarioHeader rowshow=5 function=.subView action="changeSensStatus" entrybg="wheat" width="40 5 5 5" font="12" padx=10 pady=10 edit=T
+          object name=scenarioHeader rowshow=12 function=.subView action="changeSensStatus" entrybg="wheat" width="40 5 5 5" font="12" padx=10 pady=10 edit=T
           #label text="Scenario" font="12"
           grid 1 4 sticky=N padx=30
             label text="Scenario: " font=bold

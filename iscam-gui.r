@@ -96,18 +96,19 @@ iscam <- function(reloadScenarios      = FALSE,
     viewHeader            <<- data.frame()
     viewSensitivityGroups <<- data.frame()
     viewColor             <<- data.frame()
-    viewOrder             <<- data.frame()
+    viewLineType          <<- data.frame()
     for(scenario in 1:length(op)){
       viewHeader            <<- rbind(viewHeader,op[[scenario]]$names$scenario)
       viewSensitivityGroups <<- rbind(viewSensitivityGroups,op[[scenario]]$inputs$sensitivityGroup)
       viewColor             <<- rbind(viewColor,op[[scenario]]$inputs$color)
-      viewOrder             <<- rbind(viewOrder,op[[scenario]]$inputs$order)
+      #TODO: Change loading code so that the order is actually written as the linetype
+      viewLineType          <<- rbind(viewLineType,op[[scenario]]$inputs$linetype)
     }
     colnames(viewHeader)            <<- .SCENARIO_LIST_LABEL
     colnames(viewSensitivityGroups) <<- .SENSITIVITY_GROUP_LABEL
     colnames(viewColor)             <<- .PLOT_COLOR_LABEL
-    colnames(viewOrder)             <<- .PLOT_ORDER_LABEL
-    scenarioHeader <<- cbind(viewHeader,viewSensitivityGroups,viewColor,viewOrder)
+    colnames(viewLineType)          <<- .PLOT_LINETYPE_LABEL
+    scenarioHeader <<- cbind(viewHeader,viewSensitivityGroups,viewColor,viewLineType)
     scenarioList   <<- as.numeric(rownames(viewHeader))
 
     createWin(.MAIN_GUI_DEF_FILE,env=.GlobalEnv)
@@ -232,6 +233,7 @@ iscam <- function(reloadScenarios      = FALSE,
              w = val$entryWidthScreen,
              h = val$entryHeightScreen)
   burnthin <- c(val$burn, val$thin)
+
   if(val$figureType == "sEPS"){
     figtype <- .EPS_TYPE
   }
@@ -524,7 +526,7 @@ iscam <- function(reloadScenarios      = FALSE,
                                      scenario = row,
                                      default = FALSE)
              op[[row]]$inputs$color <<- val$scenarioHeader$Color[[row]]
-             op[[row]]$inputs$order <<- val$scenarioHeader$Order[[row]]
+             op[[row]]$inputs$linetype <<- val$scenarioHeader$Line[[row]]
              op[[row]]$inputs$sensitivityGroup <<- val$scenarioHeader$Group[[row]]
              cat("\n")
            }
