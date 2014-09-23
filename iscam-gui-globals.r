@@ -102,7 +102,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .SCENARIO_LIST_LABEL             <- "Scenario List"
 .SENSITIVITY_GROUP_LABEL         <- "Group"
 .PLOT_COLOR_LABEL                <- "Color"
-.PLOT_ORDER_LABEL                <- "Order"
+.PLOT_LINETYPE_LABEL             <- "Line"
 
 # Messages
 .TELL_USER_HOW_TO_START_GUI      <- "Type iscam() to start iscam-gui\n"
@@ -181,8 +181,8 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .DEFAULT_PLOT_COLOR              <- "1"
 .PLOT_COLOR_TEXT                 <- "# Plotting color"
 .DEFAULT_SENS_GROUP              <- "1"
-.ORDER_TEXT                      <- "# Plotting order"
-.DEFAULT_PLOT_ORDER              <- "1"
+.LINETYPE_TEXT                   <- "# Plotting linetype"
+.DEFAULT_LINETYPE                <- "1"
 
 # Other globals
 .FUNEVALS                        <- 1000

@@ -168,7 +168,7 @@ drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
 }
 
 getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
-  # Return a list of data, colors, names, and inputs for the given set of models,
+  # Return a list of data, colors, linetypes, names, and inputs for the given set of models,
   # for type mcmc or mpd (must be lower case).
   # If retros==TRUE, everything in the $outputs$retros list will be added,
   #  and the first element of 'models' will be used as the base.
@@ -196,7 +196,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
     cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in '",type,"' mode. No plot to draw.")
     return(NULL)
   }
-  inputs <- out <- colors <- names <- vector("list", len <- sum(hasType))
+  inputs <- out <- colors <- linetypes <- names <- vector("list", len <- sum(hasType))
   if(retros){
     # models and nonmodels refer to the base followed by the retrospectives
     nonmodels <- !hasType
@@ -217,10 +217,12 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
         out[[model]] <- op[[models[1]]]$outputs[type]
         names[[model]]  <- op[[models[1]]]$names$scenario
         inputs[[model]] <- op[[models[1]]]$inputs$data
+        linetypes[[model]] <- op[[models[1]]]$inputs$linetype
       }else{
         out[[model]]    <- op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]
         names[[model]]  <- op[[models[1]]]$outputs$retros[[model-1]]$names$scenario
         inputs[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$data
+        linetypes[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$linetype
       }
       colors[[model]] <- .RETRO_COLORS[model]
     }else{
@@ -228,12 +230,13 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
       colors[[model]] <- op[[models[model]]]$inputs$color
       names[[model]]  <- op[[models[model]]]$names$scenario
       inputs[[model]] <- op[[models[model]]]$inputs$data
+      linetypes[[model]] <- op[[models[model]]]$inputs$linetype
     }
   }
   if(length(out) == 1 && is.null(out[[1]][[1]])){
     return(NULL)
   }
-  ret <- list(out,colors,names,inputs)
+  ret <- list(out,colors,names,inputs,linetypes)
   return(ret)
 }
 

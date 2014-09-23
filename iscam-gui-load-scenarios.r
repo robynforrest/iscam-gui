@@ -347,7 +347,7 @@
   sList$inputs$sensitivityGroup <- tmp[1,]
   sList$fileSuccess$sensitivityGroup <- TRUE
   sList$inputs$color <- tmp[2,]
-  sList$inputs$order <- tmp[3,] # plotting order
+  sList$inputs$linetype <- tmp[3,] # plotting linetype
   return(sList)
 }
 
@@ -371,8 +371,8 @@
                          .DEFAULT_SENS_GROUP,
                          .PLOT_COLOR_TEXT,
                          .DEFAULT_PLOT_COLOR,
-                         .ORDER_TEXT,
-                         .DEFAULT_PLOT_ORDER))
+                         .LINETYPE_TEXT,
+                         .DEFAULT_LINETYPE))
       writeFile <- TRUE
     }
   }else{
@@ -387,8 +387,8 @@
                        val$scenarioHeader$Group[scenario],
                        .PLOT_COLOR_TEXT,
                        val$scenarioHeader$Color[scenario],
-                       .ORDER_TEXT,
-                       val$scenarioHeader$Order[scenario]
+                       .LINETYPE_TEXT,
+                       val$scenarioHeader$Line[scenario]
                        ))
     writeFile <- TRUE
   }

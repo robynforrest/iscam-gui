@@ -96,18 +96,19 @@ iscam <- function(reloadScenarios      = FALSE,
     viewHeader            <<- data.frame()
     viewSensitivityGroups <<- data.frame()
     viewColor             <<- data.frame()
-    viewOrder             <<- data.frame()
+    viewLineType          <<- data.frame()
     for(scenario in 1:length(op)){
       viewHeader            <<- rbind(viewHeader,op[[scenario]]$names$scenario)
       viewSensitivityGroups <<- rbind(viewSensitivityGroups,op[[scenario]]$inputs$sensitivityGroup)
       viewColor             <<- rbind(viewColor,op[[scenario]]$inputs$color)
-      viewOrder             <<- rbind(viewOrder,op[[scenario]]$inputs$order)
+      #TODO: Change loading code so that the order is actually written as the linetype
+      viewLineType          <<- rbind(viewLineType,op[[scenario]]$inputs$linetype)
     }
     colnames(viewHeader)            <<- .SCENARIO_LIST_LABEL
     colnames(viewSensitivityGroups) <<- .SENSITIVITY_GROUP_LABEL
     colnames(viewColor)             <<- .PLOT_COLOR_LABEL
-    colnames(viewOrder)             <<- .PLOT_ORDER_LABEL
-    scenarioHeader <<- cbind(viewHeader,viewSensitivityGroups,viewColor,viewOrder)
+    colnames(viewLineType)          <<- .PLOT_LINETYPE_LABEL
+    scenarioHeader <<- cbind(viewHeader,viewSensitivityGroups,viewColor,viewLineType)
     scenarioList   <<- as.numeric(rownames(viewHeader))
 
     createWin(.MAIN_GUI_DEF_FILE,env=.GlobalEnv)
@@ -232,6 +233,7 @@ iscam <- function(reloadScenarios      = FALSE,
              w = val$entryWidthScreen,
              h = val$entryHeightScreen)
   burnthin <- c(val$burn, val$thin)
+
   if(val$figureType == "sEPS"){
     figtype <- .EPS_TYPE
   }
@@ -259,17 +261,18 @@ iscam <- function(reloadScenarios      = FALSE,
 
    switch(pType,
            # From iscam-gui-figures-timeseries.r
-           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            # Only MPD for Index
-           "sTSIndex"                               = {plotTS(s,7,savefig,"Index",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sTSIndex"                               = {plotTS(s,7,savefig,"Index",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            # Only MPD for Fishing mortality
-           "sFishingMortality"                      = {plotTS(s,9,savefig,"Fishing Mortality",FALSE,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sFishingMortality"                      = {plotTS(s,9,savefig,"Fishing Mortality",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sRefPoints"                             = {plotTS(s,10,savefig,"ReferencePoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,savefig,"BiologyMeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,savefig,"BiologyMaturityAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
@@ -307,29 +310,30 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
-           "sSensSB"                                = {plotTS(s,1,savefig,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sSensBRatio"                            = {plotTS(s,3,savefig,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sSensRecruit"                           = {plotTS(s,5,savefig,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,recrOffset=val$entryRecrOffset)},
+           "sSensSB"                                = {plotTS(s,1,savefig,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sSensBRatio"                            = {plotTS(s,3,savefig,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sSensRecruit"                           = {plotTS(s,5,savefig,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,recrOffset=val$entryRecrOffset)},
            # No sensitivity plot for MCMC Indices
-           "sSensIndex"                             = {plotTS(s,7,savefig,"Index",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensIndex"                             = {plotTS(s,7,savefig,"Index",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,savefig,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
-           "sSensF"                                 = {plotTS(s,9,savefig,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensF"                                 = {plotTS(s,9,savefig,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sSensRefPoints"                         = {plotTS(s,10,savefig,"ReferencePoints",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            #"sSensRecruitDev"                        = {plotTS(9,savefig,"RecruitmentDev",plotMCMC,ci,TRUE)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
            # Plot Retrospectives
-           "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sRetroD"                                = {plotTS(s,3,savefig,"RetroDepletion",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
-           "sRetroRec"                              = {plotTS(s,5,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroD"                                = {plotTS(s,3,savefig,"RetroDepletion",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sRetroRec"                              = {plotTS(s,5,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sRetroSquid"                            = {plotCohorts(s,savefig=savefig,fileText="RetroSquid",ps=ps,leg=leg,figtype=figtype)},
            # Plot runtime values returned from ADMB
-           "sObjFuncVal"                            = {plotConvergence(1,savefig,"ObjectiveFunctionValue",figtype=figtype)},
-           "sMaxGrad"                               = {plotConvergence(2,savefig,"MaximumGradient",figtype=figtype)},
-           "sFuncEvals"                             = {plotConvergence(3,savefig,"FunctionEvaluations",figtype=figtype)},
-           "sHangCodes"                             = {plotConvergence(4,savefig,"HangCodes",figtype=figtype)},
-           "sExitCodes"                             = {plotConvergence(5,savefig,"ExitCodes",figtype=figtype)},
+           "sObjFuncVal"                            = {plotConvergence(1,savefig,"ObjectiveFunctionValue",burnthin=burnthin,figtype=figtype)},
+           "sMaxGrad"                               = {plotConvergence(2,savefig,"MaximumGradient",burnthin=burnthin,figtype=figtype)},
+           "sFuncEvals"                             = {plotConvergence(3,savefig,"FunctionEvaluations",burnthin=burnthin,figtype=figtype)},
+           "sHangCodes"                             = {plotConvergence(4,savefig,"HangCodes",burnthin=burnthin,figtype=figtype)},
+           "sExitCodes"                             = {plotConvergence(5,savefig,"ExitCodes",burnthin=burnthin,figtype=figtype)},
            {
              # Default
            }
@@ -522,7 +526,7 @@ iscam <- function(reloadScenarios      = FALSE,
                                      scenario = row,
                                      default = FALSE)
              op[[row]]$inputs$color <<- val$scenarioHeader$Color[[row]]
-             op[[row]]$inputs$order <<- val$scenarioHeader$Order[[row]]
+             op[[row]]$inputs$linetype <<- val$scenarioHeader$Line[[row]]
              op[[row]]$inputs$sensitivityGroup <<- val$scenarioHeader$Group[[row]]
              cat("\n")
            }

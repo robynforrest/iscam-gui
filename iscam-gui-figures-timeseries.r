@@ -17,6 +17,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    retros     = FALSE,     # TRUE/FALSE to plot retropectives
                    sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
                    index      = 1,         # Survey index to plot if plotNum==7
+                   burnthin   = list(0,1), # List of two elements, burnin and thinning for mcmc plots
                    # PlotSpecs: Width, height, and resolution of screen and file
                    ps         = list(pngres = .RESOLUTION,
                                      pngw   = .WIDTH,
@@ -56,6 +57,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 7 Index fit
   # 8 SPR ratio
   # 9 Fishing mortality
+  #10 MSY
 
   currFuncName <- getCurrFunc()
 
@@ -92,6 +94,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   colors <- validModels[[2]]
   names  <- validModels[[3]]
   inputs <- validModels[[4]]
+  linetypes <- validModels[[5]]
+
   if(is.null(validModels)){
     if(is.null(names)){
       cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no ",type," output associated with it.\n")
@@ -108,7 +112,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 9){
+  if(plotNum < 1 || plotNum > 10){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
     return(FALSE)
   }
   if(multiple || retros){
@@ -134,32 +139,33 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
+
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
     }else{
-      plotBiomassMPD(out, colors, names, verbose = !silent, leg = leg)
+      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, ci, verbose = !silent, leg = leg)
+      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
     }else{
-      plotDepletionMPD(out, colors, names, verbose = !silent, leg = leg)
+      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, offset=recrOffset, verbose = !silent, leg = leg)
+      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
     }else{
-      plotRecruitmentMPD(out, colors, names, verbose = !silent, leg = leg)
+      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 7){
     if(plotMCMC){
-      plotIndexMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
     }else{
-      plotIndexMPD(scenario, out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
+      plotIndexMPD(scenario, out, colors, names, lty = linetypes, inputs, index = index, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 8){
@@ -171,14 +177,21 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMPD(out, colors, names, ci, verbose = !silent, leg = leg)
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
       plotFMPD(out, colors, names, verbose = !silent, leg = leg)
     }
   }
+  if(plotNum == 10){
+    if(plotMCMC){
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent)
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
+    }
+  }
 
   if(savefig){
-    cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n",sep="")
     dev.off()
   }
   return(TRUE)
@@ -187,6 +200,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
 plotBiomassMPD <- function(out       = NULL,
                            colors    = NULL,
                            names     = NULL,
+                           lty       = NULL,
                            verbose   = FALSE,
                            leg = "topright"){
   # Biomass plot for an MPD
@@ -210,6 +224,10 @@ plotBiomassMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
@@ -225,16 +243,16 @@ plotBiomassMPD <- function(out       = NULL,
      yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
    }
   }
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      lines(out[[line]]$mpd$yrs, out[[line]]$mpd$sbt, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
+      lines(out[[line]]$mpd$yrs, out[[line]]$mpd$sbt, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
       points(out[[line]]$mpd$yr[1]-0.8, out[[line]]$mpd$sbo, col=colors[[line]], pch=1)
     }
   }
   if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
 }
 
@@ -242,14 +260,15 @@ plotBiomassMCMC <- function(out       = NULL,
                             colors    = NULL,
                             names     = NULL,
                             ci        = NULL,
+                            burnthin  = list(0,1),
                             verbose   = FALSE,
                             leg = "topright"){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  # TODO: These lists should be modified by the code so that only
-  #  MCMC models will be included on the plot and legend.
+  # ci is the confidence interval to use in percent, eg. 95
+
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -274,10 +293,14 @@ plotBiomassMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    quants[[model]] <- getQuants(out[[model]]$mcmc$sbt[[1]], ci)
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(sbt, ci)
   }
   yUpper <- max(quants[[1]])
   for(model in 1:length(out)){
@@ -299,6 +322,7 @@ plotBiomassMCMC <- function(out       = NULL,
 plotDepletionMPD <- function(out       = NULL,
                              colors    = NULL,
                              names     = NULL,
+                             lty       = NULL,
                              verbose   = FALSE,
                              leg = "topright"){
   # Depletion plot for an MPD
@@ -322,6 +346,10 @@ plotDepletionMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
@@ -332,15 +360,15 @@ plotDepletionMPD <- function(out       = NULL,
     yUpper <- max(yUpper, depl)
   }
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=1, lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main="Depletion", las=1)
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main="Depletion", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
-      lines(out[[line]]$mpd$yrs, depl, type="l", col=colors[[line]], lty=1, lwd=2, ylim=c(0,yUpper))
+      lines(out[[line]]$mpd$yrs, depl, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
     }
   }
   if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
 }
 
@@ -348,6 +376,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               colors    = NULL,
                               names     = NULL,
                               ci        = NULL,
+                              burnthin  = list(0,1),
                               verbose   = FALSE,
                               leg = "topright"){
   # Depletion plot for an MCMC
@@ -380,10 +409,15 @@ plotDepletionMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    depl <- out[[model]]$mcmc$sbt[[1]] / out[[model]]$mcmc$params$bo
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    bo <- as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin))
+    depl <- sbt / bo
     quants[[model]] <- getQuants(depl, ci)
   }
   yUpper <- max(quants[[1]])
@@ -407,6 +441,7 @@ plotDepletionMCMC <- function(out       = NULL,
 plotRecruitmentMPD <- function(out       = NULL,
                                colors    = NULL,
                                names     = NULL,
+                               lty       = NULL,
                                verbose   = FALSE,
                                leg = "topright"){
   # Recruitment plot for an MPD
@@ -430,6 +465,11 @@ plotRecruitmentMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
@@ -455,7 +495,7 @@ plotRecruitmentMPD <- function(out       = NULL,
     }
   }
 
-  plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), xlim=xlim,
+  plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=c(0,yUpper), xlim=xlim,
        ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -463,11 +503,11 @@ plotRecruitmentMPD <- function(out       = NULL,
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
-      lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=1, lwd=2, ylim=c(0,yUpper), las=1)
+      lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=lty[[line]], lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
   if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
 }
 
@@ -475,6 +515,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 colors    = NULL,
                                 names     = NULL,
                                 ci        = NULL,
+                                burnthin  = list(0,1),
                                 offset    = 0.1,
                                 verbose   = FALSE,
                                 leg = "topright"){
@@ -511,11 +552,14 @@ plotRecruitmentMCMC <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
    #quants[[model]] <- getQuants(out[[model]]$mcmc$rt[[1]], ci)
-   rt <- out[[model]]$mcmc$rt[[1]]
+   rt <- window(mcmc(out[[model]]$mcmc$rt[[1]]), start=burn, thin=thin)
    quants[[model]] <- getQuants(rt, ci)
   }
   yUpper <- max(quants[[1]])
@@ -566,6 +610,7 @@ plotIndexMPD <- function(scenario  = NULL,
                          out       = NULL,
                          colors    = NULL,
                          names     = NULL,
+                         lty       = NULL,
                          inputs    = NULL,
                          index     = NULL,
                          verbose   = FALSE,
@@ -590,6 +635,10 @@ plotIndexMPD <- function(scenario  = NULL,
   }
   if(is.null(colors)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
   if(is.null(names)){
@@ -650,7 +699,7 @@ plotIndexMPD <- function(scenario  = NULL,
   }else{
     titleText <- paste0("Gear ",gearNames[index])
   }
-  plot(yrs, dat, type="l", col=colors[[1]], lty=1, lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=titleText, las=1)
+  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=titleText, las=1)
   points(yrs,inputindices$it, pch=3)
   arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
   if(length(out) > 1){
@@ -660,11 +709,11 @@ plotIndexMPD <- function(scenario  = NULL,
       tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
       yrs <- tmpindices$iyr
       dat <- dat[!is.na(dat)]
-      lines(yrs, dat,  type="l", col=colors[[model]], lty=1, lwd=2)
+      lines(yrs, dat,  type="l", col=colors[[model]], lty=lty[[model]], lwd=2)
     }
   }
   if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
 }
 
@@ -727,7 +776,7 @@ plotFMPD <- function(out       = NULL,
         color <- colors[[1]]
       }
       if(all(meanF == 0)){
-        cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+        #cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[1]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
@@ -789,4 +838,74 @@ plotFMPD <- function(out       = NULL,
   if(!is.null(leg)){
     legend(leg, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
+}
+
+plotReferencePointsMCMC <- function(out       = NULL,
+                                    colors    = NULL,
+                                    names     = NULL,
+                                    ci        = NULL,
+                                    burnthin  = list(0,1),
+                                    pch       = 20,
+                                    pointSize = 0.2,
+                                    verbose   = FALSE,
+                                    leg = "topright"){
+  # Reference points plot for an MCMC model
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  bo   <- as.vector(window(mcmc(out[[1]]$mcmc$params$bo), start=burn, thin=thin))
+  bmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin))
+  msy  <- as.vector(window(mcmc(out[[1]]$mcmc$params$msy1), start=burn, thin=thin))
+  fmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$fmsy1), start=burn, thin=thin))
+
+  if(length(out) > 1){
+    for(model in 2:length(out)){
+      bo   <- cbind(bo, as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)))
+      bmsy <- cbind(bmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$bmsy), start=burn, thin=thin)))
+      msy  <- cbind(msy, as.vector(window(mcmc(out[[model]]$mcmc$params$msy1), start=burn, thin=thin)))
+      fmsy <- cbind(fmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$fmsy1), start=burn, thin=thin)))
+    }
+  }
+
+  colors <- c(do.call("cbind",colors)) # Convert colors list to vector
+  names  <- c(do.call("cbind",names))
+
+  par(mfrow=c(2,2), mai=c(0.3,0.5,0.4,0.2), oma=c(1.,1.2,0.2,0.1))
+  ymax <- max(fmsy)
+  boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(msy)
+  boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(bo)
+  boxplot(bo, pch=pch, range = ci/100, names=names, border=colors, main="B0 (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  ymax <- max(bmsy)
+  boxplot(bmsy, pch=pch, range = ci/100, names=names, border=colors, main="BMSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
 }
