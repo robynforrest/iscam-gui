@@ -374,6 +374,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
       endRowThisGear <- startRowThisGear + nrowsThisGear - 1
       residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
+      fitData <- fitData[startRowThisGear:endRowThisGear, ]
 
       yrs <- compData[,1]
       iyr <- length(yrs)
