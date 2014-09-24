@@ -285,6 +285,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sBiologyTVGrowthPersp"                  = {plotBiology(9,compFitSex,savefig,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyTVGrowthContour"                = {plotBiology(10,compFitSex,savefig,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyComposition"                    = {plotBiology(11,compFitSex,savefig,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+          # Can delete this special one after ARF assessment
+           "sBiologyCompositionSpecial"             = {plotBiology(99,compFitSex,savefig,"BiologyCompositionSpecial",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,savefig,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,savefig,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyLW"                             = {plotBiology(14,compFitSex,savefig,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
@@ -323,6 +325,8 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensRecruitDev"                        = {plotTS(9,savefig,"RecruitmentDev",plotMCMC,ci,TRUE)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
+           "sSensCatchFit"                           = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sRetroD"                                = {plotTS(s,3,savefig,"RetroDepletion",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},

@@ -57,7 +57,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 7 Index fit
   # 8 SPR ratio
   # 9 Fishing mortality
-  #10 MSY
+  #10 Reference Points
 
   currFuncName <- getCurrFunc()
 
@@ -244,11 +244,11 @@ plotBiomassMPD <- function(out       = NULL,
    }
   }
   plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
-  points(out[[1]]$mpd$yr[1]-0.8, out[[1]]$mpd$sbo, col=colors[[1]], pch=1)
+  points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
       lines(out[[line]]$mpd$yrs, out[[line]]$mpd$sbt, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
-      points(out[[line]]$mpd$yr[1]-0.8, out[[line]]$mpd$sbo, col=colors[[line]], pch=1)
+      points(out[[line]]$mpd$yr[1], out[[line]]$mpd$sbo, col=colors[[line]], pch=20)
     }
   }
   if(!is.null(leg)){

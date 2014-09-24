@@ -44,10 +44,11 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   # 14 LW relationship with fit a parameter estimates
   # 15 VONB relationship with fit a parameter estimates
   # 16 MA relationship with fit a parameter estimates
+  # 99 Age comps for two gears. Hacked function for ARF assessment, can delete after
 
-  if(plotNum < 1 || plotNum > 16){
-    return(FALSE)
-  }
+#  if(plotNum < 1 || plotNum > 16){
+#    return(FALSE)
+#  }
   val          <- getWinVal()
   currFuncName <- getCurrFunc()
   scenario     <- val$entryScenario
@@ -55,7 +56,13 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   figDir       <- op[[scenario]]$names$figDir
   out          <- op[[scenario]]$outputs$mpd
   outMCMC      <- op[[scenario]]$outputs$mcmc
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
+  if(compFitSex == 0){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Sex_Combined_",fileText,figtype)
+  }else if(compFitSex == 1){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Male_",fileText,figtype)
+  }else if(compFitSex == 2){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Female_",fileText,figtype)
+  }
   filename     <- file.path(figDir,filenameRaw)
   # PlotSpecs: Width, height, and resolution of screen and file
   res          <- ps$pngres
@@ -92,6 +99,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg)
   if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg)
   if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg)
+  # Special can be deleted after ARF assessment
+  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg)
   # Biological plots
   if(plotNum==14) plotLW(leg)
   if(plotNum==15) plotGrowth(leg)
@@ -357,7 +366,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       startRowThisGear <- 1
       if(index > 1){
         # If index = 1, then we want it to start at row 1
-        for(ind in 1:index){
+        for(ind in 1:(index-1)){
           # Add all the gear's number of rows together to get the starting row for this gear
           startRowThisGear <- startRowThisGear + op[[scenario]]$inputs$data$nagearsvec[ind]
         }
@@ -365,6 +374,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
       endRowThisGear <- startRowThisGear + nrowsThisGear - 1
       residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
+      fitData <- fitData[startRowThisGear:endRowThisGear, ]
 
       yrs <- compData[,1]
       iyr <- length(yrs)
@@ -373,8 +383,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
 
       # Extract the data for the given sex (column 5)
       compdat <- compData[compData[,5] == sex,]
-
       #residdat <- residData[residData[,5] == sex,]
+
       if(length(compdat[,1]) > 0){
         yrs <- compdat[,1]
         # Remove header columns from data
@@ -382,7 +392,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         # Remove NAs from ragged array if they exist
         compdat <- compdat[, 1:nages]
 
-        # Extract the fit data for the given sex, odd or even rows.
+        # Extract the fit data and residual data for the given sex, odd or even rows.
         if(sex > 0){
           fitdat <- fitData[seq(sex,nrow(fitData),2),]
           residdat <- residData[seq(sex,nrow(residData),2),]
@@ -392,6 +402,9 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
         # Get row proportions from composition data
         prop <- apply(compdat, 1, function(x){x/sum(x)})
+        # Get row sums (N ages for each year)
+        numages <- apply(compdat, 1, sum)
+
         if(sex == 1){
           sexstr <- "Male"
         }else if(sex == 2){
@@ -400,13 +413,13 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           sexstr <- "Combined sexes"
         }
         if(plotnum == 1){
-          plotCompositions(prop, yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 2){
           plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 3){
-          plotCompositionsResids(t(residdat), yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
         }
       }
     }else{
@@ -417,7 +430,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
   }
 }
 
-plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                              las = 1, leglabels = c("Positive","Zero"),
                              col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
   # Plot the age or length compositions given in prop
@@ -428,20 +441,24 @@ plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
               xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
-  axis(2, at=ages, labels=ages, las=las)
-  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
+  nage <- ages[length(ages)] + 1
+  axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
+  text(yrs,rep(nage,length(yrs)),labels=numages)
+  #legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
-plotCompositionsResids <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText){
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
               xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
-  axis(2, at=ages, labels=ages, las=las)
+  nage <- ages[length(ages)] + 1
+  axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
+  text(yrs,rep(nage,length(yrs)),labels=numages)
   legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
@@ -495,3 +512,41 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   }
 }
 
+plotCompSpecial <- function(scenario, sex, leg){
+  # Plot the age or length compositions given in prop
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  compData <- as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
+  gears <- c(2,3)
+  sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
+  nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
+  nages <- length(sage:nage)
+  ages <- sage:nage
+
+  datWCVISS <- compData[compData[,2]==2,]
+  datHSSS <- compData[compData[,2]==3,]
+  dat <- rbind(datWCVISS,datHSSS)
+  datM <- dat[dat[,5]==1,]
+  datF <- dat[dat[,5]==2,]
+  datM <- datM[order(datM$V1),]
+  datF <- datF[order(datF$V1),]
+  years <- datM[,1]
+  # Strip the non-age fields
+  datM <- datM[,-(1:5)]
+  datF <- datF[,-(1:5)]
+  dat <- datM
+  sextext <- "Male"
+  if(sex == 2){
+    dat <- datF
+    sextext <- "Female"
+  }
+  prop <- apply(dat, 1, function(x){x/sum(x)})
+  numages <- apply(dat, 1, sum)
+  plotBubbles(prop, xval=years, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
+              xlab="Year", main=paste0("WCVI and HS Synoptic surveys - ",sextext), ylab="Age", las=1, axes=FALSE)
+  axis(1, at=years, labels=years, las=1)
+  axis(2, at=c(ages,(nage[1]+1)), labels=c(ages,"N"), las=1)
+  text(years,rep(nage[1]+1,10),labels=numages)
+  text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
+}

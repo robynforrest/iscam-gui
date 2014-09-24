@@ -32,13 +32,16 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   # plotNum must be one of:
   # 1  Landings
   # 2
-  # 3  Observed vs Expected landings
+  # 3  Catch fit
   currFuncName <- getCurrFunc()
+
+  if(plotNum < 1 || plotNum > 4){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
+    return(FALSE)
+  }
+
   scenarioName <- op[[scenario]]$names$scenario
-  inp          <- op[[scenario]]$inputs$data
-  inputs       <- op[[scenario]]$inputs
   figDir       <- op[[scenario]]$names$figDir
-  color        <- op[[scenario]]$inputs$color
   res          <- ps$pngres
   width        <- ps$pngw
   height       <- ps$pngh
@@ -46,15 +49,43 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 4){
-    return(FALSE)
+  if(multiple){
+    filenameRaw  <- paste0("SensitivityGroup_",sensGroup,"_",fileText,figtype)
+    filename     <- file.path(.SENS_FIGURES_DIR_NAME,filenameRaw)
+    # Extract models in the current sensitivity group
+    if(is.null(sens[[sensGroup]])){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The sensitivity group you selected has no members.")
+      return(NULL)
+    }
+    models <- sens[[sensGroup]]
+  }else{
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
+    filename     <- file.path(figDir,filenameRaw)
+    models <- scenario # For the non-multiple case
   }
-  isMCMC   <- op[[scenario]]$inputs$log$isMCMC
-  figDir   <- op[[scenario]]$names$figDir
-  out      <- op[[scenario]]$outputs$mpd
+  if(plotMCMC){
+    # Remove models which do not have MCMC outputs
+    type <- "mcmc"
+    validModels <- getValidModelsList(models, type = type)
+  }else{
+    type <- "mpd"
+    validModels <- getValidModelsList(models, type = type)
+  }
 
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
-  filename     <- file.path(figDir,filenameRaw)
+  out    <- validModels[[1]]
+  colors <- validModels[[2]]
+  names  <- validModels[[3]]
+  inputs <- validModels[[4]]
+  linetypes <- validModels[[5]]
+
+  if(is.null(validModels)){
+    if(is.null(names)){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no ",type," output associated with it.\n")
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",names[[1]]," has no ",type," output associated with it.\n")
+    }
+    return(NULL)
+  }
 
  if(savefig){
     graphics.off()
@@ -76,7 +107,11 @@ plotCatch <- function(scenario   = 1,         # Scenario number
     plotSPR(inp = inputs, scenarioName, leg = leg, col = color)
   }
   if(plotNum == 3){
-    plotExpVsObsCatch(inp = inputs, out=out, scenarioName, leg = leg, col = color)
+    if(plotMCMC){
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Catch fits not implemented.")
+    }else{
+      plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg)
+    }
   }
   if(plotNum == 4){
       plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
@@ -116,31 +151,70 @@ plotSPR <-  function(inp,
 }
 
 
-plotExpVsObsCatch<-function(inp,
-                            out,
-                            scenarioName,
-                            verbose = FALSE,
-                            leg = "topright",
-                            col = 1){
+plotCatchFit<-function(inp     = NULL,
+                       out     = NULL,
+                       colors  = NULL,
+                       names   = NULL,
+                       lty     = NULL,
+                       scenarioName,
+                       verbose = FALSE,
+                       leg = "topright"){
+  # Catch fits plot, out contains a list of models to plot,
+  # it must be at least length 1.
+  # Assumes only one catch gear
+  currFuncName <- getCurrFunc()
+  if(is.null(inp)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an input vector (inp).")
+    return(NULL)
+  }
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
 
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  catchData <- as.data.frame(inp$data$catch)
+  catchData <- as.data.frame(inp[[1]]$catch)
   years <- catchData$year
   obsCt <- catchData$value
-  gear <- catchData$gear
-  gearList <- unique(gear)
-  ngear <- length(gearList)
-  predCt <- out$ct
+  predCt <- out[[1]]$mpd$ct
+  yUpper <- max(obsCt, predCt)
 
-  for (i in 1:ngear) {
-      # Set-up plot area
-      xLim <- range(years)
-      yLim <- c(0,(max(obsCt[gear==gearList[i]],predCt[gear==gearList[i]])*1.1))
-      plot(years[gear==gearList[i]], obsCt[gear==gearList[i]], pch=19, xlim=xLim, ylim=yLim, type="p", xlab="Year", ylab="Catch")
-      lines(years[gear==gearList[i]], predCt[gear==gearList[i]], col="grey50")
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, out[[model]]$mpd$ct)
   }
+
+  xlim <- range(years)
+  ylim <- c(0,yUpper)
+  plot(years, obsCt, pch=19, col=colors[[1]], lty=lty[[1]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch")
+  lines(years, predCt, col=colors[[1]], lty=lty[[1]])
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      predCt <- out[[line]]$mpd$ct
+      lines(years, predCt, col=colors[[line]], lty=lty[[line]])
+    }
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+  }
+
 }
 
 plotExpVsObsAnnualMeanWt<-function(inp,
