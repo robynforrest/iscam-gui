@@ -401,6 +401,9 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
         # Get row proportions from composition data
         prop <- apply(compdat, 1, function(x){x/sum(x)})
+        # Get row sums (N ages for each year)
+        numages <- apply(compdat, 1, sum)
+
         if(sex == 1){
           sexstr <- "Male"
         }else if(sex == 2){
@@ -409,13 +412,13 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           sexstr <- "Combined sexes"
         }
         if(plotnum == 1){
-          plotCompositions(prop, yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 2){
           plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
         }
         if(plotnum == 3){
-          plotCompositionsResids(t(residdat), yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
         }
       }
     }else{
@@ -426,7 +429,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
   }
 }
 
-plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                              las = 1, leglabels = c("Positive","Zero"),
                              col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
   # Plot the age or length compositions given in prop
@@ -437,20 +440,24 @@ plotCompositions <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
               xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
-  axis(2, at=ages, labels=ages, las=las)
-  legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
+  nage <- ages[length(ages)] + 1
+  axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
+  text(yrs,rep(nage,length(yrs)),labels=numages)
+  #legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
-plotCompositionsResids <- function(prop, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
+plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 1.25, titleText){
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText){
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
               xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
-  axis(2, at=ages, labels=ages, las=las)
+  nage <- ages[length(ages)] + 1
+  axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
+  text(yrs,rep(nage,length(yrs)),labels=numages)
   legend(leg, legend=leglabels, col=col, pch=pch, bty=bty, cex=cex)
 }
 
