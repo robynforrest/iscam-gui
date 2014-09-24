@@ -366,7 +366,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       startRowThisGear <- 1
       if(index > 1){
         # If index = 1, then we want it to start at row 1
-        for(ind in 1:index){
+        for(ind in 1:(index-1)){
           # Add all the gear's number of rows together to get the starting row for this gear
           startRowThisGear <- startRowThisGear + op[[scenario]]$inputs$data$nagearsvec[ind]
         }
@@ -382,8 +382,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
 
       # Extract the data for the given sex (column 5)
       compdat <- compData[compData[,5] == sex,]
-
       #residdat <- residData[residData[,5] == sex,]
+
       if(length(compdat[,1]) > 0){
         yrs <- compdat[,1]
         # Remove header columns from data
@@ -391,7 +391,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         # Remove NAs from ragged array if they exist
         compdat <- compdat[, 1:nages]
 
-        # Extract the fit data for the given sex, odd or even rows.
+        # Extract the fit data and residual data for the given sex, odd or even rows.
         if(sex > 0){
           fitdat <- fitData[seq(sex,nrow(fitData),2),]
           residdat <- residData[seq(sex,nrow(residData),2),]
