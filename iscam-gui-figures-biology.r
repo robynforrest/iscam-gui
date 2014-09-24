@@ -44,10 +44,11 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   # 14 LW relationship with fit a parameter estimates
   # 15 VONB relationship with fit a parameter estimates
   # 16 MA relationship with fit a parameter estimates
+  # 99 Age comps for two gears. Hacked function for ARF assessment, can delete after
 
-  if(plotNum < 1 || plotNum > 16){
-    return(FALSE)
-  }
+#  if(plotNum < 1 || plotNum > 16){
+#    return(FALSE)
+#  }
   val          <- getWinVal()
   currFuncName <- getCurrFunc()
   scenario     <- val$entryScenario
@@ -55,7 +56,13 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   figDir       <- op[[scenario]]$names$figDir
   out          <- op[[scenario]]$outputs$mpd
   outMCMC      <- op[[scenario]]$outputs$mcmc
-  filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_",fileText,figtype)
+  if(compFitSex == 0){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Sex_Combined_",fileText,figtype)
+  }else if(compFitSex == 1){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Male_",fileText,figtype)
+  }else if(compFitSex == 2){
+    filenameRaw  <- paste0(op[[scenario]]$names$scenario,"_Female_",fileText,figtype)
+  }
   filename     <- file.path(figDir,filenameRaw)
   # PlotSpecs: Width, height, and resolution of screen and file
   res          <- ps$pngres
@@ -92,6 +99,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg)
   if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg)
   if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg)
+  # Special can be deleted after ARF assessment
+  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg)
   # Biological plots
   if(plotNum==14) plotLW(leg)
   if(plotNum==15) plotGrowth(leg)
@@ -495,3 +504,41 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   }
 }
 
+plotCompSpecial <- function(scenario, sex, leg){
+  # Plot the age or length compositions given in prop
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  compData <- as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
+  gears <- c(2,3)
+  sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
+  nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
+  nages <- length(sage:nage)
+  ages <- sage:nage
+
+  datWCVISS <- compData[compData[,2]==2,]
+  datHSSS <- compData[compData[,2]==3,]
+  dat <- rbind(datWCVISS,datHSSS)
+  datM <- dat[dat[,5]==1,]
+  datF <- dat[dat[,5]==2,]
+  datM <- datM[order(datM$V1),]
+  datF <- datF[order(datF$V1),]
+  years <- datM[,1]
+  # Strip the non-age fields
+  datM <- datM[,-(1:5)]
+  datF <- datF[,-(1:5)]
+  dat <- datM
+  sextext <- "Male"
+  if(sex == 2){
+    dat <- datF
+    sextext <- "Female"
+  }
+  prop <- apply(dat, 1, function(x){x/sum(x)})
+  numages <- apply(dat, 1, sum)
+  plotBubbles(prop, xval=years, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
+              xlab="Year", main=paste0("WCVI and HS Synoptic surveys - ",sextext), ylab="Age", las=1, axes=FALSE)
+  axis(1, at=years, labels=years, las=1)
+  axis(2, at=c(ages,(nage[1]+1)), labels=c(ages,"N"), las=1)
+  text(years,rep(nage[1]+1,10),labels=numages)
+  text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
+}

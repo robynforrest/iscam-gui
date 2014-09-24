@@ -134,7 +134,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 2 sticky=N pady=10
-         grid 9 2 sticky=N relief=raised
+         grid 10 2 sticky=N relief=raised
                label text="Biology" font="bold 10" sticky=N
                NULL
                radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
@@ -142,6 +142,8 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyComposition         text="Composition data" function=.subView sticky=W mode=character
+               NULL
+               radio name=viewPlotType value=sBiologyCompositionSpecial  text="Composition special" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyCompositionFit      text="Fit to composition data" function=.subView sticky=W mode=character
                grid 1 3 relief=raised
@@ -426,7 +428,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         button name=prevGroup     function=.subView action="prevGroup"        width=5  text="<---"
         entry name=entryIndex width=7 padx=5 value=1 function=.subView action="changeIndex" entryfont="10" sticky=W
         button name=nextGroup     function=.subView action="nextGroup"        width=5  text="--->"
-        check name=plotMCMC checked=T text="Plot MCMC" function=.subView action="changePlotMCMC" font="bold 10" sticky=W
+        check name=plotMCMC checked=F text="Plot MCMC" function=.subView action="changePlotMCMC" font="bold 10" sticky=W
         label text="Confidence %" font="bold 10" sticky=W
         entry name=entryConfidence width=5 padx=5 value=95 function=.subView action="changeConfidence" entryfont="10" sticky=W
 

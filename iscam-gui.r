@@ -285,6 +285,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sBiologyTVGrowthPersp"                  = {plotBiology(9,compFitSex,savefig,"BiologyTVGrowthPersp",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyTVGrowthContour"                = {plotBiology(10,compFitSex,savefig,"BiologyTVGrowthContour",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyComposition"                    = {plotBiology(11,compFitSex,savefig,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+          # Can delete this special one after ARF assessment
+           "sBiologyCompositionSpecial"             = {plotBiology(99,compFitSex,savefig,"BiologyCompositionSpecial",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,savefig,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,savefig,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyLW"                             = {plotBiology(14,compFitSex,savefig,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
