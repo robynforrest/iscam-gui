@@ -8,16 +8,17 @@
 # Current version   : 1.0
 #**********************************************************************************
 
-plotSelex <- function(plotNum    = 1,         # Plot code number
-                      compFitSex = 1,         # sex to plot (1=M/Both, 2=F)
-                      savefig    = .SAVEFIG,  # TRUE/FALSE for PNG image output
-                      fileText   = "Default", # Name of the file if png==TRUE
-                      plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
-                      ci         = NULL,      # confidence interval in % (0-100)
-                      multiple   = FALSE,     # TRUE/FALSE to plot sensitivity cases
-                      sensGroup  = 1,         # Sensitivity group to plot if multiple==TRUE
-                      index      = 1,         # Gear index to plot
-                      figtype    = .FIGURE_TYPE # The filetype of the figure with period, e.g. ".png"
+plotSelex <- function(plotNum    = 1,            # Plot code number
+                      compFitSex = 1,            # sex to plot (1=M/Both, 2=F)
+                      savefig    = .SAVEFIG,     # TRUE/FALSE for PNG image output
+                      fileText   = "Default",    # Name of the file if png==TRUE
+                      plotMCMC   = FALSE,        # TRUE/FALSE to plot MCMC output
+                      ci         = NULL,         # confidence interval in % (0-100)
+                      multiple   = FALSE,        # TRUE/FALSE to plot sensitivity cases
+                      sensGroup  = 1,            # Sensitivity group to plot if multiple==TRUE
+                      index      = 1,            # Gear index to plot
+                      figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                      units      = .UNITS        # Units to use in plotting
                       ){
 
   # plotNum must be one of:
