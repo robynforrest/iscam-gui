@@ -111,13 +111,12 @@ plotLogisticSel	<-	function(scenario, index, sex){
     sexstr <- "Combined sexes"
   }
 
-  gearNames <- op[[scenario]]$inputs$data$ageGearNames
+  gearNames <- op[[scenario]]$inputs$data$gearNames
   if(op[[scenario]]$inputs$data$hasAgeGearNames){
     gearTitle <- paste0(gearNames[index]," - ",sexstr)
   }else{
     gearTitle <- paste0("Gear ",gearNames[index]," - ",sexstr)
   }
-
   aflag <- 0 #flag to set age or length
  	ngear <-  op[[scenario]]$inputs$data$ngear
 	if(index <= ngear){
