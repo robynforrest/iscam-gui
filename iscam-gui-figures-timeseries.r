@@ -243,7 +243,8 @@ plotBiomassMPD <- function(out       = NULL,
      yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
    }
   }
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  par(mar=c(3,6,3,3))
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (mt)\n", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -308,7 +309,8 @@ plotBiomassMCMC <- function(out       = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  par(mar=c(3,6,3,3))
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (mt)\n", xlab="Year", main="Biomass", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
@@ -496,7 +498,7 @@ plotRecruitmentMPD <- function(out       = NULL,
   }
 
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=c(0,yUpper), xlim=xlim,
-       ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+       ylab="Recruitment (millions)", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       sage <- out[[line]]$mpd$sage
@@ -580,7 +582,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
     }
   }
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment", las=1)
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment (millions)", las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
@@ -699,7 +701,7 @@ plotIndexMPD <- function(scenario  = NULL,
   }else{
     titleText <- paste0("Gear ",gearNames[index])
   }
-  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=titleText, las=1)
+  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index (1000 mt)", xlab="Year", main=titleText, las=1)
   points(yrs,inputindices$it, pch=3)
   arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
   if(length(out) > 1){

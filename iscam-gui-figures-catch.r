@@ -101,7 +101,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   }
 
   if(plotNum == 1){
-    plotCatches(inp = inputs, scenarioName, leg = leg, col = color)
+    plotCatches(inp = inputs[[1]], scenarioName, leg = leg, col = color)
   }
   if(plotNum == 2){
     plotSPR(inp = inputs, scenarioName, leg = leg, col = color)
@@ -133,10 +133,10 @@ plotCatches <- function(inp,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  catch <- as.data.frame(inp$data$catch)
+  catch <- as.data.frame(inp$catch)
   p <- ggplot(catch,aes(x=factor(year),value,fill=factor(gear)))
 	p <- p + geom_bar(width=0.75,position="dodge",stat="identity")
-  p <- p + labs(x="Year",y="Catch",fill="Gear")
+  p <- p + labs(x="Year",y="Catch (1000 mt)",fill="Gear")
   p <- p + .PLOT_THEME
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0))
 	print(p)
@@ -203,7 +203,7 @@ plotCatchFit<-function(inp     = NULL,
 
   xlim <- range(years)
   ylim <- c(0,yUpper)
-  plot(years, obsCt, pch=19, col=colors[[1]], lty=lty[[1]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch")
+  plot(years, obsCt, pch=19, col=colors[[1]], lty=lty[[1]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch (1000 mt)")
   lines(years, predCt, col=colors[[1]], lty=lty[[1]])
   if(length(out) > 1){
     for(line in 2:length(out)){
