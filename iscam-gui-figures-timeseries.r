@@ -244,7 +244,7 @@ plotBiomassMPD <- function(out       = NULL,
    }
   }
   par(mar=c(3,6,3,3))
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (mt)\n", xlab="Year", main="Biomass", las=1)
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -310,7 +310,7 @@ plotBiomassMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
   par(mar=c(3,6,3,3))
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (mt)\n", xlab="Year", main="Biomass", las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)

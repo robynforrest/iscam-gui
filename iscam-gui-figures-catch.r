@@ -114,8 +114,8 @@ plotCatch <- function(scenario   = 1,         # Scenario number
     }
   }
   if(plotNum == 4){
-      plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
- }
+    plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
+  }
 
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")

@@ -106,12 +106,16 @@ stripAreasGroups <- function(dat){
   # Note than q1, q2, q3... will stay the same and m1 and m2 will remain if the model was two-sex.
 
   pnames <- names(dat)
+  # M will only ever be 1 or 2, for each sex
   pnames <- gsub("m_gs1","m1",pnames)
   pnames <- gsub("m_gs2","m2",pnames)
+
   pnames <- gsub("msy1","msy",pnames)
   pnames <- gsub("fmsy1","fmsy",pnames)
   pnames <- gsub("SSB1","ssb",pnames)
+  # Remove underscores
   names(dat) <- gsub("_+.*","",pnames)
+  # Remove objective function value
   dat <- dat[,names(dat) != "f"]
   return(dat)
 }
@@ -316,51 +320,58 @@ plotPriorsPosts <- function(mcmcData, inputs = NULL, burnthin = c(0,1), color = 
 
   # Convert the priors in logspace into standard space
   paramSpecs <- convertLogParams(inputs$control$param)
+  paramSpecs <- as.data.frame(paramSpecs)
+  # Remove fixed parameters
+  paramSpecs <- paramSpecs[paramSpecs$phz>0,]
+  # Remove upper and lower bound, and phase information, but keep initial value
+  paramSpecs <- paramSpecs[,-c(2:4)]
+
   # Add in the q parameters
   for(q in 1:numQParams){
     # Add a row for each q to the paramSpecs matrix
-    paramSpecs <- rbind(paramSpecs, c(NA, NA, NA, NA, qParams[1,q], exp(qParams[2,q]), exp(qParams[3,q])))
+    if(qParams[1,q] == 0){
+      # Uninformative prior with lower and upeer limit
+      paramSpecs <- rbind(paramSpecs, c(qParams[2,q], qParams[1,q], qParams[2,q], qParams[3,q]))
+    }else if(qParams[1,q] == 1){
+      # Normal prior with mean and sd
+      paramSpecs <- rbind(paramSpecs, c(exp(qParams[2,q]), qParams[1,q], exp(qParams[2,q]), exp(qParams[3,q])))
+    }else{
+    }
     rownames(paramSpecs)[nrow(paramSpecs)] <- paste0("q",q)
   }
-  # First, figure out how many output parameters have associated priors and make the grid that size
+
   priorParamNames <- rownames(paramSpecs)
-  # Add in the q parameters
-  priorParamNames <- c(priorParamNames, paste0("q",1:numQParams))
-  numWithPriors <- 0
-  for(priorParam in 1:length(priorParamNames)){
-    # For each prior that exists, match up the output paramater estimates
-    pattern <- paste0("^",priorParamNames[priorParam],"_[[:alnum:]]+$")
-    priorLoc <- grep(pattern, outputParamNames)
-    if(length(priorLoc) == 0){
-      pattern <- paste0("^",priorParamNames[priorParam],"$")
-      priorLoc <- grep(pattern, outputParamNames)
-    }
-    if(length(priorLoc) > 0){
-      numWithPriors <- numWithPriors + length(priorLoc)
-    }
+  posteriorNames <- names(mcmcData)
+  if(length(grep("^m[12]$",posteriorNames)) == 2){
+    # Remove the single 'm' and add the two m's, m1 and m2 to the prior paramSpecs table
+    mSpecInd <- grep("m",priorParamNames)
+    mSpec <- paramSpecs[mSpecInd,]
+    paramSpecs <- paramSpecs[-mSpecInd,]
+    # Add each m1 and m2 in
+    mSpec1 <- mSpec2 <- mSpec
+    rownames(mSpec1) <- "m1"
+    rownames(mSpec2) <- "m2"
+    paramSpecs <- rbind(mSpec1,mSpec2,paramSpecs)
   }
+  numWithPriors <- length(priorParamNames)
+  priorParamNames <- rownames(paramSpecs)
+
   # Make a square grid of plots
   nrows <- ncols <- ceiling(sqrt(numWithPriors))
 	par(mfrow=c(nrows, ncols), las=1)
 
-  # Plot posteriors, then match up the input prior and plot
-  for(param in 1:numParams){
+  for(paramName in 1:length(priorParamNames)){
+    # Find the parameter name from paramSpecs in the mcmcData
+    dat <- mcmcData[priorParamNames[paramName]]
+    dat <- window(mcmc(as.ts(dat), start = burnin, thin = thinning))
+
     # Plot posterior density first
     par(mar=.MCMC_MARGINS)
-    # Get posterior data
-    dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
-    # Get rid of the trailing _ and group/area/sex numbers
-    name <- sub("_.*","",outputParamNames[param])
-    paramNames <- rownames(paramSpecs)
-    # Match the name of the output posterior with its input parameter specifications
-    row <- grep(name, paramNames)
-    if(length(row) > 0){
-      specs <- paramSpecs[row,]
-      priorfn <- fNames[[specs[5]+1]] # +1 because the control prior starts at zero
-      priorfnr <- fNamesR[[specs[5]+1]] # +1 because the control prior starts at zero
-      xx <- list(p = dat, p1 = specs[6], p2 = specs[7], fn = priorfn, fnr = priorfnr, nm = outputParamNames[param])
-      plot.marg(xx, breaks = "sturges", col = "wheat")
-    }
+    specs <- unlist(paramSpecs[paramName,])
+    priorfn <- fNames[[specs[2]+1]] # +1 because the control prior starts at zero
+    priorfnr <- fNamesR[[specs[2]+1]] # +1 because the control prior starts at zero
+    xx <- list(p = dat, p1 = specs[3], p2 = specs[4], fn = priorfn, nm = priorParamNames[paramName])
+    plot.marg(xx, breaks = "sturges", col = "wheat")
   }
 }
 
