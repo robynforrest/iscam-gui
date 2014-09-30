@@ -191,7 +191,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
 
   if(savefig){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename)
     dev.off()
   }
   return(TRUE)
@@ -232,7 +232,7 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
-  if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
+   if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
     # When sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
     yUpper <- 1.1*max(out[[1]]$mpd$sbt)
   }
@@ -621,7 +621,13 @@ plotIndexMPD <- function(scenario  = NULL,
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  # ASSUMPTIONS: The gears with indices come after the gears without indices in the gear list
+  # ASSUMPTIONS:
+  # 1. The gears with indices come after the gears without indices in the gear list, i.e.
+  #    the fishery gears come first, followed by the sureveys
+  # 2. If the models have some gears missing, the gears are in the same order in all models,
+  #    with the ones removed from the end of the list. TODO: Remove this constraint and match by name
+  # 3. The model with the most survey gears comes first (after fishery gears) in the list.
+
   currFuncName <- getCurrFunc()
   if(is.null(scenario)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
@@ -667,11 +673,11 @@ plotIndexMPD <- function(scenario  = NULL,
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- as.data.frame(inputs[[1]]$indices[[index]])
-
-  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt))
+  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt)) # Account for error bars in y upper limit
   minYear <- min(inputindices$iyr)
   maxYear <- max(inputindices$iyr)
-  for(model in 1:length(out)){
+
+  for(model in 2:length(out)){
     tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
     outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
     outputit <- as.numeric(outputitDF[index,])
@@ -701,6 +707,7 @@ plotIndexMPD <- function(scenario  = NULL,
   }else{
     titleText <- paste0("Gear ",gearNames[index])
   }
+
   plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index (1000 mt)", xlab="Year", main=titleText, las=1)
   points(yrs,inputindices$it, pch=3)
   arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
