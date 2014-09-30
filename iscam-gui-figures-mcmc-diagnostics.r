@@ -359,7 +359,7 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
   priorNames <- rownames(priorSpecs)
   numWithPriors <- length(priorNames)
 
-  # Make a square grid of plots
+  # Make a square grid of plots. TODO: Improve this plot fill algorithm
   nrows <- ncols <- ceiling(sqrt(numWithPriors))
 	par(mfrow=c(nrows, ncols), las=1)
 

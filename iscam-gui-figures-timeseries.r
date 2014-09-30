@@ -677,7 +677,7 @@ plotIndexMPD <- function(scenario  = NULL,
   minYear <- min(inputindices$iyr)
   maxYear <- max(inputindices$iyr)
 
-  for(model in 2:length(out)){
+  for(model in 1:length(out)){
     tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
     outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
     outputit <- as.numeric(outputitDF[index,])
