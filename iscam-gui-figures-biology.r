@@ -208,7 +208,8 @@ plotMA <- function(leg  = NULL){
       ma <- data[[sex]][[1]]
       a <- ma[,1]
       m <- ma[,2]
-      xlim <- c(0,max(a))
+      #xlim <- c(0,max(a))
+      xlim <- c(0,25)
       if(sex == 1){
         col <- "blue"
         shade <- .getShade(col, 80)

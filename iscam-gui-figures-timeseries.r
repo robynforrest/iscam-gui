@@ -763,7 +763,7 @@ plotFMPD <- function(out       = NULL,
   nyear  <- length(yrs)
   ngear  <- out[[1]]$mpd$ngear
 
-  # This is the mean F with the # of rows being the number of gears, and that is multiplied
+  # This is the F with the # of rows being the number of gears, and that is multiplied
   # by the number of sexes. So for a 3-gear, 2 sex model, there will be 6 rows in f with main grouping
   # by gear, i.e. two, three-row groupings.
   numModels <- length(out)
@@ -825,11 +825,12 @@ plotFMPD <- function(out       = NULL,
       yrs    <- out[[line]]$mpd$yr
       nyear  <- length(yrs)
       ngear  <- out[[line]]$mpd$ngear
+      f      <- out[[line]]$mpd$ft
       for(sex in 1:nsex){
         for(gear in 1:ngear){
           meanF <- f[((sex-1) * ngear + gear),]
           if(all(meanF == 0)){
-            cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+            #cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
             lines(yrs, meanF, type = "o", col=colors[[line]], pch=pch, cex=pointSize, lty=sex, lwd=2)
             if(sex == 1){

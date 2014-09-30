@@ -115,6 +115,7 @@ stripAreasGroups <- function(dat){
   pnames <- gsub("msy1","msy",pnames)
   pnames <- gsub("fmsy1","fmsy",pnames)
   pnames <- gsub("SSB1","ssb",pnames)
+  pnames <- gsub("sel_g([0-9]+)","sel\\1",pnames)
   # Remove underscores
   names(dat) <- gsub("_+.*","",pnames)
   # Remove objective function value
@@ -144,6 +145,21 @@ stripStaticParams <- function(scenario, dat){
   }
   # The following also removes "m" in a combined sex model
   dat <- dat[,!(pnames %in% snames)]
+
+  # Remove static selectivity params
+  selParams <- as.data.frame(op[[scenario]]$inputs$control$sel)
+  estphase <- selParams["estphase",]
+  staticSel <- estphase<1
+  selPostNames <- names(dat)[grep("sel",names(dat))]
+  selPostNames <- selPostNames[staticSel]
+  datNames <- names(dat)
+  staticSelInds <- NULL
+  for(staticSel in 1:length(selPostNames)){
+    staticSelInds <- c(staticSelInds, grep(selPostNames[staticSel], datNames))
+  }
+  dat <- dat[,-staticSelInds]
+  datNames <- names(dat)
+
   return(dat)
 }
 
@@ -273,6 +289,11 @@ plotPairs <- function(mcmcData = NULL, burnthin = c(0,1)){
     y      <- h$counts; y <- y/max(y)
     rect(breaks[-nB], 0, breaks[-1], y, col="wheat", cex=0.75, ...)
   }
+
+  # Remove the reference point posteriors for this plot
+  datNames <- names(mcmcData)
+  refptInd <- c(grep("bo",datNames),grep("bmsy",datNames),grep("fmsy",datNames),grep("msy",datNames),grep("ssb",datNames))
+  mcmcData <- mcmcData[,-refptInd]
 
   numParams <- ncol(mcmcData)
   mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
