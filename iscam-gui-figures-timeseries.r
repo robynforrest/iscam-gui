@@ -58,6 +58,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 8 SPR ratio
   # 9 Fishing mortality
   #10 Reference Points
+  #11 Recruitment deviations
 
   currFuncName <- getCurrFunc()
 
@@ -95,6 +96,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   names  <- validModels[[3]]
   inputs <- validModels[[4]]
   linetypes <- validModels[[5]]
+  parout <- validModels[[6]]
 
   if(is.null(validModels)){
     if(is.null(names)){
@@ -112,7 +114,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 10){
+  if(plotNum < 1 || plotNum > 11){
     cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
     return(FALSE)
   }
@@ -187,6 +189,13 @@ plotTS <- function(scenario   = 1,         # Scenario number
       plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
+    }
+  }
+  if(plotNum == 11){
+    if(plotMCMC){
+      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
+    }else{
+      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg)
     }
   }
 
@@ -606,6 +615,84 @@ plotRecruitmentMCMC <- function(out       = NULL,
     if(!is.null(leg))  legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 
+}
+
+plotRecruitmentDevsMPD <- function(out       = NULL,
+                                   parout    = NULL,
+                                   colors    = NULL,
+                                   names     = NULL,
+                                   lty       = NULL,
+                                   verbose   = FALSE,
+                                   leg = "topright"){
+  # Recruitment deviations plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(is.null(parout)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a parameter output vector (parout).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  ryr    <- out[[1]]$mpd$yr
+  rt     <- parout[[1]]$log_rec_devs
+
+  # Get y-limits
+  maxy <- max(rt)
+  miny <- min(rt)
+  for(model in 1:length(out)){
+    tmprt  <- parout[[model]]$log_rec_devs
+    miny <- min(miny, min(tmprt))
+    maxy <- max(maxy, tmprt)
+    ylim <- c(miny, maxy)
+  }
+  # Get x-limits
+  xlim <- c(min(ryr), max(ryr))
+  if(length(out)>1){
+    for(model in 1:length(out)){
+      tmpryr   <- out[[model]]$mpd$yr
+      minx     <- min(min(tmpryr), min(xlim))
+      maxx     <- max(max(tmpryr), max(xlim))
+      xlim     <- c(minx, maxx)
+    }
+  }
+
+  plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=ylim, xlim=xlim,
+       ylab="Recruitment deviations (millions)", xlab="Year", main="Recruitment deviations", las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      ryr   <- out[[line]]$mpd$yr
+      rt    <- parout[[line]]$log_rec_devs
+      lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=lty[[line]], lwd=2, ylim=ylim, las=1)
+    }
+  }
+  abline(0, 0, lty=1, lwd=1, col="lightgreen")
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+  }
 }
 
 plotIndexMPD <- function(scenario  = NULL,
