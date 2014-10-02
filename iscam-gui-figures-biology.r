@@ -93,12 +93,14 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==7)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==8)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
-  if(plotNum==10) cat("No Plot Yet -- Coming Soon!!\n")
+  # Composition at beginning of time series, no selectivity applied
+  if(plotNum==10) plotN1(compFitSex, scenario, leg)
 
   # Composition plots
   if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg)
   if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg)
   if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg)
+
   # Special can be deleted after ARF assessment
   if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg)
   # Biological plots
@@ -550,4 +552,28 @@ plotCompSpecial <- function(scenario, sex, leg){
   axis(2, at=c(ages,(nage[1]+1)), labels=c(ages,"N"), las=1)
   text(years,rep(nage[1]+1,10),labels=numages)
   text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
+}
+
+plotN1 <- function(compFitSex, scenario, leg){
+  # Plot the age structure at the beginning of the time series without any application of selectivity.
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Get initial age comp data
+  gears <- c(2,3)
+  sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
+  nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
+  nages <- length(sage:nage)
+  ages <- sage:nage
+  nsex <- op[[scenario]]$inputs$data$nsex
+  if(nsex == 2){
+    par(mfrow=c(1,2))
+    compDataM <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[1,]), 2, function(x){x/sum(x)})
+    compDataF <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[2,]), 2, function(x){x/sum(x)})
+    plot(ages, compDataM, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure - Male")
+    plot(ages, compDataF, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure - Female")
+  }else{
+    compData <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[1,]), 2, function(x){x/sum(x)})
+    plot(compData, ages, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure")
+  }
 }

@@ -22,48 +22,17 @@ plotSelex <- function(plotNum    = 1,            # Plot code number
                       ){
 
   # plotNum must be one of:
-  # 1 logistic selectivity - age or length based will be detected automatically
- 	# 1  Length-based selectivity in end year by fleet
-  # 2  Age-based selectivity in end year by fleet
-  # 3  Selectivity at length time-varying surface
-  # 4  Selectivity at length time-varying contour
-  # 5  Retention at length time-varying surface
-  # 6  Retention at length time-varying surface
-  # 7  Discard mortality time-varying surface
-  # 8  Discard mortality time-varying contour
-  # 9  Selectivity, retention, and discard mortality at length in ending year
-  # 10 NOT USED
-  # 11 Selectivity at age time-varying surface
-  # 12 Selectivity at age time-varying contour
-  # 13 Selectivity at age in ending year if time-varying
-  # 14 Selectivity at age in ending year if NOT time-varying
-  # 15 NOT USED
-  # 16 NOT USED
-  # 17 NOT USED
-  # 18 NOT USED
-  # 19 NOT USED
-  # 20 NOT USED
-  # 21 Selectivity at age and length contour with overlaid growth curve
-  # 22 Selectivity with uncertainty if requested at end of control file
+  # 1  Logistic selectivity - age or length based will be detected automatically
 
-  if(plotNum < 1   ||
-     plotNum > 22  ||
-     plotNum == 10 ||
-     plotNum == 15 ||
-     plotNum == 16 ||
-     plotNum == 17 ||
-     plotNum == 18 ||
-     plotNum == 19 ||
-     plotNum == 20
-     ){
+  if(plotNum != 1){
     return(FALSE)
   }
-  val      <- getWinVal()
-  scenario <- val$entryScenario
+  val          <- getWinVal()
+  scenario     <- val$entryScenario
   currFuncName <- getCurrFunc()
-  isMCMC   <- op[[scenario]]$inputs$log$isMCMC
-  figDir   <- op[[scenario]]$names$figDir
-  out      <- op[[scenario]]$outputs$mpd
+  isMCMC       <- op[[scenario]]$inputs$log$isMCMC
+  figDir       <- op[[scenario]]$names$figDir
+  out          <- op[[scenario]]$outputs$mpd
   res          <- val$entryResolution
   width        <- val$entryWidth
   height       <- val$entryHeight
@@ -114,12 +83,15 @@ plotLogisticSel	<-	function(scenario, index, sex){
 
   gearNames <- op[[scenario]]$inputs$data$gearNames
   if(op[[scenario]]$inputs$data$hasAgeGearNames){
-    gearTitle <- paste0(gearNames[index]," - ",sexstr)
+#    gearTitle <- paste0(gearNames[index]," - ",sexstr)
+    gearTitle <- gearNames[index]
   }else{
-    gearTitle <- paste0("Gear ",gearNames[index]," - ",sexstr)
+#    gearTitle <- paste0("Gear ",gearNames[index]," - ",sexstr)
+    gearTitle <- paste0("Gear ",gearNames[index])
   }
   aflag <- 0 #flag to set age or length
  	ngear <-  op[[scenario]]$inputs$data$ngear
+  nsex   <- op[[scenario]]$outputs$mpd$nsex
 	if(index <= ngear){
 		selType <-   op[[scenario]]$inputs$control$sel[1,index]
 		selBlocks <- op[[scenario]]$inputs$control$sel[10,index] #selectivity time blocks
@@ -134,14 +106,14 @@ plotLogisticSel	<-	function(scenario, index, sex){
 
 		#no plot if sel is not one of the types listed above
 		if(aflag > 0){
-			logselData <-  op[[scenario]]$output$mpd$log_sel
+			logselData <- op[[scenario]]$output$mpd$log_sel
 			logselData <- logselData[which(logselData[,1]==index),]
 			xx <- logselData[,4:ncol(logselData)]
 
 			selData <- exp(xx)
 			selData <- selData[1,] #selectivity in first block
 			startBlocks <- op[[scenario]]$inputs$control$syrtimeblock[index,]
-			legtext <- paste("Selectivity Block 1 :", startBlocks[1])
+			legtext <- NULL
 
 			selData <- as.matrix(selData)
 
@@ -163,14 +135,31 @@ plotLogisticSel	<-	function(scenario, index, sex){
         legend("topleft", legend=legtext, lty=1:selBlocks, col=1:selBlocks, lwd=2, bty="n")
       }
       if(aflag==2){
+        # Plot both sexes on one plot if there are 2
         Xlab <- "Length-at-Age"
-        plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1,  main=gearTitle, ylim=c(0,1.1))
-        if(selBlocks>1){
-					for(i in 2:selBlocks){
-						lines(Len, selData[,i], lty=i, col=i, lwd=2)
-						legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))
-					}
-				}
+        if(nsex==2){
+          plot(Len[1,], selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1,  main=gearTitle, ylim=c(0,1.1))
+          lines(Len[2,], selData[,1], type="l", lwd=2, lty=2, col=1, las=1)
+          legtext <- c(legtext, paste("Male"))
+          legtext <- c(legtext, paste("Female"))
+          if(selBlocks>1){
+            for(i in 2:selBlocks){
+              lines(Len[1,], selData[,i], lty=i, col=i, lwd=2)
+              lines(Len[2,], selData[,i], lty=i+1, col=i, lwd=2)
+              legtext <- c(legtext, paste("Male - Selectivity Block",i,":", startBlocks[i]))
+              legtext <- c(legtext, paste("Female - Selectivity Block",i,":", startBlocks[i]))
+            }
+          }
+        }else{
+          plot(Len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1,  main=gearTitle, ylim=c(0,1.1))
+          legtext <- c(legtext, paste("Combined sexes"))
+          if(selBlocks>1){
+            for(i in 2:selBlocks){
+              lines(Len, selData[,i], lty=i, col=i, lwd=2)
+              legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))
+            }
+          }
+        }
         legend("topleft", legend=legtext, lty=1:selBlocks, col=1:selBlocks, lwd=2, bty="n")
 			}
     }else{
