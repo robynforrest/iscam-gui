@@ -297,7 +297,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-selectivities.r
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,savefig,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,savefig,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sSelexLogisticByFleet"                  = {plotSelex(1,compFitSex,savefig,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind,figtype=figtype)},
+           "sSelexLogisticByFleet"                  = {plotSelex(s,1,savefig,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,ps=ps,leg=leg,index=ind,figtype=figtype)},
            # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(s,1,savefig,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            #"sCatchLandingsStacked"                  = {plotCatch(s,2,savefig,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -327,7 +327,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sSensRecruitDev"                        = {plotTS(s,11,savefig,"RecruitmentDevsAllAreas",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
-           "sSensCatchFit"                           = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensCatchFit"                          = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensSelex"                              = {plotSelex(s,1,savefig,"SelexLogisticByFleet",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
 
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},

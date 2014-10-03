@@ -196,7 +196,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
     cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in '",type,"' mode. No plot to draw.")
     return(NULL)
   }
-  inputs <- out <- colors <- linetypes <- names <- parout <- vector("list", len <- sum(hasType))
+  inputs <- out <- colors <- linetypes <- names <- parout <- controlinputs <- vector("list", len <- sum(hasType))
   if(retros){
     # models and nonmodels refer to the base followed by the retrospectives
     nonmodels <- !hasType
@@ -219,12 +219,14 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
         inputs[[model]] <- op[[models[1]]]$inputs$data
         linetypes[[model]] <- op[[models[1]]]$inputs$linetype
         parout[[model]] <- op[[models[1]]]$outputs$par
+        controlinputs[[model]] <- op[[models[1]]]$inputs$control
       }else{
         out[[model]]    <- op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]
         names[[model]]  <- op[[models[1]]]$outputs$retros[[model-1]]$names$scenario
         inputs[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$data
         linetypes[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$linetype
         parout[[model]] <- op[[models[1]]]$outputs$par
+        controlinputs[[model]] <- op[[models[1]]]$inputs$control
       }
       colors[[model]] <- .RETRO_COLORS[model]
     }else{
@@ -234,12 +236,13 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
       inputs[[model]] <- op[[models[model]]]$inputs$data
       linetypes[[model]] <- op[[models[model]]]$inputs$linetype
       parout[[model]] <- op[[models[model]]]$outputs$par
+      controlinputs[[model]] <- op[[models[1]]]$inputs$control
     }
   }
   if(length(out) == 1 && is.null(out[[1]][[1]])){
     return(NULL)
   }
-  ret <- list(out,colors,names,inputs,linetypes,parout)
+  ret <- list(out,colors,names,inputs,linetypes,parout,controlinputs)
   return(ret)
 }
 
