@@ -58,6 +58,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 8 SPR ratio
   # 9 Fishing mortality
   #10 Reference Points
+  #11 Recruitment deviations
 
   currFuncName <- getCurrFunc()
 
@@ -95,6 +96,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   names  <- validModels[[3]]
   inputs <- validModels[[4]]
   linetypes <- validModels[[5]]
+  parout <- validModels[[6]]
 
   if(is.null(validModels)){
     if(is.null(names)){
@@ -112,7 +114,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 10){
+  if(plotNum < 1 || plotNum > 11){
     cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
     return(FALSE)
   }
@@ -189,9 +191,16 @@ plotTS <- function(scenario   = 1,         # Scenario number
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
   }
+  if(plotNum == 11){
+    if(plotMCMC){
+      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
+    }else{
+      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    }
+  }
 
   if(savefig){
-    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename)
     dev.off()
   }
   return(TRUE)
@@ -232,7 +241,7 @@ plotBiomassMPD <- function(out       = NULL,
   on.exit(par(oldPar))
 
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
-  if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
+   if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
     # When sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
     yUpper <- 1.1*max(out[[1]]$mpd$sbt)
   }
@@ -243,7 +252,8 @@ plotBiomassMPD <- function(out       = NULL,
      yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
    }
   }
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  par(mar=c(3,6,3,3))
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
   points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -308,7 +318,8 @@ plotBiomassMCMC <- function(out       = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass", xlab="Year", main="Biomass", las=1)
+  par(mar=c(3,6,3,3))
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
@@ -496,7 +507,7 @@ plotRecruitmentMPD <- function(out       = NULL,
   }
 
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=c(0,yUpper), xlim=xlim,
-       ylab="Recruitment", xlab="Year", main="Recruitment", las=1)
+       ylab="Recruitment (millions)", xlab="Year", main="Recruitment", las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       sage <- out[[line]]$mpd$sage
@@ -580,7 +591,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
     }
   }
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment", las=1)
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment (millions)", las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
@@ -606,6 +617,84 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
 }
 
+plotRecruitmentDevsMPD <- function(out       = NULL,
+                                   parout    = NULL,
+                                   colors    = NULL,
+                                   names     = NULL,
+                                   lty       = NULL,
+                                   verbose   = FALSE,
+                                   leg = "topright"){
+  # Recruitment deviations plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(is.null(parout)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a parameter output vector (parout).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  ryr    <- out[[1]]$mpd$yr
+  rt     <- parout[[1]]$log_rec_devs
+
+  # Get y-limits
+  maxy <- max(rt)
+  miny <- min(rt)
+  for(model in 1:length(out)){
+    tmprt  <- parout[[model]]$log_rec_devs
+    miny <- min(miny, min(tmprt))
+    maxy <- max(maxy, tmprt)
+    ylim <- c(miny, maxy)
+  }
+  # Get x-limits
+  xlim <- c(min(ryr), max(ryr))
+  if(length(out)>1){
+    for(model in 1:length(out)){
+      tmpryr   <- out[[model]]$mpd$yr
+      minx     <- min(min(tmpryr), min(xlim))
+      maxx     <- max(max(tmpryr), max(xlim))
+      xlim     <- c(minx, maxx)
+    }
+  }
+
+  plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=ylim, xlim=xlim,
+       ylab="Recruitment deviations (millions)", xlab="Year", main="Recruitment deviations", las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      ryr   <- out[[line]]$mpd$yr
+      rt    <- parout[[line]]$log_rec_devs
+      lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=lty[[line]], lwd=2, ylim=ylim, las=1)
+    }
+  }
+  abline(0, 0, lty=1, lwd=1, col="lightgreen")
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+  }
+}
+
 plotIndexMPD <- function(scenario  = NULL,
                          out       = NULL,
                          colors    = NULL,
@@ -619,7 +708,13 @@ plotIndexMPD <- function(scenario  = NULL,
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  # ASSUMPTIONS: The gears with indices come after the gears without indices in the gear list
+  # ASSUMPTIONS:
+  # 1. The gears with indices come after the gears without indices in the gear list, i.e.
+  #    the fishery gears come first, followed by the sureveys
+  # 2. If the models have some gears missing, the gears are in the same order in all models,
+  #    with the ones removed from the end of the list. TODO: Remove this constraint and match by name
+  # 3. The model with the most survey gears comes first (after fishery gears) in the list.
+
   currFuncName <- getCurrFunc()
   if(is.null(scenario)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
@@ -665,10 +760,10 @@ plotIndexMPD <- function(scenario  = NULL,
 
   # Get the plotting limits by looking through the input lists and outputs of indices
   inputindices <- as.data.frame(inputs[[1]]$indices[[index]])
-
-  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt))
+  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt)) # Account for error bars in y upper limit
   minYear <- min(inputindices$iyr)
   maxYear <- max(inputindices$iyr)
+
   for(model in 1:length(out)){
     tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
     outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
@@ -699,7 +794,8 @@ plotIndexMPD <- function(scenario  = NULL,
   }else{
     titleText <- paste0("Gear ",gearNames[index])
   }
-  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index", xlab="Year", main=titleText, las=1)
+
+  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index (1000 mt)", xlab="Year", main=titleText, las=1)
   points(yrs,inputindices$it, pch=3)
   arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
   if(length(out) > 1){
@@ -754,7 +850,7 @@ plotFMPD <- function(out       = NULL,
   nyear  <- length(yrs)
   ngear  <- out[[1]]$mpd$ngear
 
-  # This is the mean F with the # of rows being the number of gears, and that is multiplied
+  # This is the F with the # of rows being the number of gears, and that is multiplied
   # by the number of sexes. So for a 3-gear, 2 sex model, there will be 6 rows in f with main grouping
   # by gear, i.e. two, three-row groupings.
   numModels <- length(out)
@@ -816,11 +912,12 @@ plotFMPD <- function(out       = NULL,
       yrs    <- out[[line]]$mpd$yr
       nyear  <- length(yrs)
       ngear  <- out[[line]]$mpd$ngear
+      f      <- out[[line]]$mpd$ft
       for(sex in 1:nsex){
         for(gear in 1:ngear){
           meanF <- f[((sex-1) * ngear + gear),]
           if(all(meanF == 0)){
-            cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
+            #cat0(.PROJECT_NAME,"->",currFuncName,"All meanFs for scenario ",names[[line]],", gear ",gear,", and sex ",sex," are 0 so it is not plotted.")
           }else{
             lines(yrs, meanF, type = "o", col=colors[[line]], pch=pch, cex=pointSize, lty=sex, lwd=2)
             if(sex == 1){

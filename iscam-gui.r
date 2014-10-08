@@ -266,6 +266,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
+           "sTSRecruitmentDevsAllAreas"             = {plotTS(s,11,savefig,"RecruitmentDevsAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecruitmentByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            # Only MPD for Index
            "sTSIndex"                               = {plotTS(s,7,savefig,"Index",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
@@ -287,6 +288,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sBiologyComposition"                    = {plotBiology(11,compFitSex,savefig,"BiologyComposition",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
           # Can delete this special one after ARF assessment
            "sBiologyCompositionSpecial"             = {plotBiology(99,compFitSex,savefig,"BiologyCompositionSpecial",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sBiologyCompositionN1"                  = {plotBiology(10,compFitSex,savefig,"BiologyCompositionN1",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionFit"                 = {plotBiology(12,compFitSex,savefig,"BiologyCompositionFit",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyCompositionResid"               = {plotBiology(13,compFitSex,savefig,"BiologyCompositionResiduals",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            "sBiologyLW"                             = {plotBiology(14,compFitSex,savefig,"BiologyLengthWeightRelationship",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
@@ -295,7 +297,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-selectivities.r
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,savefig,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,savefig,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
-           "sSelexLogisticByFleet"                  = {plotSelex(1,compFitSex,savefig,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,index=ind,figtype=figtype)},
+           "sSelexLogisticByFleet"                  = {plotSelex(s,1,savefig,"SelexLogisticByFleet",plotMCMC,ci,sensGroup=sgr,ps=ps,leg=leg,index=ind,figtype=figtype)},
            # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(s,1,savefig,"CatchLandings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
            #"sCatchLandingsStacked"                  = {plotCatch(s,2,savefig,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
@@ -322,10 +324,11 @@ iscam <- function(reloadScenarios      = FALSE,
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
            "sSensF"                                 = {plotTS(s,9,savefig,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sSensRefPoints"                         = {plotTS(s,10,savefig,"ReferencePoints",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
-           #"sSensRecruitDev"                        = {plotTS(9,savefig,"RecruitmentDev",plotMCMC,ci,TRUE)},
+           "sSensRecruitDev"                        = {plotTS(s,11,savefig,"RecruitmentDevsAllAreas",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
-           "sSensCatchFit"                           = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensCatchFit"                          = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
+           "sSensSelex"                              = {plotSelex(s,1,savefig,"SelexLogisticByFleet",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype)},
 
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
