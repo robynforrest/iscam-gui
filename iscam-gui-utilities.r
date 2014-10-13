@@ -197,7 +197,8 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
     return(NULL)
   }
   inputs <- out <- colors <- linetypes <- names <- parout <- controlinputs <- vector("list", len <- sum(hasType))
-  if(retros){
+
+ if(retros){
     # models and nonmodels refer to the base followed by the retrospectives
     nonmodels <- !hasType
     models <- hasType
@@ -243,7 +244,8 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
     return(NULL)
   }
   ret <- list(out,colors,names,inputs,linetypes,parout,controlinputs)
-  return(ret)
+ 
+ return(ret)
 }
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5){

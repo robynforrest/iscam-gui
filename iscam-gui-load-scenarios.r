@@ -769,6 +769,9 @@ readData <- function(file = NULL, verbose = FALSE){
 	    }
 	    colnames(tmp$meanwtdata) <- c("year","meanwt","gear","area","group","sex","timing")
    }
+  
+  tmp$anom_obs <- matrix(NA, nrow =  (tmp$nyr - tmp$syr +1), ncol = 2) 
+  for(row in 1:nrow(tmp$anom_obs))  tmp$anom_obs[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
 
   return(tmp)
@@ -892,7 +895,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   tmp$weight_sig <-  vector(length=nvals)
   for(val in 1:nvals)  tmp$weight_sig[val] <- as.numeric(dat[ind <- ind + 1])
 
-  nrows <- 15
+  nrows <- 17
   tmp$misc <- matrix(NA, nrow = nrows, ncol = 1)
   for(row in 1:nrows){
     tmp$misc[row,1] <- as.numeric(dat[ind <- ind + 1])
@@ -901,7 +904,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   rownames(tmp$misc) <- c("verbose","rectype","sdobscatchfirstphase","sdobscatchlastphase",
                           "unfishedfirstyear","maternaleffects","meanF","sdmeanFfirstphase",
                           "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
-                          "fracZpriorspawn","agecompliketype","IFDdist")
+                          "fracZpriorspawn","agecompliketype","IFDdist", "DDM1", "Envdt")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
   return(tmp)
 }

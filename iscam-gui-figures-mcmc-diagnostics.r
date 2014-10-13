@@ -38,6 +38,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   mcmcOut      <- op[[scenario]]$outputs$mcmc
   mpdData      <- op[[scenario]]$outputs$mpd #For MLE estimates (Prior/Post plot)
   inputs       <- op[[scenario]]$inputs # For the priors information
+  
   if(is.null(mcmcOut)){
     cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no mcmc output data associated with it.\n")
     return(NULL)
@@ -73,9 +74,9 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   mcmcData <- stripAreasGroups(mcmcData)
   # We only want to see estimated parameters, so this call strips the static params.
   mcmcData <- stripStaticParams(scenario, mcmcData)
-
+  
   if(plotNum == 1){
-    plotTraces(mcmcData, burnthin=burnthin)
+     plotTraces(mcmcData, burnthin=burnthin)
   }
   if(plotNum == 2){
     plotAutocor(mcmcData, burnthin=burnthin)
