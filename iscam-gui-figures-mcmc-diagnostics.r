@@ -117,6 +117,7 @@ stripAreasGroups <- function(dat){
   pnames <- gsub("fmsy1","fmsy",pnames)
   pnames <- gsub("SSB1","ssb",pnames)
   pnames <- gsub("sel_g([0-9]+)","sel\\1",pnames)
+ 
   # Remove underscores
   names(dat) <- gsub("_+.*","",pnames)
   # Remove objective function value
@@ -131,6 +132,7 @@ stripStaticParams <- function(scenario, dat){
 
   # Check the control file to see which parameters were static
   inp <- as.data.frame(op[[scenario]]$inputs$control$param)
+  
   static <- inp[inp$phz <= 0,]
   snames <- rownames(static)
 
@@ -138,15 +140,17 @@ stripStaticParams <- function(scenario, dat){
   pnames <- names(dat)
   # remove the log_ stuff from the input parameter names
   snames <- gsub("log_","",snames)
+
   # There will be either one "m" or "m1" and "m2" in pnames.
   # If "m" is in snames, remove the "m1", and "m2" from pnames
   if("m" %in% snames){
     ms <- c("m1","m2")
     pnames <- pnames[!(pnames %in% ms)]
   }
-  # The following also removes "m" in a combined sex model
-  dat <- dat[,!(pnames %in% snames)]
 
+    # The following also removes "m" in a combined sex model
+    dat <- dat[,!(pnames %in% snames)]
+ 
   # Remove static selectivity params
   selParams <- as.data.frame(op[[scenario]]$inputs$control$sel)
   estphase <- selParams["estphase",]
@@ -158,9 +162,9 @@ stripStaticParams <- function(scenario, dat){
   for(staticSel in 1:length(selPostNames)){
     staticSelInds <- c(staticSelInds, grep(selPostNames[staticSel], datNames))
   }
+ 
   dat <- dat[,-staticSelInds]
   datNames <- names(dat)
-
   return(dat)
 }
 
