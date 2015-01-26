@@ -758,14 +758,12 @@ readData <- function(file = NULL, verbose = FALSE){
   }
   # Build a list of age comp gear N's
   tmp$agearsN <- list()
-  index <- 1
+  start <- 1
   for(ng in 1:length(tmp$nagearsvec)){
-    start <- index
-    end <- index + tmp$nagearsvec[ng] - 1
+    end <- start + tmp$nagearsvec[ng] - 1
     tmp$agearsN[[ng]] <- agen[start:end]
-    index <- index + tmp$nagearsvec[ng]
+    start <- end + 1
   }
-
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
   tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])

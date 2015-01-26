@@ -135,7 +135,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 2 sticky=N pady=10
-         grid 11 2 sticky=N relief=raised
+         grid 10 2 sticky=N relief=raised
                label text="Biology" font="bold 10" sticky=N
                NULL
                radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
@@ -143,8 +143,6 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyComposition         text="Composition data" function=.subView sticky=W mode=character
-               NULL
-               radio name=viewPlotType value=sBiologyCompositionSpecial  text="Composition special" function=.subView sticky=W mode=character
                NULL
                radio name=viewPlotType value=sBiologyCompositionN1       text="Composition N1" function=.subView sticky=W mode=character
                NULL

@@ -375,6 +375,17 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
       }
       numages <- op[[scenario]]$inputs$data$agearsN[[index]]
+      if(nSex == 2){
+        # Get odd elements
+          tmpagen <- op[[scenario]]$inputs$data$agearsN[[index]]
+        if(sex == 1){
+          # Males are odd
+          numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
+        }else{
+          # Females get even
+          numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
+        }
+      }
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
       endRowThisGear <- startRowThisGear + nrowsThisGear - 1
       residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
