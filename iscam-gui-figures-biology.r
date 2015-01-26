@@ -587,6 +587,6 @@ plotN1 <- function(compFitSex, scenario, leg){
     plot(ages, compDataF, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure - Female")
   }else{
     compData <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[1,]), 2, function(x){x/sum(x)})
-    plot(compData, ages, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure")
+    plot(ages, compData, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure")
   }
 }
