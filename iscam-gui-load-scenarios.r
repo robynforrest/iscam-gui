@@ -652,6 +652,22 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$hasAgeGearNames <- TRUE
   }
 
+  # Save the number of specimens per year (comment at end of each age comp
+  # line), eg. #135 means 135 specimens contributed to the age propoirtions for that year
+  agen <- vector()
+  # Match age comp lines which have N's as comments
+  tmp$hasAgeCompN <- FALSE
+  pattern <- "^[[:digit:]]{4}[[:space:]]+[[:digit:]][[:space:]]+[[:digit:]][[:space:]]+[[:digit:]][[:space:]]+[[:digit:]].*#([[:digit:]]+).*"
+  dat <- data[grep(pattern,data)]
+  if(length(dat) > 0){
+    for(ageN in 1:length(dat)){
+      agen[ageN] <- sub(pattern,"\\1",dat[ageN])
+    }
+  }
+  # N is now a vector of values of N for the age comp data.
+  # The individual gears have not yet been parsed out, this will
+  # happen later when the age comps are read in.
+
   # Get the element numbers which start with #.
   dat <- grep("^#.*",data)
   # remove the lines that start with #.
@@ -740,6 +756,15 @@ readData <- function(file = NULL, verbose = FALSE){
      colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
    }
   }
+  # Build a list of age comp gear N's
+  tmp$agearsN <- list()
+  index <- 1
+  for(ng in 1:length(tmp$nagearsvec)){
+    start <- index
+    end <- index + tmp$nagearsvec[ng] - 1
+    tmp$agearsN[[ng]] <- agen[start:end]
+    index <- index + tmp$nagearsvec[ng]
+  }
 
   # Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
@@ -756,12 +781,11 @@ readData <- function(file = NULL, verbose = FALSE){
     }
     colnames(tmp$waa) <- c("year","gear","area","group","sex",tmp$sage:tmp$nage)
    }
-     
+
    # Annual Mean Weight data
     # Catch data
     tmp$nmeanwt <- as.numeric(dat[ind <- ind + 1])
     tmp$nmeanwtobs <- as.numeric(dat[ind <- ind + 1])
-        
     if(tmp$nmeanwtobs >0){
 	    tmp$meanwtdata  <- matrix(NA, nrow = sum(tmp$nmeanwtobs), ncol = 7)
 	    for(row in 1:sum(tmp$nmeanwtobs)){

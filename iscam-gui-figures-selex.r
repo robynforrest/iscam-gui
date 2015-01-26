@@ -157,11 +157,25 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   ## }
 
   logselData <- out[[1]]$mpd$log_sel
+  # Get the log selectivity for the gear given by 'index'
   logselData <- logselData[which(logselData[,1]==index),]
-  xx <- logselData[,4:ncol(logselData)]
-  selData <- exp(xx)
-  selData <- selData[1,] #selectivity in first block
-  selData <- as.matrix(selData)
+  if(nsex==2 && aflag==2){
+    lsdat1 <- logselData[which(logselData[,2]==1),]
+    lsdat2 <- logselData[which(logselData[,2]==2),]
+    xx1 <- lsdat1[,4:ncol(lsdat1)]
+    xx2 <- lsdat2[,4:ncol(lsdat2)]
+    selData1 <- exp(xx1)
+    selData1 <- selData1[1,] #selectivity in first block
+    selData1 <- as.matrix(selData1)
+    selData2 <- exp(xx2)
+    selData2 <- selData2[1,] #selectivity in first block
+    selData2 <- as.matrix(selData2)
+  }else{
+    xx <- logselData[,4:ncol(logselData)]
+    selData <- exp(xx)
+    selData <- selData[1,] #selectivity in first block
+    selData <- as.matrix(selData)
+  }
   if(aflag == 1){
     # logistic age selectivity is not sex-specific
     Xlab <- "Age"
@@ -188,10 +202,14 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
     }
   }else if(aflag == 2){
     Xlab <- "Length (cm)"
+    age <- out[[1]]$mpd$age
     if(nsex == 2){
       len        <- out[[1]]$mpd$la
-      plot(len[1,], selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=colors[[1]], lty=lty[[1]], las=1,  main=gearTitle, ylim=c(0,1.1))
-      lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[1]]+1, col=colors[[1]], las=1)
+#      plot(len[1,], selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=colors[[1]], lty=lty[[1]], las=1,  main=gearTitle, ylim=c(0,1.1))
+#      lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[1]]+1, col=colors[[1]], las=1)
+      #browser()
+      plot(age, selData1[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=colors[[1]], lty=lty[[1]], las=1,  main=gearTitle, ylim=c(0,1.1))
+      lines(age, selData2[,1], type="l", lwd=2, lty=lty[[1]]+1, col=colors[[1]], las=1)
       currName <- names[[1]]
       names[[1]] <- paste0(currName, " - Male")
       female <- paste0(currName, " - Female")
@@ -215,8 +233,10 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
           selData    <- exp(xx)
           selData    <- selData[1,] #selectivity in first block
           selData    <- as.matrix(selData)
-          lines(len[1,], selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
-          lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[model]]+1, col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
+#          lines(len[1,], selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
+#          lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[model]]+1, col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
+          lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
+          lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]]+1, col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
           currName <- names[[model]]
           names[[model]] <- paste0(currName, " - Male")
           female <- paste0(currName, " - Female")

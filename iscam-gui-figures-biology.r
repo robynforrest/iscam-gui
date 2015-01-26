@@ -1,5 +1,5 @@
 #**********************************************************************************
-# ss-explore-figures-biology.r
+# iscam-gui-figures-biology.r
 # This file contains the code for plotting biological values iScam outputs.
 #
 # Author            : Chris Grandin
@@ -374,6 +374,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           startRowThisGear <- startRowThisGear + op[[scenario]]$inputs$data$nagearsvec[ind]
         }
       }
+      numages <- op[[scenario]]$inputs$data$agearsN[[index]]
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
       endRowThisGear <- startRowThisGear + nrowsThisGear - 1
       residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
@@ -405,15 +406,16 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
         # Get row proportions from composition data
         prop <- apply(compdat, 1, function(x){x/sum(x)})
-        # Get row sums (N ages for each year)
-        numages <- apply(compdat, 1, sum)
+        # Get row sums (N ages for each year). This is obsolete now that the number of ages are passed in the data file
+        # along with the age comps
+        #numages <- apply(compdat, 1, sum)
 
         if(sex == 1){
           sexstr <- "Male"
         }else if(sex == 2){
           sexstr <- "Female"
         }else{
-          sexstr <- "Combined sexes"
+          sexstr <- "Single sex"
         }
         if(plotnum == 1){
           plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab)

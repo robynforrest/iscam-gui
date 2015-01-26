@@ -39,6 +39,7 @@ removeAllExcept <- function(vars  = c("op","sens","bio")){
 removeAllExcept()
 
 require(PBSmodelling)
+require(tcltk)
 require(coda)
 require(ggplot2) # Only used for Observed landings plot.
 require(reshape2)
@@ -473,9 +474,13 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "nextGroup" = {
            nextGroup <- val$entryIndex + 1
-           if(nextGroup > length(op[[scenario]]$inputs$data$indices)){
-             nextGroup <- length(op[[scenario]]$inputs$data$indices)
+           # Set this to work for ngears.
+           if(nextGroup > op[[scenario]]$inputs$data$ngear){
+             nextGroup <- op[[scenario]]$inputs$data$ngear
            }
+           ## if(nextGroup > length(op[[scenario]]$inputs$data$indices)){
+           ##   nextGroup <- length(op[[scenario]]$inputs$data$indices)
+           ## }
            setWinVal(c(entryIndex=nextGroup))
          },
          # Write the plots and tables to disk
