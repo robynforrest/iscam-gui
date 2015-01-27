@@ -78,7 +78,6 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }else{
     models <- scenario # For the non-multiple and retro cases
   }
-
   if(plotMCMC){
     # Remove models which do not have MCMC outputs
     type <- "mcmc"
@@ -217,6 +216,7 @@ plotBiomassMPD <- function(out       = NULL,
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
   currFuncName <- getCurrFunc()
+
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
     return(NULL)

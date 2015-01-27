@@ -176,14 +176,17 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
 
   currFuncName <- getCurrFunc()
   if(retros){
-    numRetros <- length(op[[models[1]]]$outputs$retros) + 1  # +1 for the base
+    retroScenario <- models[1]
+    numRetros <- length(op[[retroScenario]]$outputs$retros) + 1  # +1 for the base; numRetros includes base run
     hasType <- vector("numeric", length = numRetros)
     for(model in 1:numRetros){
       if(model == 1){
         # base model
-        hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+        #hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
+        hasType[[model]] <- !is.null(unlist(op[[retroScenario]]$outputs[type]))
       }else{
-        hasType[[model]] <- !is.null(unlist(op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]))
+        # retrospectives
+        hasType[[model]] <- !is.null(unlist(op[[retroScenario]]$outputs$retros[[model-1]]$outputs[type]))
       }
     }
   }else{
@@ -214,19 +217,19 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
   for(model in 1:len){
     if(retros){
       if(model == 1){
-        out[[model]] <- op[[models[1]]]$outputs[type]
-        names[[model]]  <- op[[models[1]]]$names$scenario
-        inputs[[model]] <- op[[models[1]]]$inputs$data
+        out[[model]] <- op[[retroScenario]]$outputs[type]
+        names[[model]]  <- op[[retroScenario]]$names$scenario
+        inputs[[model]] <- op[[retroScenario]]$inputs$data
         linetypes[[model]] <- op[[models[1]]]$inputs$linetype
-        parout[[model]] <- op[[models[1]]]$outputs$par
-        controlinputs[[model]] <- op[[models[1]]]$inputs$control
+        parout[[model]] <- op[[retroScenario]]$outputs$par
+        controlinputs[[model]] <- op[[retroScenario]]$inputs$control
       }else{
-        out[[model]]    <- op[[models[1]]]$outputs$retros[[model-1]]$outputs[type]
-        names[[model]]  <- op[[models[1]]]$outputs$retros[[model-1]]$names$scenario
-        inputs[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$data
-        linetypes[[model]] <- op[[models[1]]]$outputs$retros[[model-1]]$inputs$linetype
-        parout[[model]] <- op[[models[1]]]$outputs$par
-        controlinputs[[model]] <- op[[models[1]]]$inputs$control
+        out[[model]]    <- op[[retroScenario]]$outputs$retros[[model-1]]$outputs[type]
+        names[[model]]  <- op[[retroScenario]]$outputs$retros[[model-1]]$names$scenario
+        inputs[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$data
+        linetypes[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$linetype
+        parout[[model]] <- op[[retroScenario]]$outputs$par
+        controlinputs[[model]] <- op[[retroScenario]]$inputs$control
       }
       colors[[model]] <- .RETRO_COLORS[model]
     }else{

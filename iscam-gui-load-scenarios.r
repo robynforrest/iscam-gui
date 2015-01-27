@@ -142,7 +142,7 @@
   tmp$outputs     <- list(mpd               = NULL, # Report file is loaded in here
                           mcmc              = NULL, # mcmc files are loaded in here
                           par               = NULL, # par file loaded in here
-                          retro             = NULL) # The retrospective plotting code looks at this.
+                          retros            = NULL) # The retrospective plotting code looks at this.
   tmp$names$scenario       <- basename(dired)
   tmp$names$dir            <- dired
   tmp$names$figDir         <- file.path(dired,.FIGURES_DIR_NAME)
@@ -312,21 +312,20 @@
   if(!is.na(ind)){
     dirList <- dirList[-ind]
   }
+  # Try to load the retrospective runs
   if(length(dirList) > 0){
     tmp$outputs$retros <- .loadScenarios(dired = dired)
-    tmp$outputs$retroSummary <- NULL
     modelList <- NULL
     modelList[[1]] <- tmp$outputs$mpd
     for(retro in 1:length(tmp$outputs$retros)){
       modelList[[retro+1]] <- tmp$outputs$retros[[retro]]$outputs$mpd
     }
-    #tmp$outputs$retrosSummary <- paste0(currFuncName,"NEED TO IMPLEMENT retro loading, was SSsummarize!")
+  }else{
+    tmpFdFigures <- file.path(dired,.FIGURES_DIR_NAME)
+    tmpFdTables  <- file.path(dired,.TABLES_DIR_NAME)
+    dir.create(tmpFdFigures,showWarnings=!silent)
+    dir.create(tmpFdTables,showWarnings=!silent)
   }
-
-  tmpFdFigures <- file.path(dired,.FIGURES_DIR_NAME)
-  tmpFdTables  <- file.path(dired,.TABLES_DIR_NAME)
-  dir.create(tmpFdFigures,showWarnings=!silent)
-  dir.create(tmpFdTables,showWarnings=!silent)
   return(tmp)
 }
 
