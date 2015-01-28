@@ -17,7 +17,7 @@ grid 3 1 padx=10 pady=5 sticky=W
            button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
            button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
-     notebook name=nbPage tabs="RunModel Figs1 Figs2 SaveFigs MCMC SensPlots Retros RunDiag BioTool" font="8"
+     notebook name=nbPage tabs="RunModel ScenarioFigs SensitivityFigs DiagnosticFigs SaveFigs Retrospectives BioTool" font="8"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: RunModel                    --#
@@ -93,18 +93,18 @@ grid 3 1 padx=10 pady=5 sticky=W
                          null
 
 #--------------------------------------------------------------------#
-#--                      Notebook Tab: Figures1                    --#
+#--                      Notebook Tab: ScenarioFigs                --#
 #--------------------------------------------------------------------#
 
-     grid 1 2 relief=raised
+     grid 1 4 relief=raised
           grid 8 1 sticky=N relief=raised
                label text="Time series" font="bold 10" sticky=N
-               radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass all areas"   function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sTSSpawningBiomassByArea            text="Spawning biomass by area"     function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sTSSpawningDepletionAllAreas        text="Spawning depletion all areas" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sTSSpawningDepletionByArea          text="Spawning depletion by area"   function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment"                  function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sTSRecruitmentDevsAllAreas          text="Recruitment deviations"       function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass"            function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sTSSpawningBiomassByArea            text="Spawning biomass"           function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSSpawningDepletionAllAreas        text="Spawning depletion"          function=.subView sticky=W mode=character
+               #radio name=viewPlotType value=sTSSpawningDepletionByArea          text="Spawning depletion by area" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment"                 function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSRecruitmentDevsAllAreas          text="Recruitment deviations"      function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sTSRecruitmentByArea                text="Recruitment by area"          function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSIndex                            text="Index fits"                   function=.subView sticky=W mode=character
                radio name=viewPlotType value=sFishingMortality                   text="Fishing mortality"            function=.subView sticky=W mode=character
@@ -115,7 +115,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sCatchLandings                  text="Landings" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sCatchLandingsStacked           text="Landings stacked" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sCatchLandingsObsVsExpLandings  text="Catch fit" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchAnnualMeanWt text="Annual mean weights in catch" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sCatchAnnualMeanWt text="Annual mean wt/catch" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscards                 text="Discards" function=.subView sticky=W mode=character
@@ -128,37 +128,21 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sCatchTotalSeasonsStacked      text="Total catch (if discards present) aggregated across seasons stacked" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscardsSeasons          text="Discards aggregated across seasons" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sCatchDiscardsSeasonsStacked   text="Discards aggregated across seasons stacked" function=.subView sticky=W mode=character
-
-
-#--------------------------------------------------------------------#
-#--                      Notebook Tab: Figures2                    --#
-#--------------------------------------------------------------------#
-
-     grid 1 2 sticky=N pady=10
-         grid 10 2 sticky=N relief=raised
+         grid 11 1 sticky=N relief=raised
                label text="Biology" font="bold 10" sticky=N
-               NULL
-               radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
-               NULL
-               radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
-               NULL
-               radio name=viewPlotType value=sBiologyComposition         text="Composition data" function=.subView sticky=W mode=character
-               NULL
-               radio name=viewPlotType value=sBiologyCompositionN1       text="Composition N1" function=.subView sticky=W mode=character
-               NULL
-               radio name=viewPlotType value=sBiologyCompositionFit      text="Fit to composition data" function=.subView sticky=W mode=character
                grid 1 3 relief=raised
                  radio name=compFitSex value=sCompFitSexM                   text="M"      function=.subView sticky=W mode=character
                  radio name=compFitSex value=sCompFitSexF                   text="F"      function=.subView sticky=W mode=character
                  radio name=compFitSex value=sCompFitSexC                   text="Single" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyMeanWtAtAge         text="Mean weight at length" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyMaturityAtAge       text="Maturity at age" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyComposition         text="Composition data" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyCompositionN1       text="Composition N1" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sBiologyCompositionFit      text="Fit to composition data" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sBiologyCompositionResid    text="Composition residuals" function=.subView sticky=W mode=character
-               NULL
                radio name=viewPlotType value=sBiologyLW                  text="Length/Weight relationship" function=.subView sticky=W mode=character
-               NULL
                radio name=viewPlotType value=sBiologyVONB                text="Length/Age relationship (VonB)" function=.subView sticky=W mode=character
-               NULL
                radio name=viewPlotType value=sBiologyMA                  text="Maturity/Age relationship" function=.subView sticky=W mode=character
-               NULL
 
                #radio name=viewPlotType value=sBiologyFecundity          text="Fecundity" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sBiologyFecundityWeight    text="Fecundity as a function of weight" function=.subView sticky=W mode=character
@@ -170,7 +154,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sBiologyTVGrowthContour    text="Contour of time-varying growth" function=.subView sticky=W mode=character
           grid 2 1 sticky=N relief=raised
                label text="Selectivity" font="bold 10" sticky=N
-               radio name=viewPlotType value=sSelexLogisticByFleet text="Logistic age- or length-based in end year by fleet" function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sSelexLogisticByFleet text="End year" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexLengthBasedByFleet text="Length based in end year by fleet" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexAgeBasedByFleet text="Age based in end year by fleet" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexTVAtLengthSurface text="Time-varying length surface" function=.subView sticky=W mode=character
@@ -186,66 +170,9 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sSelexAtAgeContour text="at-age in end year" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexAgeLengthGrowthCurve text="at-age and length contour overlaid growth curve" function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSelexUncertainty text="Uncertainty if requested at end of control file" function=.subView sticky=W mode=character
-#--------------------------------------------------------------------#
-#--                      Notebook Tab: OutputFigures               --#
-#--------------------------------------------------------------------#
-
-     grid 1 1 sticky=N pady=10
-          grid 3 1 relief=sunken padx=20
-               grid 1 2
-                    button name=writePlots      function=.subView action="writePlots"          width=25 text="Write scenario figures"
-                    button name=writeTables     function=.subView action="writeTables"         width=25 text="Write scenario tables"
-               grid 1 2
-                    button name=writeAllPlots    function=.subView action="writeAllPlots"       width=25 text="Write ALL figures"
-                    button name=writeAllTables   function=.subView action="writeAllTables"      width=25 text="Write ALL tables"
-               grid 1 2
-                    button name=writeSensPlots   function=.subView action="writeSensPlots"      width=25 text="Write sensitivity figures" fg="chocolate4"
-                    button name=writeRetroPlots  function=.subView action="writeRetroPlots"      width=25 text="Write retrospective figures" fg="chocolate4"
 
 #--------------------------------------------------------------------#
-#--                      Notebook Tab: MCMC Diagnostics            --#
-#--------------------------------------------------------------------#
-
-     grid 7 3 byrow=T sticky=N relief=raised
-          #1
-          label text="MCMC Diagnostics" font="bold 10" sticky=NW
-          null
-          null
-          #2
-          radio name=viewPlotType value=sMCMCTrace          text="Traceplots"                       function=.subView mode=character sticky=W
-          label text="Burn" font="bold 10" width=5 sticky=E
-          entry name=burn function=.subView action="changeBurnThin" width=5 value=0   entryfont="10"
-          #3
-          radio name=viewPlotType value=sMCMCAutocor        text="Autocorrelation"                  function=.subView mode=character sticky=W
-          label text="Thin" font="bold 10" width=5 sticky=E
-          entry name=thin function=.subView action="changeBurnThin" width=5 value=1   entryfont="10"
-          #4
-          radio name=viewPlotType value=sMCMCDensity         text="Density"                        function=.subView mode=character sticky=W
-          null
-          null
-          #5
-          radio name=viewPlotType value=sParameterPairs     text="Pairs with histograms"            function=.subView mode=character sticky=W
-          null
-          null
-          #6
-          radio name=viewPlotType value=sPriorsVsPosts      text="Priors vs. Posts"                 function=.subView mode=character sticky=W
-          null
-          null
-          #7
-          radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
-          null
-          null
-          #5
-          #radio name=viewPlotType value=sMCMCGeweke         text="Geweke Diagnostic"                     function=.subView mode=character sticky=W
-          #label text="Nbin" font="bold 10" width=5 sticky=E
-          #entry name=nbin  function=.subView action="changeBurnThin" width=5 value=20   entryfont="10"
-          #6
-          #radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
-          #null
-          #null
-
-#--------------------------------------------------------------------#
-#--                      Notebook Tab: Sensitivity Comparisons     --#
+#--                      Notebook Tab: SensitivityFigs             --#
 #--------------------------------------------------------------------#
      grid 14 5 byrow=T sticky=N relief=raised
           #1
@@ -332,6 +259,70 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           null
+#--------------------------------------------------------------------#
+#--                      Notebook Tab:  DiagnosticsFigs            --#
+#--------------------------------------------------------------------#
+     grid 1 2
+          grid 7 3 byrow=T sticky=N relief=raised
+               #1
+               label text="MCMC Diagnostics" font="bold 10" sticky=NW
+               null
+               null
+               #2
+               radio name=viewPlotType value=sMCMCTrace          text="Traceplots"                       function=.subView mode=character sticky=W
+               label text="Burn" font="bold 10" width=5 sticky=E
+               entry name=burn function=.subView action="changeBurnThin" width=5 value=0   entryfont="10"
+               #3
+               radio name=viewPlotType value=sMCMCAutocor        text="Autocorrelation"                  function=.subView mode=character sticky=W
+               label text="Thin" font="bold 10" width=5 sticky=E
+               entry name=thin function=.subView action="changeBurnThin" width=5 value=1   entryfont="10"
+               #4
+               radio name=viewPlotType value=sMCMCDensity         text="Density"                        function=.subView mode=character sticky=W
+               null
+               null
+               #5
+               radio name=viewPlotType value=sParameterPairs     text="Pairs with histograms"            function=.subView mode=character sticky=W
+               null
+               null
+               #6
+               radio name=viewPlotType value=sPriorsVsPosts      text="Priors vs. Posts"                 function=.subView mode=character sticky=W
+               null
+               null
+               #7
+               radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
+               null
+               null
+               #5
+               #radio name=viewPlotType value=sMCMCGeweke         text="Geweke Diagnostic"                     function=.subView mode=character sticky=W
+               #label text="Nbin" font="bold 10" width=5 sticky=E
+               #entry name=nbin  function=.subView action="changeBurnThin" width=5 value=20   entryfont="10"
+               #6
+               #radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
+               #null
+               #null
+          grid 5 1 sticky=NW relief=raised
+               label text="Runtime values" font="bold 10" sticky=NW
+               radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
+               radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
+               radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
+               radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
+
+
+#--------------------------------------------------------------------#
+#--                      Notebook Tab: OutputFigures               --#
+#--------------------------------------------------------------------#
+
+     grid 1 1 sticky=N pady=10
+          grid 3 1 relief=sunken padx=20
+               grid 1 2
+                    button name=writePlots      function=.subView action="writePlots"          width=25 text="Write scenario figures"
+                    button name=writeTables     function=.subView action="writeTables"         width=25 text="Write scenario tables"
+               grid 1 2
+                    button name=writeAllPlots    function=.subView action="writeAllPlots"       width=25 text="Write ALL figures"
+                    button name=writeAllTables   function=.subView action="writeAllTables"      width=25 text="Write ALL tables"
+               grid 1 2
+                    button name=writeSensPlots   function=.subView action="writeSensPlots"      width=25 text="Write sensitivity figures" fg="chocolate4"
+                    button name=writeRetroPlots  function=.subView action="writeRetroPlots"      width=25 text="Write retrospective figures" fg="chocolate4"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Retrospectives              --#
@@ -370,17 +361,6 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           button name=runAllRetros function=.subView action="runAllRetros"     width=15 padx=5 pady=5 text="Run All retros"  fg="blue"
-
-#--------------------------------------------------------------------#
-#--                      Notebook Tab: RuntimeValues               --#
-#--------------------------------------------------------------------#
-
-     grid 5 1 sticky=NW relief=raised
-          label text="Runtime values" font="bold 10" sticky=NW
-          radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
-          radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
-          radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
-          radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: BioTool                     --#
