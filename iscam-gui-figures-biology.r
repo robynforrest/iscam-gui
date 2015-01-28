@@ -9,7 +9,7 @@
 
 plotBiology <- function(plotNum    = 1,         # Plot code number
                         compFitSex = 1,         # Composition plots sex to plot (1=M/Both, 2=F)
-                        savefig    = .SAVEFIG,      # TRUE/FALSE for PNG image output
+                        savefig    = .SAVEFIG,  # TRUE/FALSE for PNG image output
                         fileText   = "Default", # Name of the file if png==TRUE
                         plotMCMC   = FALSE,     # TRUE/FALSE to plot MCMC output
                         ci         = NULL,      # confidence interval in % (0-100)
@@ -329,7 +329,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  nSex <- op[[scenario]]$inputs$data$nsex
+  nsex <- op[[scenario]]$inputs$data$nsex
   nAgears <-  op[[scenario]]$input$data$nagears
   nAgearsobs <- op[[scenario]]$input$data$nagearsvec
   # ageLengthFlags, 0 = length data 1= age data, if two-sex model this will be length 2 vector
@@ -365,7 +365,6 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
       }
       compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
 
-      nsex <- op[[scenario]]$inputs$data$nsex
       startRowThisGear <- 1
       if(index > 1){
         # If index = 1, then we want it to start at row 1
@@ -375,7 +374,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
       }
       numages <- op[[scenario]]$inputs$data$agearsN[[index]]
-      if(nSex == 2){
+      if(nsex == 2){
         # Get odd elements
           tmpagen <- op[[scenario]]$inputs$data$agearsN[[index]]
         if(sex == 1){
@@ -506,7 +505,6 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
 
   # Get max proportion so all plots can be scaled the same
   maxY <- max(prop,as.matrix(fit))
-
   for(yr in 1:length(yrs)){
     year <- yrs[yr]
     obs  <- prop[yr,]

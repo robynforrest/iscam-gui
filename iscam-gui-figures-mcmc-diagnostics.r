@@ -127,6 +127,7 @@ stripStaticParams <- function(scenario, dat){
   # Strip out the static (non-estimated) parameters from the mcmc output data
   # for the given scenario.
   # We only need to see estimated parameters on the diagnostic plots!
+  # If there are no static parameters, NULL will be returned
 
   # Check the control file to see which parameters were static
   inp <- as.data.frame(op[[scenario]]$inputs$control$param)
@@ -154,12 +155,14 @@ stripStaticParams <- function(scenario, dat){
   selPostNames <- selPostNames[staticSel]
   datNames <- names(dat)
   staticSelInds <- NULL
-  for(staticSel in 1:length(selPostNames)){
-    staticSelInds <- c(staticSelInds, grep(selPostNames[staticSel], datNames))
+  if(length(selPostNames) > 0){
+    # If there are static parameters, remove them.
+    for(staticSel in 1:length(selPostNames)){
+      staticSelInds <- c(staticSelInds, grep(selPostNames[staticSel], datNames))
+    }
+    dat <- dat[,-staticSelInds]
   }
-  dat <- dat[,-staticSelInds]
   datNames <- names(dat)
-
   return(dat)
 }
 
