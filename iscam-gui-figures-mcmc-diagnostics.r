@@ -26,12 +26,12 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
 
   # Plot a convergence plot for an MCMC model run
   # plotNum must be one of:
-  # 1 Trace plots
-  # 2 Autocorrelation plots
-  # 3 Density plots
-  # 4 Pairs plots with histograms
-  # 5 Priors vs. Posteriors plots
-  # 6 Variance partitions
+  # 1  Trace plots
+  # 2  Autocorrelation plots
+  # 3  Density plots
+  # 4  Pairs plots with histograms
+  # 5  Priors vs. Posteriors plots
+  # 6  Variance partitions
 
   currFuncName <- getCurrFunc()
   scenarioName <- op[[scenario]]$names$scenario

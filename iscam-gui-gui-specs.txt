@@ -17,7 +17,7 @@ grid 3 1 padx=10 pady=5 sticky=W
            button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
            button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
-     notebook name=nbPage tabs="RunModel ScenarioFigs SensitivityFigs DiagnosticFigs SaveFigs Retrospectives BioTool" font="8"
+     notebook name=nbPage tabs="RunModel ScenarioFigs ComparisonFigs DiagnosticFigs SaveFigs Retrospectives BioTool" font="8"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: RunModel                    --#
@@ -172,11 +172,12 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sSelexUncertainty text="Uncertainty if requested at end of control file" function=.subView sticky=W mode=character
 
 #--------------------------------------------------------------------#
-#--                      Notebook Tab: SensitivityFigs             --#
+#--                      Notebook Tab: ComparisonFigs              --#
 #--------------------------------------------------------------------#
+   grid 1 2
      grid 14 5 byrow=T sticky=N relief=raised
           #1
-          label text="Sensitivity Groups"     font="bold 10" sticky=W
+          label text="Comparison Groups"     font="bold 10" sticky=W
           null
           null
           null
@@ -259,10 +260,16 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           null
+     grid 5 1 sticky=NW relief=raised
+          label text="Runtime values" font="bold 10" sticky=NW
+          radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
+
 #--------------------------------------------------------------------#
 #--                      Notebook Tab:  DiagnosticsFigs            --#
 #--------------------------------------------------------------------#
-     grid 1 2
           grid 7 3 byrow=T sticky=N relief=raised
                #1
                label text="MCMC Diagnostics" font="bold 10" sticky=NW
@@ -300,13 +307,6 @@ grid 3 1 padx=10 pady=5 sticky=W
                #radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
                #null
                #null
-          grid 5 1 sticky=NW relief=raised
-               label text="Runtime values" font="bold 10" sticky=NW
-               radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
-               radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
-               radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
-               radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
-
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: OutputFigures               --#

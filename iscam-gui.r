@@ -69,6 +69,7 @@ source(.FIGURES_SELEX_SOURCE)
 source(.FIGURES_TIMESERIES_SOURCE)
 source(.FIGURES_CATCH_SOURCE)
 source(.FIGURES_MCMC_SOURCE)
+source(.FIGURES_MLE_SOURCE)
 source(.FIGURES_RETROSPECTIVES_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
@@ -336,16 +337,16 @@ iscam <- function(reloadScenarios      = FALSE,
            "sRetroD"                                = {plotTS(s,3,savefig,"RetroDepletion",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sRetroRec"                              = {plotTS(s,5,savefig,"RetroSpawningBiomass",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype)},
            "sRetroSquid"                            = {plotCohorts(s,savefig=savefig,fileText="RetroSquid",ps=ps,leg=leg,figtype=figtype)},
-           # Plot runtime values returned from ADMB
-           "sObjFuncVal"                            = {plotConvergence(1,savefig,"ObjectiveFunctionValue",burnthin=burnthin,figtype=figtype)},
-           "sMaxGrad"                               = {plotConvergence(2,savefig,"MaximumGradient",burnthin=burnthin,figtype=figtype)},
-           "sFuncEvals"                             = {plotConvergence(3,savefig,"FunctionEvaluations",burnthin=burnthin,figtype=figtype)},
-           "sHangCodes"                             = {plotConvergence(4,savefig,"HangCodes",burnthin=burnthin,figtype=figtype)},
-           "sExitCodes"                             = {plotConvergence(5,savefig,"ExitCodes",burnthin=burnthin,figtype=figtype)},
+           # Plot runtime values comparisons returned from ADMB
+           "sObjFuncVal"                            = {plotDiagnostics(s, 1, savefig,"ObjectiveFunctionValue",burnthin=burnthin,figtype=figtype)},
+           "sMaxGrad"                               = {plotDiagnostics(s, 2, savefig,"MaximumGradient",burnthin=burnthin,figtype=figtype)},
+           "sFuncEvals"                             = {plotDiagnostics(s, 3, savefig,"FunctionEvaluations",burnthin=burnthin,figtype=figtype)},
+           "sHangCodes"                             = {plotDiagnostics(s, 4, savefig,"HangCodes",burnthin=burnthin,figtype=figtype)},
+           "sExitCodes"                             = {plotDiagnostics(s, 5, savefig,"ExitCodes",burnthin=burnthin,figtype=figtype)},
            {
              # Default
            }
-           )
+          )
   }
   .PLOT_IS_LIVE <<- TRUE
   return(invisible())
