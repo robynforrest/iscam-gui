@@ -340,8 +340,8 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
   fNames <- c(dunif,dnorm,dlnorm,dbeta,dgamma)
 
   numParams <- ncol(mcmcData)
-  numQParams <- ncol(inputs$control$survq)
   qParams <- inputs$control$survq
+  numQParams <- ncol(qParams)
   priorSpecs <- as.data.frame(inputs$control$param)
 
   # Remove fixed parameters
@@ -390,8 +390,11 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
   for(postInd in 1:ncol(mcmcData)){
     # Find the parameter name from mcmcData in the priorSpecs table
     # and plot if it is in the paramSpecs table
+    # Make sure that the name matches exactly by adding anchors ^ and $ to the pattern
+    # and log_ is optional
     postName <- names(mcmcData)[postInd]
-    priorInd <- grep(postName, priorNames)
+    priorPattern <- paste0("^[log_]*",postName,"$")
+    priorInd <- grep(priorPattern, priorNames)
     if(length(priorInd) > 0){
       # The posterior name is in the list of priors..
       dat <- mcmcData[,postInd]
@@ -408,6 +411,8 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
         mle <- mpdData$m[1]
       }else if(pName == "log_m2"){
         mle <- mpdData$m[2]
+      }else if(pName == "h"){
+        mle <- mpdData$steepness
       }else if(length(grep(qpat,pName)) > 0){
         num <- as.numeric(sub(qpat, "\\1", pName))
         mle <- mpdData$q[num]
