@@ -90,6 +90,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
     type <- "mpd"
     validModels <- getValidModelsList(models, retros = TRUE, type = type)
   }
+
   out    <- validModels[[1]]
   colors <- validModels[[2]]
   names  <- validModels[[3]]

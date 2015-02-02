@@ -260,12 +260,13 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           null
-     grid 5 1 sticky=NW relief=raised
+     grid 6 1 sticky=NW relief=raised
           label text="Runtime values" font="bold 10" sticky=NW
           radio name=viewPlotType value=sObjFuncVal         text="Objective function Val"           function=.subView mode=character sticky=W
           radio name=viewPlotType value=sMaxGrad            text="Max Gradient"                     function=.subView mode=character sticky=W
           radio name=viewPlotType value=sFuncEvals          text="Function Evaluations"             function=.subView mode=character sticky=W
           radio name=viewPlotType value=sExitCodes          text="Exit Codes"                       function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sHangCodes          text="Hang Codes"                       function=.subView mode=character sticky=W
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab:  DiagnosticsFigs            --#

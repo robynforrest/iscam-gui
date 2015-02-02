@@ -12,6 +12,8 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
                             plotNum    = 1,         # Plot code number
                             savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                             fileText   = "Default", # Name of the file if png==TRUE
+                            retros     = FALSE,     # TRUE/FALSE to plot retropectives
+                            sensGroup  = 1,         # Sensitivity group to plot
                             # PlotSpecs: Width, height, and resolution of screen and file
                             ps         = list(pngres = .RESOLUTION,
                                               pngw   = .WIDTH,
@@ -35,10 +37,31 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
 
   currFuncName <- getCurrFunc()
   scenarioName <- op[[scenario]]$names$scenario
-  #mcmcOut      <- op[[scenario]]$outputs$mcmc
-  mpdData      <- op[[scenario]]$outputs$mpd
-  if(is.null(mpdData)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no MPD output data associated with it.\n")
+  if(is.null(sens[[sensGroup]])){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The sensitivity group you selected has no members.")
+    return(NULL)
+  }
+  models <- sens[[sensGroup]]
+  type <- "mpd"
+  if(retros){
+    validModels <- getValidModelsList(models, retros = TRUE, type = type)
+  }else{
+    validModels <- getValidModelsList(models, type = type)
+  }
+
+  out    <- validModels[[1]]
+  colors <- validModels[[2]]
+  names  <- validModels[[3]]
+  inputs <- validModels[[4]]
+  linetypes <- validModels[[5]]
+  parout <- validModels[[6]]
+
+  if(is.null(validModels)){
+    if(is.null(names)){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",scenarioName," has no ",type," output associated with it.\n")
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"The model ",names[[1]]," has no ",type," output associated with it.\n")
+    }
     return(NULL)
   }
 
@@ -50,8 +73,14 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  filenameRaw  <- paste0(scenarioName,"_",fileText,figtype)
-  filename     <- file.path(figDir,filenameRaw)
+  if(retros){
+    filenameRaw  <- paste0("Retrospective_",scenarioName,"_",fileText,figtype)
+    filename     <- file.path(op[[scenario]]$names$dir,.FIGURES_DIR_NAME,filenameRaw)
+  }else{
+    filenameRaw  <- paste0("SensitivityGroup_",sensGroup,"_",fileText,figtype)
+    filename     <- file.path(.SENS_FIGURES_DIR_NAME,filenameRaw)
+  }
+
   if(savefig){
     graphics.off()
     if(figtype == .PNG_TYPE){
@@ -64,21 +93,20 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
   }else{
     windows(width=widthScreen,height=heightScreen)
   }
-#browser()
   if(plotNum == 1){
-    plotObjFunVal(mpdData)
+    plotObjFunVal(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
   }
   if(plotNum == 2){
-    plotMaxGradient(mpdData)
+    plotMaxGrad(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
   }
   if(plotNum == 3){
-    plotFuncEvals(mpdData)
+    plotFuncEvals(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
   }
   if(plotNum == 4){
-    plotHangCodes(mpdData)
+    plotHangCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
   }
   if(plotNum == 5){
-    plotExitCodes(mpdData)
+    plotExitCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
   }
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -87,20 +115,278 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
   return(TRUE)
 }
 
-plotObjFunVal <- function(dat = NULL){
+plotObjFunVal <- function(out       = NULL,
+                          colors    = NULL,
+                          names     = NULL,
+                          lty       = NULL,
+                          verbose   = FALSE,
+                          leg = "topright"){
   # Objective function values for runs
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
 
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-browser()
-  # At this point, dat$ObjectiveFunction, dat$MaxGrad, dat$ExitCode, and dat$HangCode are present.
-  # Need to merge them by comparison group
-  
   currFuncName <- getCurrFunc()
-  if(is.null(dat)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"dat must be supplied.\n")
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
     return(NULL)
   }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  dat <- out[[1]]$mpd$ObjectiveFunction
+
+  for(model in 2:length(out)){
+    dat <- rbind(dat,out[[model]]$mpd$ObjectiveFunction)
+  }
+  dat <- t(dat)
+  colnames(dat) <- 1:length(out)
+  rownames(dat) <- ""
+  plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","black"),xaxt='n',yaxt='n')
+  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1,1:length(out))
+  title("Objective function values")
+}
+
+plotMaxGrad <- function(out       = NULL,
+                        colors    = NULL,
+                        names     = NULL,
+                        lty       = NULL,
+                        verbose   = FALSE,
+                        leg = "topright"){
+  # Maximum gradient values for runs
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # GREEN represents a good gradient, i.e. one that is smaller than .maxGrad
+  # RED represents anything greater than .MAXGRAD
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  dat <- out[[1]]$mpd$MaxGrad
+
+  for(model in 2:length(out)){
+    dat <- rbind(dat,out[[model]]$mpd$MaxGrad)
+  }
+  .MAXGRAD <- 0.05
+  dat <- t(dat)
+  colnames(dat) <- 1:length(out)
+  rownames(dat) <- ""
+  dat <- ifelse(dat>.MAXGRAD,0,dat)
+  dat <- ifelse(dat<.MAXGRAD,dat,-dat)
+  plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
+  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1,1:length(out))
+  title(paste("Maximum gradient values (<",.MAXGRAD,")"))
+}
+
+plotFuncEvals <- function(out       = NULL,
+                          colors    = NULL,
+                          names     = NULL,
+                          lty       = NULL,
+                          verbose   = FALSE,
+                          leg = "topright"){
+  # Number of function evaluations for runs
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # GREEN means the number of function evaluations was greater than .FUNEVALS
+  # RED means the number of function evaluations was less than .FUNEVALS
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  dat <- out[[1]]$mpd$FuncEvals
+
+  for(model in 2:length(out)){
+    dat <- rbind(dat,out[[model]]$mpd$FuncEvals)
+  }
+  .FUNEVALS <- 500
+  dat <- t(dat)
+  colnames(dat) <- 1:length(out)
+  rownames(dat) <- ""
+  dat <- ifelse(dat<.FUNEVALS,-dat,dat)
+  plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
+  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1,1:length(out))
+  title(paste("Number of function evaluations (<",.FUNEVALS,")"))
+}
+
+plotHangCodes <- function(out       = NULL,
+                          colors    = NULL,
+                          names     = NULL,
+                          lty       = NULL,
+                          verbose   = FALSE,
+                          leg = "topright"){
+  # Hang codes for runs
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # GREEN means no error condition
+  # RED means no improvement in function value when 10th to last value compared with
+  #     current value, or no positive definite hessian
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+  .PCHCODE <- 35
+  plotcharCol <- ifelse(out[[1]]$mpd$HangCode==1,"red","green")
+  plot(1,1,
+       pch=.PCHCODE,
+       xlab="Scenario",
+       ylab="",
+       col=plotcharCol,
+       xlim=c(1,length(out)),
+       ylim=c(1,1))
+
+  for(model in 2:length(out)){
+    plotcharCol <- ifelse(out[[model]]$mpd$HangCode==1,"red","green")
+    points(model,1,pch=.PCHCODE,col=plotcharCol)
+  }
+  title("Hang code values")
+}
+
+plotExitCodes <- function(out       = NULL,
+                          colors    = NULL,
+                          names     = NULL,
+                          lty       = NULL,
+                          verbose   = FALSE,
+                          leg = "topright"){
+  # Hang codes for runs
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # GREEN for normal exit - i.e. all derivatives satisfy conditions
+  # RED for problem with the initial estimate for the Hessian matrix.
+  #     - The hessian matrix must be positive definite
+  # ORANGE for problem with the derivatives, either:
+  # a) There is an error in the derivatives or
+  # b) function does not decrease in direction of search, perhaps due to numerical
+  #    round off error, or too stringent a convergence criterion
+  # PURPLE for Maximum number of function calls exceeded
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+  .PCHCODE <- 35
+  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==1,"red","green")
+  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==2,"blue",plotcharCol)
+  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==3,"purple",plotcharCol)
+
+  plot(1,1,
+       pch=.PCHCODE,
+       xlab="Scenario",
+       ylab="",
+       col=plotcharCol,
+       xlim=c(1,length(out)),
+       ylim=c(1,1))
+
+  for(model in 2:length(out)){
+    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==1,"red","green")
+    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==2,"blue",plotcharCol)
+    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==3,"purple",plotcharCol)
+    points(model,1,pch=.PCHCODE,col=plotcharCol)
+  }
+  title("Exit code values")
 }
 
 # FROM THE CCAM DAYS..
