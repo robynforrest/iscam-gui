@@ -322,6 +322,9 @@ plotHangCodes <- function(out       = NULL,
     plotcharCol <- ifelse(out[[model]]$mpd$HangCode==1,"red","green")
     points(model,1,pch=.PCHCODE,col=plotcharCol)
   }
+  legend("topright",legend=c("Good - No error condition",
+                             "Non-positive definite hessian"),
+                             col=c("green","red"),pch=.PCHCODE)
   title("Hang code values")
 }
 
@@ -335,6 +338,7 @@ plotExitCodes <- function(out       = NULL,
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
+  # Exit codes can be 0-3 I believe, TODO: need to find this in the ADMB source to make sure.
   # GREEN for normal exit - i.e. all derivatives satisfy conditions
   # RED for problem with the initial estimate for the Hessian matrix.
   #     - The hessian matrix must be positive definite
@@ -368,8 +372,8 @@ plotExitCodes <- function(out       = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
   .PCHCODE <- 35
-  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==1,"red","green")
-  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==2,"blue",plotcharCol)
+  plotcharCol <- "green"
+  plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==2,"orange",plotcharCol)
   plotcharCol <- ifelse(out[[1]]$mpd$ExitCode==3,"purple",plotcharCol)
 
   plot(1,1,
@@ -381,128 +385,13 @@ plotExitCodes <- function(out       = NULL,
        ylim=c(1,1))
 
   for(model in 2:length(out)){
-    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==1,"red","green")
-    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==2,"blue",plotcharCol)
+    plotcharCol <- "green"
+    plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==2,"orange",plotcharCol)
     plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==3,"purple",plotcharCol)
     points(model,1,pch=.PCHCODE,col=plotcharCol)
   }
+  legend("topright",legend=c("Good - All derivatives calculated successfully.",
+                             "Derivative error",
+                             "Maximum function evaluations reached."),col=c("green","orange","purple"),pch=.PCHCODE)
   title("Exit code values")
-}
-
-# FROM THE CCAM DAYS..
-plotRuntimeStats <- function(type=0,ylab=""){
-  # plots runtime stats for all scenarios.
-  # assumes all scenarios have the same number of projected years
-  # assumes the opList structure is used.
-  # types:
-  # 1 = objFun, 2 = max gradient, 3 = number of function evals, 4 = hangcode, any other value = exit code
-  try(dev.off(),silent=T)
-  if(type==1 | type==2 | type==3){ # use PLOTBUBBLES from PBSModelling for these ones
-    if(type==1){
-      # Objective function values
-      # GREEN means value is positive GOOD
-      # RED means a bad objective function value, i.e. returned -1,#IND (which is represented as 0.0 from GrMPE)
-      dat <- abs(opList[[1]][[4]]$ObjectiveFunction)
-      for(scenario in 2:length(opList)){
-        if(opList[[scenario]][[6]]){ # if MPD results are loaded
-          dat <- rbind(dat,opList[[scenario]][[4]]$ObjectiveFunction)
-        }else{
-          dat <- rbind(dat,NA)
-          cat(paste("Error plotting 'Runtime Statistics' figure.  There are no MPD outputs loaded for scenario",scenario,", it is NULL on the plot.\n\n"))
-        }
-      }
-      dat <- t(dat)
-      colnames(dat) <- 1:length(opList)
-      rownames(dat) <- ""
-      plotBubbles(dat,dnam=F,cpro=F,ylab=ylab,clrs=c("green","red","black"),xaxt='n',yaxt='n')
-      text(1:length(opList),1.04,dat,srt=-45,adj=1)
-      text(1:length(opList),1,1:length(opList))
-      title("Objective function values")
-    }else if(type==2){
-      # Maximum Gradient values
-      # GREEN represents a good gradient, i.e. one that is smaller than .maxGrad
-      # RED represents anything greater than .MAXGRAD
-      dat <- abs(opList[[1]][[4]]$MaxGrad)
-      for(scenario in 2:length(opList)){
-        if(opList[[scenario]][[6]]){ # if MPD results are loaded
-          dat <- rbind(dat,opList[[scenario]][[4]]$MaxGrad)
-        }else{
-          dat <- rbind(dat,NA)
-          cat(paste("Error plotting 'Runtime Statistics' figure.  There are no MPD outputs loaded for scenario",scenario,", it is NULL on the plot.\n\n"))
-        }
-      }
-      dat <- t(dat)
-      colnames(dat) <- 1:length(opList)
-      rownames(dat) <- ""
-      dat <- ifelse(dat>.MAXGRAD,0,dat)
-      dat <- ifelse(dat<.MAXGRAD,dat,-dat)
-      plotBubbles(dat,dnam=F,cpro=F,ylab=ylab,clrs=c("green","red","red"),xaxt='n',yaxt='n')
-      text(1:length(opList),1.04,dat,srt=-45,adj=1)
-      text(1:length(opList),1,1:length(opList))
-      title(paste("Maximum gradient values (<",.MAXGRAD,")"))
-    }else if(type==3){
-      # Number of function evaluations
-      # GREEN means the number of function evaluations was greater than .FUNEVALS
-      # RED means the number of function evaluations was less than .FUNEVALS
-      dat <- opList[[1]][[4]]$nf
-      for(scenario in 2:length(opList)){
-        if(opList[[scenario]][[6]]){ # if MPD results are loaded
-          dat <- rbind(dat,opList[[scenario]][[4]]$nf)
-        }else{
-          dat <- rbind(dat,NA)
-          cat(paste("Error plotting 'Runtime Statistics' figure.  There are no MPD outputs loaded for scenario",scenario,", it is NULL on the plot.\n\n"))
-        }
-      }
-      dat <- t(dat)
-      colnames(dat) <- 1:length(opList)
-      rownames(dat) <- ""
-      dat <- ifelse(dat<.FUNEVALS,-dat,dat)
-      plotBubbles(dat,dnam=F,cpro=F,ylab=ylab,clrs=c("green","red","black"),xaxt='n',yaxt='n')
-      text(1:length(opList),1.04,dat,srt=-45,adj=1)
-      text(1:length(opList),1,1:length(opList))
-      title(paste("Number of function evaluations (>",.FUNEVALS,")"))
-    }
-  }else{
-  # NOT USING PLOTBUBBLES!!
-    if(type==4){
-      # Hang codes
-      plotcharCol <- ifelse(opList[[1]][[4]]$HangCode==1,"red","green")
-      # GREEN means no error condition
-      # RED means no improvement in function value when 10th to last value compared with
-      #     current value.
-    }else{
-      # Exit codes
-      plotcharCol <- ifelse(opList[[1]][[4]]$ExitCode==1,"green","red")
-      # GREEN for normal exit - i.e. all derivatives satisfy conditions
-      # RED for problem with the initial estimate for the Hessian matrix.
-      #     - The hessian matrix must be positive definite
-      plotcharCol <- ifelse(opList[[1]][[4]]$ExitCode==2,"blue",plotcharCol)
-      # BLUE for problem with the derivatives, either:
-      # a) There is an error in the derivatives or
-      # b) function does not decrease in direction of search, perhaps due to numerical
-      #    round off error, or too stringent a convergence criterion
-      plotcharCol <- ifelse(opList[[1]][[4]]$ExitCode==3,"purple",plotcharCol)
-      # PURPLE for Maximum number of function calls exceeded
-    }
-    #  par( oma=c(2,2,4,1), mar=c(3,3,3,1), mfrow=c(1,1) )
-    plot(1,1,
-         pch=.PCHCODE,
-         xlab="Scenario",
-         ylab=ylab,
-         col=plotcharCol,
-         xlim=c(1,length(opList)),
-         ylim=c(1,1))
-    for(scenario in 2:length(opList)){
-      if(type==4){
-        plotcharCol <- ifelse(opList[[scenario]][[4]]$HangCode==1,"red","green")
-        title("Hang code values")
-      }else{
-        plotcharCol <- ifelse(opList[[scenario]][[4]]$ExitCode==1,"green","red")
-        plotcharCol <- ifelse(opList[[scenario]][[4]]$ExitCode==2,"blue",plotcharCol)
-        plotcharCol <- ifelse(opList[[scenario]][[4]]$ExitCode==3,"purple",plotcharCol)
-        title("Exit code values")
-      }
-      points(scenario,1,pch=.PCHCODE,col=plotcharCol)
-    }
-  }
 }
