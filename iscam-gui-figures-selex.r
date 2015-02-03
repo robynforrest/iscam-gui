@@ -1,10 +1,10 @@
 #**********************************************************************************
-# ss-explore-figures-selex.r
+# iscam-gui-figures-selex.r
 # This file contains the code for plotting selectivity values SS outputs using the
 # infrastructure provided with ss-explore.
 #
 # Author            : Chris Grandin
-# Development Date  : October 2013
+# Development Date  : October 2013 - February 2015
 # Current version   : 1.0
 #**********************************************************************************
 
@@ -120,143 +120,69 @@ plotSelex <- function(scenario   = 1,            # Scenario number
 plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
   # Both sexes will be plotted with linetype of the females = linetype for males + 1 The colors will be the same.
+  # Notes:
+  # - Models may have different gears than others, but we want the selectivity plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
 
+  currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  currFuncName <- getCurrFunc()
-  gearNames <- inputs[[1]]$gearNames
- 	ngear     <- inputs[[1]]$ngear
-  nsex      <- inputs[[1]]$nsex
-  aflag     <- 0 #flag to set age or length
-  selType   <- controlinputs[[1]]$sel[1,index]
-  selBlocks <- controlinputs[[1]]$sel[10,index] #selectivity time blocks
-
-  if(selType != 1 && selType != 6 && selType != 11){
-    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
+  # Get a list of unique index names across all models to be included in this plot
+  agegearnames <- NULL
+  for(model in 1:length(inputs)){
+    agegearnames <- c(agegearnames, inputs[[model]]$ageGearNames)
+  }
+  if(is.null(agegearnames)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply age gear names in the data files to plot selectivities across models.")
     return(NULL)
   }
-  if(inputs[[1]]$hasAgeGearNames){
-    gearTitle <- gearNames[index]
-  }else{
-    gearTitle <- paste0("Gear ",gearNames[index])
+  agegearnames <- unique(agegearnames)
+  if(index > length(agegearnames)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a gear number less or equal to ",length(agegearnames),".")
+    return(NULL)
   }
-
-  if(selType == 1 || selType == 6){
-    aflag <-1
-  }else if(selType == 11){
-    aflag <- 2
-  }
-
-  #startBlocks <- op[[scenario]]$inputs$control$syrtimeblock[index,]
-  ## if(selBlocks > 1){
-  ##   for(i in 2:selBlocks){
-  ##     logselBlockData <- xx[which(logselData[,3]==startBlocks[i]),]
-  ##     selData <- cbind(selData, exp(logselBlockData))
-  ##   }
-  ## }
-
-  logselData <- out[[1]]$mpd$log_sel
-  # Get the log selectivity for the gear given by 'index'
-  logselData <- logselData[which(logselData[,1]==index),]
-  if(nsex==2 && aflag==2){
-    lsdat1 <- logselData[which(logselData[,2]==1),]
-    lsdat2 <- logselData[which(logselData[,2]==2),]
-    xx1 <- lsdat1[,4:ncol(lsdat1)]
-    xx2 <- lsdat2[,4:ncol(lsdat2)]
-    selData1 <- exp(xx1)
-    selData1 <- selData1[1,] #selectivity in first block
-    selData1 <- as.matrix(selData1)
-    selData2 <- exp(xx2)
-    selData2 <- selData2[1,] #selectivity in first block
-    selData2 <- as.matrix(selData2)
-  }else{
-    xx <- logselData[,4:ncol(logselData)]
-    selData <- exp(xx)
-    selData <- selData[1,] #selectivity in first block
-    selData <- as.matrix(selData)
-  }
-  if(aflag == 1){
-    # logistic age selectivity is not sex-specific
-    Xlab <- "Age"
-    age <- out[[1]]$mpd$age
-    plot(age, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, lty=lty[[1]], col=colors[[1]], las=1, main=gearTitle, ylim=c(0,1.1))
-    ## if(selBlocks > 1){
-    ##   # TODO: implement this. currently only works right for a single selectivity block
-    ##   for(i in 2:selBlocks){
-    ##     lines(age, selData[,i], lty=i, col=i, lwd=2)
-    ##     legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))
-    ##   }
-    ## }
-    if(length(out) > 1){
-      for(model in 2:length(out)){
-        age        <- out[[model]]$mpd$age
-        logselData <- out[[model]]$mpd$log_sel
-        logselData <- logselData[which(logselData[,1]==index),]
-        xx         <- logselData[,4:ncol(logselData)]
-        selData    <- exp(xx)
-        selData    <- selData[1,] #selectivity in first block
-        selData    <- as.matrix(selData)
-        lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
+  curragegearname <- agegearnames[index]
+  # The 'agegearnames' vector will be used as the gear to scroll through,
+  # i.e. when the user changes to the next gear, the next name in this list will
+  # be matched.
+  titleText    <- agegearnames[index]
+  mat <- NULL
+  for(model in 1:length(out)){
+    age <- out[[model]]$mpd$age
+    gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
+    logselData   <- out[[model]]$mpd$log_sel
+    if(!is.na(gearnum)){
+      nsex         <- inputs[[model]]$nsex
+      age          <- out[[model]]$mpd$age
+      agegearnames <- inputs[[model]]$ageGearNames
+      logselData   <- logselData[which(logselData[,1] == gearnum),]
+      #selType      <- inputs[[model]]$sel[1, gearnum]
+      #selBlocks    <- inputs[[model]]$sel[10, gearnum] # selectivity time blocks
+      if(nsex == 2){
+        # There is no sex-specific selectivity, but we need to extract one of them
+        # since two sexes are reported. May as well choose Female.
+        logselData <- logselData[which(logselData[,2] == 2),]
       }
+      selData <- exp(logselData[,4:ncol(logselData)])
+      selData <- selData[1,] #selectivity in first block
+      #selData <- as.matrix(selData)
+      mat <- cbind(mat, selData)
     }
-  }else if(aflag == 2){
-    Xlab <- "Length (cm)"
-    age <- out[[1]]$mpd$age
-    if(nsex == 2){
-      len        <- out[[1]]$mpd$la
-#      plot(len[1,], selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=colors[[1]], lty=lty[[1]], las=1,  main=gearTitle, ylim=c(0,1.1))
-#      lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[1]]+1, col=colors[[1]], las=1)
-      #browser()
-      plot(age, selData1[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=colors[[1]], lty=lty[[1]], las=1,  main=gearTitle, ylim=c(0,1.1))
-      lines(age, selData2[,1], type="l", lwd=2, lty=lty[[1]]+1, col=colors[[1]], las=1)
-      currName <- names[[1]]
-      names[[1]] <- paste0(currName, " - Male")
-      female <- paste0(currName, " - Female")
-      names <- append(names, female)
-      colors <- append(colors, colors[[1]])
-      lty <- append(lty, lty[[1]]+1)
-      ## if(selBlocks > 1){
-      ##   for(i in 2:selBlocks){
-      ##     lines(len[1,], selData[,i], lty=i, col=i, lwd=2)
-      ##     lines(len[2,], selData[,i], lty=i+1, col=i, lwd=2)
-      ##     legtext <- c(legtext, paste("Male - Selectivity Block",i,":", startBlocks[i]))
-      ##     legtext <- c(legtext, paste("Female - Selectivity Block",i,":", startBlocks[i]))
-      ##   }
-      ## }
-      if(length(out) > 1){
-        for(model in 2:length(out)){
-          len        <- out[[model]]$mpd$la
-          logselData <- out[[model]]$mpd$log_sel
-          logselData <- logselData[which(logselData[,1]==index),]
-          xx         <- logselData[,4:ncol(logselData)]
-          selData    <- exp(xx)
-          selData    <- selData[1,] #selectivity in first block
-          selData    <- as.matrix(selData)
-#          lines(len[1,], selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
-#          lines(len[2,], selData[,1], type="l", lwd=2, lty=lty[[model]]+1, col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
-          lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
-          lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]]+1, col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
-          currName <- names[[model]]
-          names[[model]] <- paste0(currName, " - Male")
-          female <- paste0(currName, " - Female")
-          names <- append(names, female)
-          colors <- append(colors, colors[[model]])
-          lty <- append(lty, lty[[model]]+1)
-        }
-      }
+    if(inputs[[1]]$hasAgeGearNames){
+      gearTitle <- agegearnames[gearnum]
     }else{
-      len     <- out[[model]]$mpd$la
-      plot(len, selData[,1], type="l", xlab=Xlab, ylab="Proportion", lwd=2, col=1, las=1,  main=gearTitle, ylim=c(0,1.1))
-      legtext <- c(legtext, paste("Combined sexes"))
-      if(selBlocks>1){
-        for(i in 2:selBlocks){
-          lines(len, selData[,i], lty=i, col=i, lwd=2)
-          legtext <- c(legtext, paste("Selectivity Block",i,":", startBlocks[i]))
-        }
-      }
+      gearTitle <- paste0("Gear ", agegearnames[gearnum])
     }
   }
+  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = gearTitle, ylim = c(0,1.1))
+#  if(selType != 1 && selType != 6 && selType != 11){
+#    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
+#    return(NULL)
+#  }
+# lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }

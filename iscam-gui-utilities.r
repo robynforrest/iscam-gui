@@ -220,6 +220,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
         out[[model]] <- op[[retroScenario]]$outputs[type]
         names[[model]]  <- op[[retroScenario]]$names$scenario
         inputs[[model]] <- op[[retroScenario]]$inputs$data
+        inputs[[model]]$sel <- op[[retroScenario]]$inputs$control$sel
         linetypes[[model]] <- op[[models[1]]]$inputs$linetype
         parout[[model]] <- op[[retroScenario]]$outputs$par
         controlinputs[[model]] <- op[[retroScenario]]$inputs$control
@@ -227,6 +228,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
         out[[model]]    <- op[[retroScenario]]$outputs$retros[[model-1]]$outputs[type]
         names[[model]]  <- op[[retroScenario]]$outputs$retros[[model-1]]$names$scenario
         inputs[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$data
+        inputs[[model]]$sel <- op[[retroScenario]]$outputs$retros[[mode-1]]$inputs$control$sel
         linetypes[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$linetype
         parout[[model]] <- op[[retroScenario]]$outputs$par
         controlinputs[[model]] <- op[[retroScenario]]$inputs$control
@@ -237,6 +239,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
       colors[[model]] <- op[[models[model]]]$inputs$color
       names[[model]]  <- op[[models[model]]]$names$scenario
       inputs[[model]] <- op[[models[model]]]$inputs$data
+      inputs[[model]]$sel <- op[[models[model]]]$inputs$control$sel
       linetypes[[model]] <- op[[models[model]]]$inputs$linetype
       parout[[model]] <- op[[models[model]]]$outputs$par
       controlinputs[[model]] <- op[[models[1]]]$inputs$control

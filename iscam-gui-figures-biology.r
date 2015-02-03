@@ -330,11 +330,10 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
   on.exit(par(oldPar))
 
   nsex <- op[[scenario]]$inputs$data$nsex
-  nAgears <-  op[[scenario]]$input$data$nagears
+  nAgears <- op[[scenario]]$input$data$nagears
   nAgearsobs <- op[[scenario]]$input$data$nagearsvec
   # ageLengthFlags, 0 = length data 1= age data, if two-sex model this will be length 2 vector
   ageLengthFlags <- op[[scenario]]$input$data$agecompflag
-
   gearNames <- op[[scenario]]$inputs$data$ageGearNames
   if(op[[scenario]]$inputs$data$hasAgeGearNames){
     titleText <- gearNames[index]
@@ -364,7 +363,6 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         ylab="Age"
       }
       compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
-
       startRowThisGear <- 1
       if(index > 1){
         # If index = 1, then we want it to start at row 1
@@ -416,6 +414,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
         }
         # Get row proportions from composition data
         prop <- apply(compdat, 1, function(x){x/sum(x)})
+
         # Get row sums (N ages for each year). This is obsolete now that the number of ages are passed in the data file
         # along with the age comps
         #numages <- apply(compdat, 1, sum)

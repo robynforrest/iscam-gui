@@ -476,9 +476,9 @@ iscam <- function(reloadScenarios      = FALSE,
          "nextGroup" = {
            nextGroup <- val$entryIndex + 1
            # Set this to work for ngears.
-           if(nextGroup > op[[scenario]]$inputs$data$ngear){
-             nextGroup <- op[[scenario]]$inputs$data$ngear
-           }
+           #if(nextGroup > op[[scenario]]$inputs$data$ngear){
+           #  nextGroup <- op[[scenario]]$inputs$data$ngear
+           #}
            ## if(nextGroup > length(op[[scenario]]$inputs$data$indices)){
            ##   nextGroup <- length(op[[scenario]]$inputs$data$indices)
            ## }
