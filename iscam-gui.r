@@ -178,32 +178,32 @@ iscam <- function(reloadScenarios      = FALSE,
 }
 
 .writeSensPlots <- function(silent=.SILENT){
-  # write overlay sensitivity plots
-  assignGlobals(1)
-  assign("saveon",T,envir=.GlobalEnv)
-  val <- getWinVal()
-  uniqueSensitivityGroups <- c()  # base must be 0
-  for(scenario in 1:length(op)){
-    # count number of unique sensitivity groups
-    if(!is.element(op[[scenario]][[4]]$SensitivityGroup,uniqueSensitivityGroups) && op[[scenario]][[4]]$SensitivityGroup != 0){
-        uniqueSensitivityGroups <- c(uniqueSensitivityGroups,op[[scenario]][[4]]$SensitivityGroup)
-    }
-  }
-  for(sensitivityGroup in uniqueSensitivityGroups){
-    fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-                     whichPlot="biomass",
-                     ylimit=val$biomassYlim,
-                     useMaxYlim=val$maxBiomassYlim)
-    fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-                     whichPlot="depletion",
-                     ylimit=val$depletionYlim,
-                     useMaxYlim=val$maxDepletionYlim)
-    fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-                     whichPlot="recruits",
-                     ylimit=val$recruitmentYlim,
-                     useMaxYlim=val$maxRecruitmentYlim)
-  }
-  assign("saveon",FALSE,envir=.GlobalEnv)
+##   # write overlay sensitivity plots
+##   assignGlobals(1)
+##   assign("saveon",T,envir=.GlobalEnv)
+##   val <- getWinVal()
+##   uniqueSensitivityGroups <- c()  # base must be 0
+##   for(scenario in 1:length(op)){
+##     # count number of unique sensitivity groups
+##     if(!is.element(op[[scenario]][[4]]$SensitivityGroup,uniqueSensitivityGroups) && op[[scenario]][[4]]$SensitivityGroup != 0){
+##         uniqueSensitivityGroups <- c(uniqueSensitivityGroups,op[[scenario]][[4]]$SensitivityGroup)
+##     }
+##   }
+##   for(sensitivityGroup in uniqueSensitivityGroups){
+##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
+##                      whichPlot="biomass",
+##                      ylimit=val$biomassYlim,
+##                      useMaxYlim=val$maxBiomassYlim)
+##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
+##                      whichPlot="depletion",
+##                      ylimit=val$depletionYlim,
+##                      useMaxYlim=val$maxDepletionYlim)
+##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
+##                      whichPlot="recruits",
+##                      ylimit=val$recruitmentYlim,
+##                      useMaxYlim=val$maxRecruitmentYlim)
+##   }
+##   assign("saveon",FALSE,envir=.GlobalEnv)
 }
 
 .doPlots <- function(savefig=.SAVEFIG){

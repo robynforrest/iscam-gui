@@ -412,7 +412,7 @@ grid 3 1 padx=10 pady=5 sticky=W
   grid 3 1
     grid 1 1
       grid 3 7
-        label text="Index/Gear to plot" font="bold 10" sticky=W
+        label text="Gear to plot" font="bold 10" sticky=W
         button name=prevGroup     function=.subView action="prevGroup"        width=5  text="<---"
         entry name=entryIndex width=7 padx=5 value=1 function=.subView action="changeIndex" entryfont="10" sticky=W
         button name=nextGroup     function=.subView action="nextGroup"        width=5  text="--->"

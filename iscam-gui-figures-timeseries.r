@@ -167,7 +167,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
     }else{
-      plotIndexMPD(scenario, out, colors, names, lty = linetypes, inputs, index = index, verbose = !silent, leg = leg)
+      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg)
     }
   }
   if(plotNum == 8){
@@ -698,23 +698,23 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
 
 plotIndexMPD <- function(scenario  = NULL,
                          out       = NULL,
+                         inputs    = NULL,
+                         index     = NULL,
                          colors    = NULL,
                          names     = NULL,
                          lty       = NULL,
-                         inputs    = NULL,
-                         index     = NULL,
                          verbose   = FALSE,
                          leg = "topright"){
   # Index fits plot for an MPD
+  # scenario is the sccenario number. Only used if 'out' is of length 1.
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
-  # ASSUMPTIONS:
-  # 1. The gears with indices come after the gears without indices in the gear list, i.e.
-  #    the fishery gears come first, followed by the sureveys
-  # 2. If the models have some gears missing, the gears are in the same order in all models,
-  #    with the ones removed from the end of the list. TODO: Remove this constraint and match by name
-  # 3. The model with the most survey gears comes first (after fishery gears) in the list.
+  # Notes:
+  # - Models may have different gears than others, but we want the index plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
 
   currFuncName <- getCurrFunc()
   if(is.null(scenario)){
@@ -749,64 +749,70 @@ plotIndexMPD <- function(scenario  = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
     return(NULL)
   }
-  if(index > length(inputs[[1]]$indices)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(inputs[[1]]$indices)," (index).")
-    return(NULL)
-  }
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  # Get the number of gears with indices
-  nits <- op[[scenario]]$inputs$control$nits
+  # Get a list of unique index names across all models to be included in this plot
+  indexnames <- NULL
+  for(model in 1:length(inputs)){
+    indexnames <- c(indexnames, inputs[[model]]$indexGearNames)
+  }
+  if(is.null(indexnames)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply index names in the data files to plot indices across models.")
+    return(NULL)
+  }
+  indexnames <- unique(indexnames)
+  if(index > length(indexnames)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(indexnames)," (index).")
+    return(NULL)
+  }
+  currindexname <- indexnames[index]
+  # The 'indexnames' vector will be used as the index to scroll through,
+  # i.e. when the user changes to the next index, the next name in this list will
+  # be matched.
 
   # Get the plotting limits by looking through the input lists and outputs of indices
-  inputindices <- as.data.frame(inputs[[1]]$indices[[index]])
-  yUpper <- max(inputindices$it + inputindices$it*(1/inputindices$wt)) # Account for error bars in y upper limit
-  minYear <- min(inputindices$iyr)
-  maxYear <- max(inputindices$iyr)
-
+  yUpper <- NULL
+  minYear <- NULL
+  maxYear <- NULL
   for(model in 1:length(out)){
-    tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
+    gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
+    inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
     outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-    outputit <- as.numeric(outputitDF[index,])
-    inputit  <- tmpindices$it
-    # NA is removed here because surveys have different years, and missing ones are NA
-    yUpper   <- max(yUpper, inputit, outputit, na.rm=TRUE)
-    minYear1 <- min(tmpindices$iyr)
-    maxYear1 <- max(tmpindices$iyr)
-    minYear  <- min(minYear, minYear1)
-    maxYear  <- max(maxYear, maxYear1)
+    outputit <- as.numeric(outputitDF[gearnum,])
+     # Account for error bars in y upper limit, remove NAs for years which do not have surveys
+    yUpper <- max(yUpper, outputit, inputindices$it + inputindices$it*(1/inputindices$wt), na.rm = TRUE)
+    minYear <- min(minYear, inputindices$iyr)
+    maxYear <- max(maxYear, inputindices$iyr)
   }
+
+  titleText <- indexnames[index]
   outputitDF <- as.data.frame(out[[1]]$mpd$it_hat)
   if((nrow(outputitDF) > ncol(outputitDF)) && (ncol(outputitDF) == 1)){
     dat <- as.numeric(outputitDF[,index])
   }else{
     dat <- as.numeric(outputitDF[index,])
   }
+  gearnum <- match(currindexname, inputs[[1]]$indexGearNames)
+  inputindices <- as.data.frame(inputs[[1]]$indices[[gearnum]])
   yrs <- inputindices$iyr
-
   cv <- 1/inputindices$wt
   dat <- dat[!is.na(dat)]
-
-  # Remove non-index gear names from all gear names
-  gearNames <- inputs[[1]]$gearNames[(length(inputs[[1]]$gearNames) - nits + 1):(nits+1)]
-  if(inputs[[1]]$hasGearNames){
-    titleText <- gearNames[index]
-  }else{
-    titleText <- paste0("Gear ",gearNames[index])
-  }
 
   plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index (1000 mt)", xlab="Year", main=titleText, las=1)
   points(yrs,inputindices$it, pch=3)
   arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
   if(length(out) > 1){
     for(model in 2:length(out)){
-      outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-      dat <- as.numeric(outputitDF[index,])
-      tmpindices <- as.data.frame(inputs[[model]]$indices[[index]])
-      yrs <- tmpindices$iyr
-      dat <- dat[!is.na(dat)]
-      lines(yrs, dat,  type="l", col=colors[[model]], lty=lty[[model]], lwd=2)
+      gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
+      if(!is.na(gearnum)){
+        outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
+        dat <- as.numeric(outputitDF[gearnum,])
+        tmpindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
+        yrs <- tmpindices$iyr
+        dat <- dat[!is.na(dat)]
+        lines(yrs, dat,  type="l", col=colors[[model]], lty=lty[[model]], lwd=2)
+      }
     }
   }
   if(!is.null(leg)){

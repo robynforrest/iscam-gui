@@ -334,7 +334,7 @@ plotExitCodes <- function(out       = NULL,
                           lty       = NULL,
                           verbose   = FALSE,
                           leg = "topright"){
-  # Hang codes for runs
+  # Exit codes for runs
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -390,8 +390,8 @@ plotExitCodes <- function(out       = NULL,
     plotcharCol <- ifelse(out[[model]]$mpd$ExitCode==3,"purple",plotcharCol)
     points(model,1,pch=.PCHCODE,col=plotcharCol)
   }
-  legend("topright",legend=c("Good - All derivatives calculated successfully.",
+  legend("topright",legend=c("Good - All derivatives calculated successfully",
                              "Derivative error",
-                             "Maximum function evaluations reached."),col=c("green","orange","purple"),pch=.PCHCODE)
+                             "Maximum function evaluations reached"),col=c("green","orange","purple"),pch=.PCHCODE)
   title("Exit code values")
 }

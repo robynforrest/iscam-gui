@@ -640,6 +640,17 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$hasGearNames <- TRUE
   }
 
+  # Get the element number for the "IndexGears" names if present
+  dat <- grep("^#.*IndexGears:.+",data)
+  tmp$hasIndexGearNames <- FALSE
+  if(length(dat >0)){
+    # The gear names were in the file
+    indexGearNamesStr <- gsub("^#.*IndexGears:(.+)","\\1",data[dat])
+    indexGearNames <- strsplit(indexGearNamesStr,",")[[1]]
+    tmp$indexGearNames <- gsub("^[[:blank:]]+","",indexGearNames)
+    tmp$hasIndexGearNames <- TRUE
+  }
+
   # Get the element number for the "AgeGears" names if present (gears with age comp data)
   dat <- grep("^#.*AgeGears:.+",data)
   tmp$hasAgeGearNames <- FALSE
