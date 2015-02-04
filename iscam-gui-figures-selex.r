@@ -177,11 +177,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       selData <- selData[1,] #selectivity in first block
       #selData <- as.matrix(selData)
       mat <- cbind(mat, selData)
-    }
-    if(inputs[[1]]$hasAgeGearNames){
       gearTitle <- agegearnames[gearnum]
-    }else{
-      gearTitle <- paste0("Gear ", agegearnames[gearnum])
     }
   }
   titletext <- ""
