@@ -833,7 +833,7 @@ plotIndexMPD <- function(scenario  = NULL,
   }
 
   matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
-          las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)))
+          las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year", ylab="x 1000 metric tonnes")
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
