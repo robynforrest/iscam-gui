@@ -26,6 +26,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                                         h      = .HEIGHT),
                       leg        = "topright",   # Legend location. If NULL, none will be drawn
                       figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                      showtitle  = TRUE,         # Show the main title on the plot
                       units      = .UNITS,       # Units to use in plotting
                       silent     = .SILENT
                       ){
@@ -106,7 +107,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
 
   if(plotNum==1){
     plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
-                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg)
+                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 
@@ -117,7 +118,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   return(TRUE)
 }
 
-plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg){
+plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg, showtitle = TRUE){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
   # Both sexes will be plotted with linetype of the females = linetype for males + 1 The colors will be the same.
   # Notes:
@@ -183,7 +184,11 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       gearTitle <- paste0("Gear ", agegearnames[gearnum])
     }
   }
-  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = gearTitle, ylim = c(0,1.1))
+  titletext <- ""
+  if(showtitle){
+    titletext <- gearTitle
+  }
+  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = titletext, ylim = c(0,1.1))
 #  if(selType != 1 && selType != 6 && selType != 11){
 #    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
 #    return(NULL)

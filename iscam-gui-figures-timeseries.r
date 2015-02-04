@@ -27,6 +27,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                                      h      = .HEIGHT),
                    leg        = "topright",   # Legend location. If NULL, none will be drawn
                    figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                   showtitle  = TRUE,         # Show the main title on the plot
                    recrOffset = 0.1,          # Recruitment bar offset used if multiple==TRUE
                    btarg      = 0.4,          # Biomass target line for depletion plots
                    blim       = 0.25,         # Biomass limit line for depletion plots
@@ -144,30 +145,30 @@ plotTS <- function(scenario   = 1,         # Scenario number
 
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle)
     }else{
-      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg)
+      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle)
     }else{
-      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
+      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle)
     }else{
-      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 7){
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
     }else{
-      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg)
+      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 8){
@@ -181,21 +182,21 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
-      plotFMPD(out, colors, names, verbose = !silent, leg = leg)
+      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 10){
     if(plotMCMC){
-      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent)
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
   }
   if(plotNum == 11){
     if(plotMCMC){
-      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg)
+      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle)
     }else{
-      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
     }
   }
 
@@ -211,6 +212,7 @@ plotBiomassMPD <- function(out       = NULL,
                            names     = NULL,
                            lty       = NULL,
                            verbose   = FALSE,
+                           showtitle = TRUE,
                            leg = "topright"){
   # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -254,7 +256,11 @@ plotBiomassMPD <- function(out       = NULL,
    }
   }
   par(mar=c(3,6,3,3))
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
+  title <- ""
+  if(showtitle){
+    title <- "Spawning Biomass"
+  }
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
   points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -273,6 +279,7 @@ plotBiomassMCMC <- function(out       = NULL,
                             ci        = NULL,
                             burnthin  = list(0,1),
                             verbose   = FALSE,
+                            showtitle = TRUE,
                             leg = "topright"){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -320,7 +327,11 @@ plotBiomassMCMC <- function(out       = NULL,
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
   par(mar=c(3,6,3,3))
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main="Biomass", las=1)
+  title <- ""
+  if(showtitle){
+    title <- "Spawning Biomass"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
@@ -336,6 +347,7 @@ plotDepletionMPD <- function(out       = NULL,
                              names     = NULL,
                              lty       = NULL,
                              verbose   = FALSE,
+                             showtitle = TRUE,
                              leg = "topright"){
   # Depletion plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -372,7 +384,11 @@ plotDepletionMPD <- function(out       = NULL,
     yUpper <- max(yUpper, depl)
   }
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main="Depletion", las=1)
+  title <- ""
+  if(showtitle){
+    title <- "Reletive Spawning Biomass"
+  }
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
@@ -390,6 +406,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               ci        = NULL,
                               burnthin  = list(0,1),
                               verbose   = FALSE,
+                              showtitle = TRUE,
                               leg = "topright"){
   # Depletion plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -438,8 +455,11 @@ plotDepletionMCMC <- function(out       = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Depletion", xlab="Year", main="Depletion", las=1)
+  title <- ""
+  if(showtitle){
+    title <- "Reletive Spawning Biomass"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
@@ -455,6 +475,7 @@ plotRecruitmentMPD <- function(out       = NULL,
                                names     = NULL,
                                lty       = NULL,
                                verbose   = FALSE,
+                               showtitle = TRUE,
                                leg = "topright"){
   # Recruitment plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -506,9 +527,13 @@ plotRecruitmentMPD <- function(out       = NULL,
       xlim     <- c(minx, maxx)
     }
   }
+  title <- ""
+  if(showtitle){
+    title <- "Recruitment"
+  }
 
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=c(0,yUpper), xlim=xlim,
-       ylab="Recruitment (millions)", xlab="Year", main="Recruitment", las=1)
+       ylab="Recruitment (millions)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       sage <- out[[line]]$mpd$sage
@@ -530,6 +555,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 burnthin  = list(0,1),
                                 offset    = 0.1,
                                 verbose   = FALSE,
+                                showtitle = TRUE,
                                 leg = "topright"){
   # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -591,8 +617,12 @@ plotRecruitmentMCMC <- function(out       = NULL,
       Xlim <- c(minx, maxx)
     }
   }
+  title <- ""
+  if(showtitle){
+    title <- "Recruitment"
+  }
 
-  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment (millions)", las=1)
+  plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment (millions)", main=title, las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
   if(length(out) > 1){
@@ -624,6 +654,7 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
                                    names     = NULL,
                                    lty       = NULL,
                                    verbose   = FALSE,
+                                   showtitle = TRUE,
                                    leg = "topright"){
   # Recruitment deviations plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -680,9 +711,13 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
       xlim     <- c(minx, maxx)
     }
   }
+  title <- ""
+  if(showtitle){
+    title <- "Recruitment deviations"
+  }
 
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=ylim, xlim=xlim,
-       ylab="Recruitment deviations (millions)", xlab="Year", main="Recruitment deviations", las=1)
+       ylab="Recruitment deviations (millions)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       ryr   <- out[[line]]$mpd$yr
@@ -704,6 +739,7 @@ plotIndexMPD <- function(scenario  = NULL,
                          names     = NULL,
                          lty       = NULL,
                          verbose   = FALSE,
+                         showtitle = TRUE,
                          leg = "topright"){
   # Index fits plot for an MPD
   # scenario is the sccenario number. Only used if 'out' is of length 1.
@@ -791,9 +827,13 @@ plotIndexMPD <- function(scenario  = NULL,
       mat          <- cbind(mat, dat)
     }
   }
+  title <- ""
+  if(showtitle){
+    title <- paste0("Index fit - ",gearTitle)
+  }
 
   matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
-          las = 1, main = gearTitle, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)))
+          las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)))
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
@@ -809,6 +849,7 @@ plotFMPD <- function(out       = NULL,
                      pch       = 20,
                      pointSize = 0.2,
                      verbose   = FALSE,
+                     showtitle = TRUE,
                      leg = "topright"){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -866,7 +907,11 @@ plotFMPD <- function(out       = NULL,
       }else{
         if(sex == 1 && gear == 1){
           # First one, so use plot command
-          plot(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main="Fishing Mortality", las=1)
+          title <- ""
+          if(showtitle){
+            title <- "Fishing Mortality"
+          }
+          plot(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main=title, las=1)
         }else{
           lines(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2)
         }
@@ -935,6 +980,7 @@ plotReferencePointsMCMC <- function(out       = NULL,
                                     pch       = 20,
                                     pointSize = 0.2,
                                     verbose   = FALSE,
+                                    showtitle = TRUE,
                                     leg = "topright"){
   # Reference points plot for an MCMC model
   # col is a list of the colors to use in the plot

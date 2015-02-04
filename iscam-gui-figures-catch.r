@@ -23,8 +23,9 @@ plotCatch <- function(scenario   = 1,         # Scenario number
                                         res    = .RESOLUTION,
                                         w      = .WIDTH,
                                         h      = .HEIGHT),
-                      leg        = "topright",# Legend location. If NULL, none will be drawn
+                      leg        = "topright",   # Legend location. If NULL, none will be drawn
                       figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                      showtitle  = TRUE,         # Show the main title on the plot
                       units      = .UNITS,
                       silent     = .SILENT){
 
@@ -101,20 +102,20 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   }
 
   if(plotNum == 1){
-    plotCatches(inp = inputs[[1]], scenarioName, leg = leg, col = color)
+    plotCatches(inp = inputs[[1]], scenarioName, leg = leg, col = color, showtitle = showtitle)
   }
   if(plotNum == 2){
-    plotSPR(inp = inputs, scenarioName, leg = leg, col = color)
+    plotSPR(inp = inputs, scenarioName, leg = leg, col = color, showtitle = showtitle)
   }
   if(plotNum == 3){
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Catch fits not implemented.")
     }else{
-      plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg)
+      plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg, showtitle = showtitle)
     }
   }
   if(plotNum == 4){
-    plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color)
+    plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color, showtitle = showtitle)
   }
 
   if(savefig){
@@ -128,6 +129,7 @@ plotCatches <- function(inp,
                         scenarioName,
                         verbose = FALSE,
                         leg = "topright",
+                        showtitle = TRUE,
                         col = 1){
   # Catch plot for iscam model, plots by gear
   oldPar <- par(no.readonly=TRUE)
@@ -146,10 +148,10 @@ plotSPR <-  function(inp,
                      scenarioName,
                      verbose = FALSE,
                      leg = "topright",
+                        showtitle = TRUE,
                      col = 1){
 
 }
-
 
 plotCatchFit<-function(inp     = NULL,
                        out     = NULL,
@@ -158,7 +160,8 @@ plotCatchFit<-function(inp     = NULL,
                        lty     = NULL,
                        scenarioName,
                        verbose = FALSE,
-                       leg = "topright"){
+                       leg = "topright",
+                       showtitle = TRUE){
   # Catch fits plot, out contains a list of models to plot,
   # it must be at least length 1.
   # Assumes only one catch gear
@@ -203,7 +206,11 @@ plotCatchFit<-function(inp     = NULL,
 
   xlim <- range(years)
   ylim <- c(0,yUpper)
-  plot(years, obsCt, pch=19, col=colors[[1]], lty=lty[[1]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch (1000 mt)")
+  titletext <- ""
+  if(showtitle){
+    titletext <- "Catch fit"
+  }
+  plot(years, obsCt, pch=19, col=colors[[1]], lty=lty[[1]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch (1000 mt)", main=titletext)
   lines(years, predCt, col=colors[[1]], lty=lty[[1]])
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -222,6 +229,7 @@ plotExpVsObsAnnualMeanWt<-function(inp,
                                 scenarioName,
                                 verbose = FALSE,
                                 leg = "topright",
+                                showtitle = TRUE,
                                 col = 1){
   nmeanwtObs <- inp$data$nmeanwtobs
   if( nmeanwtObs > 0){
@@ -250,5 +258,8 @@ plotExpVsObsAnnualMeanWt<-function(inp,
 		      box()
 		  }
 		  par(mfrow=c(1,1),mar=c(5,4,2,2))
-	}else cat("WARNING: No Annual Mean Weight Data")
+	}else{
+    cat0("WARNING: No Annual Mean Weight Data")
+  }
+  
 }

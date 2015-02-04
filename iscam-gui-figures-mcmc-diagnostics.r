@@ -18,6 +18,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                                               w      = .WIDTH,
                                               h      = .HEIGHT),
                             figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                            sowtitle   = TRUE,         # Show the main title on the plot
                             burnthin   = list(0,1), # List of two elements, burnin and thinning
                             exFactor        = 1.5,
                             showEntirePrior = TRUE,
@@ -75,22 +76,22 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   mcmcData <- stripStaticParams(scenario, mcmcData)
 
   if(plotNum == 1){
-    plotTraces(mcmcData, burnthin=burnthin)
+    plotTraces(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 2){
-    plotAutocor(mcmcData, burnthin=burnthin)
+    plotAutocor(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 3){
-    plotDensity(mcmcData, burnthin=burnthin)
+    plotDensity(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 4){
-    plotPairs(mcmcData, burnthin=burnthin)
+    plotPairs(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 5){
-    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin)
+    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 6){
-    plotVariancePartitions(mcmcData, burnthin=burnthin)
+    plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -166,7 +167,7 @@ stripStaticParams <- function(scenario, dat){
   return(dat)
 }
 
-plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200){
+plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, showtitle = TRUE){
   # Traceplots for an mcmc matrix, mcmcData
   # axis.lab.freq is the frequency of x-axis labelling
 
@@ -203,7 +204,8 @@ plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200){
 
 plotAutocor <- function(mcmcData = NULL,
                         burnthin = c(0,1),
-                        lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50)){
+                        lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50),
+                        showtitle = TRUE){
   # Plot autocorrelations for all mcmc parameters
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
@@ -232,7 +234,7 @@ plotAutocor <- function(mcmcData = NULL,
   }
 }
 
-plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity = 30){
+plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE){
   # Plot densities for the mcmc parameters in the matrix mcmcData
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
@@ -266,7 +268,7 @@ plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity =
   }
 }
 
-plotPairs <- function(mcmcData = NULL, burnthin = c(0,1)){
+plotPairs <- function(mcmcData = NULL, burnthin = c(0,1), showtitle = TRUE){
   # Pairs plots for an mcmc matrix, mcmcData
 
   oldPar <- par(no.readonly=TRUE)
@@ -303,7 +305,7 @@ plotPairs <- function(mcmcData = NULL, burnthin = c(0,1)){
   pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
 }
 
-plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30){
+plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE){
   # Produce a grid of the parameters' posteriors with their priors overlaid.
   # mpdData is used to get the MLE estimates for each parameter
 	oldPar	<- par(no.readonly=T)
@@ -484,7 +486,7 @@ plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
 
-plotVariancePartitions <- function(mcmcData, burnthin = c(0,1)){
+plotVariancePartitions <- function(mcmcData, burnthin = c(0,1), showtitle = TRUE){
   # Produce a grid of pairs plots for the variance parameters' posteriors
   # Assumes that there are an equal number of each rho and vartheta
   #  parameters, i.e. each group must have both rho and vartheta and

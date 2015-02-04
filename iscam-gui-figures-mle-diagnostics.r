@@ -22,6 +22,7 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
                                               w      = .WIDTH,
                                               h      = .HEIGHT),
                             figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                            showtitle  = TRUE,         # Show main title on plot
                             burnthin   = list(0,1), # List of two elements, burnin and thinning
                             exFactor        = 1.5,
                             units           = .UNITS,
@@ -94,19 +95,19 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
     windows(width=widthScreen,height=heightScreen)
   }
   if(plotNum == 1){
-    plotObjFunVal(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    plotObjFunVal(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum == 2){
-    plotMaxGrad(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    plotMaxGrad(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum == 3){
-    plotFuncEvals(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    plotFuncEvals(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum == 4){
-    plotHangCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    plotHangCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum == 5){
-    plotExitCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg)
+    plotExitCodes(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -120,6 +121,7 @@ plotObjFunVal <- function(out       = NULL,
                           names     = NULL,
                           lty       = NULL,
                           verbose   = FALSE,
+                          showtitle = TRUE,
                           leg = "topright"){
   # Objective function values for runs
   # out is a list of the mpd outputs to show on the plot
@@ -161,7 +163,9 @@ plotObjFunVal <- function(out       = NULL,
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","black"),xaxt='n',yaxt='n')
   text(1:length(out),1.04,dat,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
-  title("Objective function values")
+  if(showtitle){
+    title("Objective function values")
+  }
 }
 
 plotMaxGrad <- function(out       = NULL,
@@ -169,6 +173,7 @@ plotMaxGrad <- function(out       = NULL,
                         names     = NULL,
                         lty       = NULL,
                         verbose   = FALSE,
+                        showtitle = TRUE,
                         leg = "topright"){
   # Maximum gradient values for runs
   # out is a list of the mpd outputs to show on the plot
@@ -215,7 +220,9 @@ plotMaxGrad <- function(out       = NULL,
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
   text(1:length(out),1.04,dat,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
-  title(paste("Maximum gradient values (<",.MAXGRAD,")"))
+  if(showtitle){
+    title(paste0("Maximum gradient values (<",.MAXGRAD,")"))
+  }
 }
 
 plotFuncEvals <- function(out       = NULL,
@@ -223,6 +230,7 @@ plotFuncEvals <- function(out       = NULL,
                           names     = NULL,
                           lty       = NULL,
                           verbose   = FALSE,
+                          showtitle = TRUE,
                           leg = "topright"){
   # Number of function evaluations for runs
   # out is a list of the mpd outputs to show on the plot
@@ -268,7 +276,9 @@ plotFuncEvals <- function(out       = NULL,
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
   text(1:length(out),1.04,dat,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
-  title(paste("Number of function evaluations (<",.FUNEVALS,")"))
+  if(showtitle){
+    title(paste0("Number of function evaluations (<",.FUNEVALS,")"))
+  }
 }
 
 plotHangCodes <- function(out       = NULL,
@@ -276,6 +286,7 @@ plotHangCodes <- function(out       = NULL,
                           names     = NULL,
                           lty       = NULL,
                           verbose   = FALSE,
+                          showtitle = TRUE,
                           leg = "topright"){
   # Hang codes for runs
   # out is a list of the mpd outputs to show on the plot
@@ -325,7 +336,9 @@ plotHangCodes <- function(out       = NULL,
   legend("topright",legend=c("Good - No error condition",
                              "Non-positive definite hessian"),
                              col=c("green","red"),pch=.PCHCODE)
-  title("Hang code values")
+  if(showtitle){
+    title("Hang code values")
+  }
 }
 
 plotExitCodes <- function(out       = NULL,
@@ -333,6 +346,7 @@ plotExitCodes <- function(out       = NULL,
                           names     = NULL,
                           lty       = NULL,
                           verbose   = FALSE,
+                          showtitle = TRUE,
                           leg = "topright"){
   # Exit codes for runs
   # out is a list of the mpd outputs to show on the plot
@@ -393,5 +407,7 @@ plotExitCodes <- function(out       = NULL,
   legend("topright",legend=c("Good - All derivatives calculated successfully",
                              "Derivative error",
                              "Maximum function evaluations reached"),col=c("green","orange","purple"),pch=.PCHCODE)
-  title("Exit code values")
+  if(showtitle){
+    title("Exit code values")
+  }
 }

@@ -25,6 +25,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                                           h      = .HEIGHT),
                         leg        = "topright",   # Legend location. If NULL, none will be drawn
                         figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
+                        showtitle  = TRUE,         # Showe the main title on the plot
                         units      = .UNITS){
 
   # plotNum must be one of:
@@ -94,19 +95,19 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==8)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
   # Composition at beginning of time series, no selectivity applied
-  if(plotNum==10) plotN1(compFitSex, scenario, leg)
+  if(plotNum==10) plotN1(compFitSex, scenario, leg, showtitle = showtitle)
 
   # Composition plots
-  if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg)
-  if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg)
-  if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg)
+  if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg, showtitle=showtitle)
+  if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg, showtitle=showtitle)
+  if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg, showtitle=showtitle)
 
   # Special can be deleted after ARF assessment
-  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg)
+  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg, showtitle=showtitle)
   # Biological plots
-  if(plotNum==14) plotLW(leg)
-  if(plotNum==15) plotGrowth(leg)
-  if(plotNum==16) plotMA(leg)
+  if(plotNum==14) plotLW(leg, showtitle=showtitle)
+  if(plotNum==15) plotGrowth(leg, showtitle=showtitle)
+  if(plotNum==16) plotMA(leg, showtitle=showtitle)
 
   if(savefig){
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n")
@@ -115,7 +116,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   return(TRUE)
 }
 
-plotLW <- function(leg){
+plotLW <- function(leg, showtitle = TRUE){
   # Plot the length/weight data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is round weight in grams.
@@ -185,7 +186,7 @@ plotLW <- function(leg){
   }
 }
 
-plotMA <- function(leg  = NULL){
+plotMA <- function(leg  = NULL, showtitle = TRUE){
   # Plot the maturity/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is maturity level.
@@ -251,7 +252,7 @@ plotMA <- function(leg  = NULL){
   }
 }
 
-plotGrowth <- function(leg){
+plotGrowth <- function(leg, showtitle = TRUE){
   # Plot the length/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is age.
@@ -315,7 +316,7 @@ plotGrowth <- function(leg){
   }
 }
 
-plotComps <- function(plotnum = 1, sex, scenario, index, leg){
+plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
   # Plot the age or length compositions for the given index (gear).
   # If the model is two-sex, a two-paneled plot will be drawn.
   # plotnum:
@@ -427,13 +428,13 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
           sexstr <- "Single sex"
         }
         if(plotnum == 1){
-          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle)
         }
         if(plotnum == 2){
-          plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab)
+          plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab, showtitle = showtitle)
         }
         if(plotnum == 3){
-          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab)
+          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle)
         }
       }
     }else{
@@ -446,14 +447,17 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg){
 
 plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                              las = 1, leglabels = c("Positive","Zero"),
-                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText){
+                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, showtitle = TRUE){
   # Plot the age or length compositions given in prop
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
-
+  titletext <- ""
+  if(showtitle){
+    titletext <- paste0(gearTitle," - ",title)
+  }
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
+              xlab="Year", main=titletext, ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
   nage <- ages[length(ages)] + 1
   axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
@@ -463,12 +467,16 @@ plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  y
 
 plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText){
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText, showtitle = TRUE){
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
+  titletext <- ""
+  if(showtitle){
+    titletext <- paste0(gearTitle," - ",title)
+  }
   plotBubbles(prop, xval=yrs, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0(gearTitle," - ",title), ylab=ylab, las=las, cex=cex, axes=FALSE)
+              xlab="Year", main=titletext, ylab=ylab, las=las, cex=cex, axes=FALSE)
   axis(1, at=yrs, labels=yrs, las=las)
   nage <- ages[length(ages)] + 1
   axis(2, at=c(ages,nage), labels=c(ages,"N"), las=1)
@@ -478,7 +486,7 @@ plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, l
 
 plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                 las = 1, leglabels = c("Positive","Zero"),
-                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE){
+                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE, showtitle = TRUE){
   # Plot the age or length composition fits, no more than 36 or this function will need to be modified.
   # sex, 1=M/Both, 2=F
 
@@ -520,12 +528,14 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
     if(yr == nyrs){
       mtext(paste(ylab), side=1, line=0.5, cex=cex, outer=TRUE)
       mtext("Proportion", side=2, line=0.6, cex=cex, outer=TRUE)
-      mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=TRUE)
+      if(showtitle){
+        mtext(paste0(gearTitle," - ",title), side=3, line=-0.5, cex=cex, outer=TRUE)
+      }
     }
   }
 }
 
-plotCompSpecial <- function(scenario, sex, leg){
+plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE){
   # Plot the age or length compositions given in prop
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
@@ -556,15 +566,19 @@ plotCompSpecial <- function(scenario, sex, leg){
   }
   prop <- apply(dat, 1, function(x){x/sum(x)})
   numages <- apply(dat, 1, sum)
+  titletext <- ""
+  if(showtitle){
+    titletext <- paste0("WCVI and HS Synoptic surveys - ",sextext)
+  }
   plotBubbles(prop, xval=years, yval=ages, prettyaxis=TRUE, size=0.1, powr=0.5,
-              xlab="Year", main=paste0("WCVI and HS Synoptic surveys - ",sextext), ylab="Age", las=1, axes=FALSE)
+              xlab="Year", main=titletext, ylab="Age", las=1, axes=FALSE)
   axis(1, at=years, labels=years, las=1)
   axis(2, at=c(ages,(nage[1]+1)), labels=c(ages,"N"), las=1)
   text(years,rep(nage[1]+1,10),labels=numages)
   text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
 }
 
-plotN1 <- function(compFitSex, scenario, leg){
+plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE){
   # Plot the age structure at the beginning of the time series without any application of selectivity.
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
@@ -576,14 +590,20 @@ plotN1 <- function(compFitSex, scenario, leg){
   nages <- length(sage:nage)
   ages <- sage:nage
   nsex <- op[[scenario]]$inputs$data$nsex
+  title <- titlem <- titlef <- ""
+  if(showtitle){
+    title <- "Initial population age structure"
+    titlem <- "Initial population age structure - Male"
+    titlef <- "Initial population age structure - Female"
+  }
   if(nsex == 2){
     par(mfrow=c(1,2))
     compDataM <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[1,]), 2, function(x){x/sum(x)})
     compDataF <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[2,]), 2, function(x){x/sum(x)})
-    plot(ages, compDataM, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure - Male")
-    plot(ages, compDataF, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure - Female")
+    plot(ages, compDataM, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main=titlem)
+    plot(ages, compDataF, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main=titlef)
   }else{
     compData <- apply(as.matrix(op[[scenario]]$outputs$mpd$N[1,]), 2, function(x){x/sum(x)})
-    plot(ages, compData, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main="Initial population age structure")
+    plot(ages, compData, type="o", pch=19, lwd=2, ylim=c(0,1), xlab="Age", ylab="Proportion", main=title)
   }
 }

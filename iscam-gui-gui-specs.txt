@@ -420,9 +420,9 @@ grid 3 1 padx=10 pady=5 sticky=W
         label text="Confidence %" font="bold 10" sticky=W
         entry name=entryConfidence width=5 padx=5 value=95 function=.subView action="changeConfidence" entryfont="10" sticky=W
 
+        check name=showTitle checked=T font="bold 10" text="Show title on plot" function=.subView action="showTitle"
+        null
         label text="Screen graphics:" font="bold 10" sticky=W
-        null
-        null
         label text="Width" font="bold 10" sticky=W
         entry name=entryWidthScreen width=5 padx=5 value=10 function=.subView action="changeScreenGraphics" entryfont="10" sticky=W
         label text="Height" font="bold 10" sticky=W
