@@ -154,7 +154,13 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
     age <- out[[model]]$mpd$age
     gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
     logselData   <- out[[model]]$mpd$log_sel
-    if(!is.na(gearnum)){
+    if(is.na(gearnum)){
+      # Remove the gear from the legend lists, using the property that if a list
+      # element is set to NULL, it will be removed completely from the list.
+      lty[[model]] <- NULL
+      colors[[model]] <- NULL
+      names[[model]] <- NULL
+    }else{
       nsex         <- inputs[[model]]$nsex
       age          <- out[[model]]$mpd$age
       agegearnames <- inputs[[model]]$ageGearNames

@@ -753,10 +753,8 @@ plotIndexMPD <- function(scenario  = NULL,
   on.exit(par(oldPar))
 
   # Get a list of unique index names across all models to be included in this plot
-  indexnames <- NULL
-  for(model in 1:length(inputs)){
-    indexnames <- c(indexnames, inputs[[model]]$indexGearNames)
-  }
+  inpvec <- unlist(inputs)
+  indexnames <- unique(inpvec[grep("indexGearNames",names(inpvec))])
   if(is.null(indexnames)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply index names in the data files to plot indices across models.")
     return(NULL)
@@ -770,51 +768,36 @@ plotIndexMPD <- function(scenario  = NULL,
   # The 'indexnames' vector will be used as the index to scroll through,
   # i.e. when the user changes to the next index, the next name in this list will
   # be matched.
+  gearTitle <- indexnames[index]
+  mat <- NULL
 
-  # Get the plotting limits by looking through the input lists and outputs of indices
-  yUpper <- NULL
-  minYear <- NULL
-  maxYear <- NULL
   for(model in 1:length(out)){
     gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
-    inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
-    outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-    outputit <- as.numeric(outputitDF[gearnum,])
-     # Account for error bars in y upper limit, remove NAs for years which do not have surveys
-    yUpper <- max(yUpper, outputit, inputindices$it + inputindices$it*(1/inputindices$wt), na.rm = TRUE)
-    minYear <- min(minYear, inputindices$iyr)
-    maxYear <- max(maxYear, inputindices$iyr)
-  }
-
-  titleText <- indexnames[index]
-  outputitDF <- as.data.frame(out[[1]]$mpd$it_hat)
-  if((nrow(outputitDF) > ncol(outputitDF)) && (ncol(outputitDF) == 1)){
-    dat <- as.numeric(outputitDF[,index])
-  }else{
-    dat <- as.numeric(outputitDF[index,])
-  }
-  gearnum <- match(currindexname, inputs[[1]]$indexGearNames)
-  inputindices <- as.data.frame(inputs[[1]]$indices[[gearnum]])
-  yrs <- inputindices$iyr
-  cv <- 1/inputindices$wt
-  dat <- dat[!is.na(dat)]
-
-  plot(yrs, dat, type="l", col=colors[[1]], lty=lty[[1]], lwd=2, xlim=c(minYear,maxYear),ylim=c(0,yUpper),ylab="Index (1000 mt)", xlab="Year", main=titleText, las=1)
-  points(yrs,inputindices$it, pch=3)
-  arrows(yrs,inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it, code=3,angle=90,length=0.01, col=colors[[1]])
-  if(length(out) > 1){
-    for(model in 2:length(out)){
-      gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
-      if(!is.na(gearnum)){
-        outputitDF <- as.data.frame(out[[model]]$mpd$it_hat)
-        dat <- as.numeric(outputitDF[gearnum,])
-        tmpindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
-        yrs <- tmpindices$iyr
-        dat <- dat[!is.na(dat)]
-        lines(yrs, dat,  type="l", col=colors[[model]], lty=lty[[model]], lwd=2)
-      }
+    #browser()
+    if(is.na(gearnum)){
+      # Remove the gear from the legend lists, using the property that if a list
+      # element is set to NULL, it will be removed completely from the list.
+      lty[[model]] <- NULL
+      colors[[model]] <- NULL
+      names[[model]] <- NULL
+    }else{
+      inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
+      outputit     <- as.data.frame(out[[model]]$mpd$it_hat)
+      dat          <- as.numeric(outputit[gearnum,])
+      tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearnum]])
+      yrs          <- tmpindices$iyr
+      cv           <- 1 / inputindices$wt
+      dat          <- dat[!is.na(dat)]
+      mat          <- cbind(mat, dat)
     }
   }
+
+  matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+          las = 1, main = gearTitle, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)))
+  points(yrs, inputindices$it, pch = 3)
+  arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
+         code = 3, angle = 90, length = 0.01, col = "black")
+
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
