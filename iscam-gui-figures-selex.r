@@ -184,7 +184,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   if(showtitle){
     titletext <- gearTitle
   }
-  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = titletext, ylim = c(0,1.1))
+  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = titletext, ylim = c(0,1.1), ylab="", xlab="Age")
 #  if(selType != 1 && selType != 6 && selType != 11){
 #    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
 #    return(NULL)
