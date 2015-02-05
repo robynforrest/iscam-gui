@@ -813,9 +813,9 @@ plotIndexMPD <- function(scenario  = NULL,
     if(is.na(gearnum)){
       # Remove the gear from the legend lists, using the property that if a list
       # element is set to NULL, it will be removed completely from the list.
-      lty[[model]] <- NULL
-      colors[[model]] <- NULL
-      names[[model]] <- NULL
+      lty[[model]] <- NA
+      colors[[model]] <- NA
+      names[[model]] <- NA
     }else{
       inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
       outputit     <- as.data.frame(out[[model]]$mpd$it_hat)
@@ -831,7 +831,11 @@ plotIndexMPD <- function(scenario  = NULL,
   if(showtitle){
     title <- paste0("Index fit - ",gearTitle)
   }
-
+  # Change the NAs to NULLs for the legend variables, using the property that if a list
+  # element is set to NULL, it will be removed completely from the list.
+  lty[sapply(lty, is.na)] <- NULL
+  colors[sapply(colors, is.na)] <- NULL
+  names[sapply(names, is.na)] <- NULL
   matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
           las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year", ylab="x 1000 metric tonnes")
   points(yrs, inputindices$it, pch = 3)

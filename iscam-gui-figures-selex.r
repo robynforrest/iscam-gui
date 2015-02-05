@@ -156,11 +156,10 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
     gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
     logselData   <- out[[model]]$mpd$log_sel
     if(is.na(gearnum)){
-      # Remove the gear from the legend lists, using the property that if a list
-      # element is set to NULL, it will be removed completely from the list.
-      lty[[model]] <- NULL
-      colors[[model]] <- NULL
-      names[[model]] <- NULL
+      # Remove the gear from the legend lists by setting to NA
+      lty[[model]] <- NA
+      colors[[model]] <- NA
+      names[[model]] <- NA
     }else{
       nsex         <- inputs[[model]]$nsex
       age          <- out[[model]]$mpd$age
@@ -184,6 +183,11 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   if(showtitle){
     titletext <- gearTitle
   }
+  # Change the NAs to NULLs for the legend variables, using the property that if a list
+  # element is set to NULL, it will be removed completely from the list.
+  lty[sapply(lty, is.na)] <- NULL
+  colors[sapply(colors, is.na)] <- NULL
+  names[sapply(names, is.na)] <- NULL
   matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = titletext, ylim = c(0,1.1), ylab="", xlab="Age")
 #  if(selType != 1 && selType != 6 && selType != 11){
 #    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")

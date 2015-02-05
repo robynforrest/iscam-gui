@@ -662,6 +662,22 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$hasAgeGearNames <- TRUE
   }
 
+  # Get the element number for the "CatchUnits" if present
+  dat <- grep("^#.*CatchUnits:.+",data)
+  if(length(dat >0)){
+    # The catch units comment was in the file
+    catchUnitsStr <- gsub("^#.*CatchUnits:(.+)","\\1",data[dat])
+    tmp$catchUnits <- gsub("^[[:blank:]]+","",catchUnitsStr)
+  }
+
+  # Get the element number for the "IndexUnits" if present
+  dat <- grep("^#.*IndexUnits:.+",data)
+  if(length(dat >0)){
+    # The catch units comment was in the file
+    indexUnitsStr <- gsub("^#.*IndexUnits:(.+)","\\1",data[dat])
+    tmp$indexUnits <- gsub("^[[:blank:]]+","",indexUnitsStr)
+  }
+
   # Save the number of specimens per year (comment at end of each age comp
   # line), eg. #135 means 135 specimens contributed to the age propoirtions for that year
   agen <- vector()
