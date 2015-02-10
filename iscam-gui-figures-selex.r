@@ -127,7 +127,23 @@ tile <- function(){
   val <- 1
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 1, insert value at beginning of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value at beginning of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(9,2,3)
+  ind <- 1
+  val <- 1
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value at beginning of list with replacement")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -143,7 +159,23 @@ tile <- function(){
   val <- 4
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 2, insert value at end of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value at end of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,9)
+  ind <- 3
+  val <- 3
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value at end of list with replacement")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -159,7 +191,23 @@ tile <- function(){
   val<- 3
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 3, insert value in middle of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value in middle of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,9,3)
+  ind <- 2
+  val <- 2
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert value in middle of list with replacement")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -175,7 +223,23 @@ tile <- function(){
   val <- list(1,2,3)
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 4, insert list elements at beginning of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements at beginning of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(9,4,5)
+  ind <- 1
+  val <- list(1,2,3)
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements at beginning of list with replacement")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -191,7 +255,23 @@ tile <- function(){
   val <- list(4,5,6)
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 5, insert list elements at end of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements at end of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,9)
+  ind <- 3
+  val <- list(3,4,5)
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements at end of list with replacement")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -207,7 +287,7 @@ tile <- function(){
   val <- list(3,4,5)
   out <- ile(l,ind,val)
   cat0("**********************************************")
-  cat0(.PROJECT_NAME,"->",currFuncName,"Case 6, insert list elements in middle of list")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements in middle of list")
   cat0("Input list:")
   print(l)
   cat0("Index:")
@@ -218,16 +298,33 @@ tile <- function(){
   print(out)
   cat0("**********************************************")
 
+  l <- list(1,9,5)
+  ind <- 2
+  val <- list(2,3,4)
+  out <- ile(l,ind,val,replace=TRUE)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Insert list elements in middle of list with replacement")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
 }
 
-ile <- function(l, ind, val){
+ile <- function(l, ind, val, replace=FALSE){
   # insert the element 'val' at list 'l' in position given by 'ind'
   # while preserving the rest of the list.
   # i.e. a list of [[1]] 1 [[2]] 2 [[3]] 4
   # with function call(l, 3, 3) will return:
   # [[1]] 1 [[2]] 2 [[3]] 3 [[4]] 4
   # Algorithm: Get the left part of the list, then glue on the 'val'
-  #            element and then the right part of the list
+  #            element and then glue on the right part of the list.
+  #            If replace is TRUE, the list element at position
+  #            'ind' will be replaced with the 'val'.
   # if 'val' is a list, it will be inserted as if each element is
   # on its own, i.e. the return list will be a single, simple list
   # with the sublist 'val' flattened and inserted element-by-element
@@ -258,6 +355,9 @@ ile <- function(l, ind, val){
   }else{
     tmpl[[ind]] <- val
     ind <- ind + 1
+  }
+  if(replace){
+    origind <- origind + 1
   }
   # Glue on the right part of the list to tmpl if
   # the list has more elements to be appended
@@ -326,11 +426,9 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       age          <- out[[model]]$mpd$age
       agegearnames <- inputs[[model]]$ageGearNames
       logselData   <- logselData[which(logselData[,1] == gearnum),]
-      # Cannot use index here because it may not match what is on the UI
-      #nb <- controlinputs[[model]]$sel["nselblocks",][index]
       nb <- controlinputs[[model]]$sel["nselblocks",][gearnum]
       yrs <- logselData[,3]
-      if(nb > 1){
+      if(nb > 1){ # If the number of selectivity blocks is > 1
         # Remove the current legend parameters, since we are going to replace them
         # with multiple blocks
         lty1 <- lty[[model]]
