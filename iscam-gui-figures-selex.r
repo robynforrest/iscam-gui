@@ -154,16 +154,19 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   # be matched.
   titleText    <- agegearnames[index]
 
-  # mat wiull hold all rows to be plotted. These can be different models, multiple time blocks
+  # mat will hold all rows to be plotted. These can be different models, multiple time blocks
   # within a model, two sexes, or any combination of these.
   # lty, names, and colors will also be modified to reflect the complexities stated.
   mat <- NULL
   for(model in 1:length(out)){
+    # For each model, chek to see that it matches the current gear to be plotted,
+    # then check for selectivity blocks and add them
     age <- out[[model]]$mpd$age
     gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
     logselData   <- out[[model]]$mpd$log_sel
     if(is.na(gearnum)){
-      # Remove the gear from the legend lists by setting to NA
+      # The gear being plotted is not in this model, so remove the gear from the
+      # legend lists by setting to NA. It will be set to NULL later to erase them from the list.
       lty[[model]] <- NA
       colors[[model]] <- NA
       names[[model]] <- NA
@@ -192,9 +195,8 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
           if(nb == nblock){
             endyr <- yrs[length(yrs)]
           }else{
-            endyr <- tb[nblock+1] - 1
+            endyr <- tb[nblock + 1] - 1
           }
-#browser()          
           if(endyr > tb[nblock]){
             dat <- logselData[logselData[,3] >= tb[nblock] & logselData[,3] < endyr,]
             # place data in the matrix 'mat' and modify legend parameters
@@ -206,6 +208,10 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
             lty1 <- lty1 + 1
             colors[[length(colors) + 1]] <- colors1
             names[[length(names) + 1]] <- paste0(names1, " - ",tb[nblock],"-",endyr)
+            #lty[[length(lty) + 1]] <- ile(lty, model, lty[[model]] + 1, replace=TRUE)
+            #colors <- ile(colors, model, colors[[model]], replace=TRUE)
+            #modelname <- names[[model]]
+            #names <- ile(names, model, paste0(modelname, " - ",tb[nblock],"-",endyr), replace=TRUE)
           }
         }
       }else{

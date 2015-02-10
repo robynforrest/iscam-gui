@@ -919,7 +919,14 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   maxblock <- max(tmp$sel[10,])
   tmp$syrtimeblock <- matrix(nrow=ngears, ncol=maxblock)
   for(ng in 1:ngears){
-    tmp$syrtimeblock[ng,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+    # pad the vector with NA's to make it the right size if it isn't maxblocks size
+    tmpvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+    if(length(tmpvec) < maxblock){
+      for(i in (length(tmpvec) + 1):maxblock){
+        tmpvec[i] <- NA
+      }
+    }
+    tmp$syrtimeblock[ng,] <- tmpvec
   }
 
   # Priors for survey Q, one column for each survey
