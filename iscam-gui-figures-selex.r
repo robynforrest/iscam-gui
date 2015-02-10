@@ -133,6 +133,10 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
+  if(selType != 1 && selType != 6 && selType != 11){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
+    return(NULL)
+  }
 
   # Get a list of unique index names across all models to be included in this plot
   agegearnames <- NULL
@@ -208,10 +212,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
             lty1 <- lty1 + 1
             colors[[length(colors) + 1]] <- colors1
             names[[length(names) + 1]] <- paste0(names1, " - ",tb[nblock],"-",endyr)
-            #lty[[length(lty) + 1]] <- ile(lty, model, lty[[model]] + 1, replace=TRUE)
-            #colors <- ile(colors, model, colors[[model]], replace=TRUE)
-            #modelname <- names[[model]]
-            #names <- ile(names, model, paste0(modelname, " - ",tb[nblock],"-",endyr), replace=TRUE)
           }
         }
       }else{
@@ -238,11 +238,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
   matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1, main = titletext, ylim = c(0,1.1), ylab="", xlab="Age")
-#  if(selType != 1 && selType != 6 && selType != 11){
-#    cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
-#    return(NULL)
-#  }
-# lines(age, selData[,1], type="l", lwd=2, lty=lty[[model]], col=colors[[model]], las=1, main=gearTitle, ylim=c(0,1.1))
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
