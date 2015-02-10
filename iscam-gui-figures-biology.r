@@ -495,16 +495,37 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   on.exit(par(oldPar))
 
   nyrs <- nrow(prop)
+  # Packing algorithm
   if(nyrs <= 36 && nyrs > 25){
-    nside <- c(6,6)
+    if(nyrs <= 30){
+      nside <- c(6,5)
+    }else{
+      nside <- c(6,6)
+    }
   }else if(nyrs <= 25 && nyrs > 16){
-    nside <- c(5,5)
+    if(nyrs <= 20){
+      nside <- c(5,4)
+    }else{
+      nside <- c(5,5)
+    }
   }else if(nyrs <= 16 && nyrs > 9){
-    nside <- c(4,4)
+    if(nyrs <= 12){
+      nside <- c(4,3)
+    }else{
+      nside <- c(4,4)
+    }
   }else if(nyrs <=  9 && nyrs > 4){
-    nside <- c(3,3)
+    if(nyrs <= 6){
+      nside <- c(3,2)
+    }else{
+      nside <- c(3,3)
+    }
   }else if(nyrs <=  4 && nyrs > 1){
-    nside <- c(2,2)
+    if(nyrs == 2){
+      nside <- c(2,1)
+    }else{
+      nside <- c(2,2)
+    }
   }else{
     nside <- c(1,1)
   }
