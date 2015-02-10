@@ -118,6 +118,158 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   return(TRUE)
 }
 
+tile <- function(){
+  # Test the 'insert list element' (ile) function
+  currFuncName <- getCurrFunc()
+
+  l <- list(2,3,4)
+  ind <- 1
+  val <- 1
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 1, insert value at beginning of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,3)
+  ind <- 4
+  val <- 4
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 2, insert value at end of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,4)
+  ind <- 3
+  val<- 3
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 3, insert value in middle of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(4,5,6)
+  ind <- 1
+  val <- list(1,2,3)
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 4, insert list elements at beginning of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,3)
+  ind <- 4
+  val <- list(4,5,6)
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 5, insert list elements at end of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+  l <- list(1,2,6)
+  ind <- 3
+  val <- list(3,4,5)
+  out <- ile(l,ind,val)
+  cat0("**********************************************")
+  cat0(.PROJECT_NAME,"->",currFuncName,"Case 6, insert list elements in middle of list")
+  cat0("Input list:")
+  print(l)
+  cat0("Index:")
+  print(ind)
+  cat0("Value:")
+  print(val)
+  cat0("Returned list:")
+  print(out)
+  cat0("**********************************************")
+
+}
+
+ile <- function(l, ind, val){
+  # insert the element 'val' at list 'l' in position given by 'ind'
+  # while preserving the rest of the list.
+  # i.e. a list of [[1]] 1 [[2]] 2 [[3]] 4
+  # with function call(l, 3, 3) will return:
+  # [[1]] 1 [[2]] 2 [[3]] 3 [[4]] 4
+  # Algorithm: Get the left part of the list, then glue on the 'val'
+  #            element and then the right part of the list
+  # if 'val' is a list, it will be inserted as if each element is
+  # on its own, i.e. the return list will be a single, simple list
+  # with the sublist 'val' flattened and inserted element-by-element
+  #
+  # Returns NA if there is an error
+  # Only works on lists of values, not lists of lists.
+  currFuncName <- getCurrFunc()
+
+  if(ind < 1 || ind > (length(l)+ 1)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Index less than zero or greater than the length of the list.")
+    return(NA)
+  }
+  # tmpl is the left part of the list
+  if(ind == 1){
+    tmpl <- NULL
+  }else{
+    tmpl <- l[1:(ind-1)]
+  }
+  # Glue on the 'val' element to the end of tmpl
+  # remember the old index, so that we can refer to the list 'l' after
+  origind <- ind
+  if(is.list(val)){
+    unval <- unlist(val)
+    for(i in 1:length(val)){
+      tmpl[[ind]] <- unval[i]
+      ind <- ind + 1
+    }
+  }else{
+    tmpl[[ind]] <- val
+    ind <- ind + 1
+  }
+  # Glue on the right part of the list to tmpl if
+  # the list has more elements to be appended
+  if(origind <= length(l)){
+    for(i in origind:length(l)){
+      tmpl[[ind]] <- l[[i]]
+      ind <- ind + 1
+    }
+  }
+  return(as.list(tmpl))
+}
+
 plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg, showtitle = TRUE){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
   # Both sexes will be plotted with linetype of the females = linetype for males + 1 The colors will be the same.
@@ -126,6 +278,9 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   #   The solution is to match them by name if plotting multiple (sensitivity plots)
   #   by creating a unique vector of names which is the union of all names across all models
   #   and using that to match to the names in each model, only plotting if the name is found.
+  #
+  # - Selectivity blocks (if more than one) will be drawn with the same color as the scenario's color,
+  #   but incrementing line tyles (lty) and labelled on the legend with the range of years the block covers.
 
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
@@ -150,6 +305,10 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   # i.e. when the user changes to the next gear, the next name in this list will
   # be matched.
   titleText    <- agegearnames[index]
+
+  # mat wiull hold all rows to be plotted. These can be different models, multiple time blocks
+  # within a model, two sexes, or any combination of these.
+  # lty, names, and colors will also be modified to reflect the complexities stated.
   mat <- NULL
   for(model in 1:length(out)){
     age <- out[[model]]$mpd$age
@@ -161,21 +320,59 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       colors[[model]] <- NA
       names[[model]] <- NA
     }else{
+      # Get the selectivity time blocks for this gear (index)
+      tb           <- controlinputs[[model]]$syrtimeblock[gearnum,]
       nsex         <- inputs[[model]]$nsex
       age          <- out[[model]]$mpd$age
       agegearnames <- inputs[[model]]$ageGearNames
       logselData   <- logselData[which(logselData[,1] == gearnum),]
-      #selType      <- inputs[[model]]$sel[1, gearnum]
-      #selBlocks    <- inputs[[model]]$sel[10, gearnum] # selectivity time blocks
-      if(nsex == 2){
-        # There is no sex-specific selectivity, but we need to extract one of them
-        # since two sexes are reported. May as well choose Female.
-        logselData <- logselData[which(logselData[,2] == 2),]
+      # Cannot use index here because it may not match what is on the UI
+      #nb <- controlinputs[[model]]$sel["nselblocks",][index]
+      nb <- controlinputs[[model]]$sel["nselblocks",][gearnum]
+      yrs <- logselData[,3]
+      if(nb > 1){
+        # Remove the current legend parameters, since we are going to replace them
+        # with multiple blocks
+        lty1 <- lty[[model]]
+        colors1 <- colors[[model]]
+        names1 <- names[[model]]
+        lty[[model]] <- NA
+        colors[[model]] <- NA
+        names[[model]] <- NA
+        # The following loop slices the block data into the correct blocks by year,
+        # i.e. if vector tb = 1996 2004 will be translated to 1996-2003
+        #      and 2004-end year of data
+        for(nblock in 1:nb){
+          if(nb == nblock){
+            endyr <- yrs[length(yrs)]
+          }else{
+            endyr <- tb[nblock+1] - 1
+          }
+#browser()          
+          if(endyr > tb[nblock]){
+            dat <- logselData[logselData[,3] >= tb[nblock] & logselData[,3] < endyr,]
+            # place data in the matrix 'mat' and modify legend parameters
+            selData <- exp(dat[,4:ncol(dat)])
+            selData <- selData[nrow(selData),] # end-year selectivity for this block
+            mat <- cbind(mat, selData)
+            # Modify legend parameters to show selectivity blocks
+            lty[[length(lty) + 1]] <- lty1
+            lty1 <- lty1 + 1
+            colors[[length(colors) + 1]] <- colors1
+            names[[length(names) + 1]] <- paste0(names1, " - ",tb[nblock],"-",endyr)
+          }
+        }
+      }else{
+        if(nsex == 2){
+          # There is no sex-specific selectivity, but we need to extract one of them
+          # since two sexes are reported. May as well choose Female.
+          logselData <- logselData[which(logselData[,2] == 2),]
+        }
+        selData <- exp(logselData[,4:ncol(logselData)])
+        selData <- selData[nrow(selData),] # end-year selectivity for the only block
+        #selData <- as.matrix(selData)
+        mat <- cbind(mat, selData)
       }
-      selData <- exp(logselData[,4:ncol(logselData)])
-      selData <- selData[1,] #selectivity in first block
-      #selData <- as.matrix(selData)
-      mat <- cbind(mat, selData)
       gearTitle <- agegearnames[gearnum]
     }
   }

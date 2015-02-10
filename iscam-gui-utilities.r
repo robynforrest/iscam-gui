@@ -242,7 +242,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
       inputs[[model]]$sel <- op[[models[model]]]$inputs$control$sel
       linetypes[[model]] <- op[[models[model]]]$inputs$linetype
       parout[[model]] <- op[[models[model]]]$outputs$par
-      controlinputs[[model]] <- op[[models[1]]]$inputs$control
+      controlinputs[[model]] <- op[[models[model]]]$inputs$control
     }
   }
   if(length(out) == 1 && is.null(out[[1]][[1]])){
