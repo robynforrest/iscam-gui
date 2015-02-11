@@ -257,6 +257,51 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5){
   abs(x - round(x)) < tol
 }
 
+getRowsCols <- function(num){
+  # Returns a vector of length 2 representing the number of
+  # rows and columns to use to pack a plot in a grid
+  if(num <= 49 && num > 36){
+    if(num <= 42){
+      nside <- c(7,6)
+    }else{
+      nside <- c(7,7)
+    }
+  }else if(num <= 36 && num > 25){
+    if(num <= 30){
+      nside <- c(6,5)
+    }else{
+      nside <- c(6,6)
+    }
+  }else if(num <= 25 && num > 16){
+    if(num <= 20){
+      nside <- c(5,4)
+    }else{
+      nside <- c(5,5)
+    }
+  }else if(num <= 16 && num > 9){
+    if(num <= 12){
+      nside <- c(4,3)
+    }else{
+      nside <- c(4,4)
+    }
+  }else if(num <=  9 && num > 4){
+    if(num <= 6){
+      nside <- c(3,2)
+    }else{
+      nside <- c(3,3)
+    }
+  }else if(num <=  4 && num > 1){
+    if(num == 2){
+      nside <- c(2,1)
+    }else{
+      nside <- c(2,2)
+    }
+  }else{
+    nside <- c(1,1)
+  }
+  return(nside)
+}
+
 ile <- function(l, ind, val, replace=FALSE){
   # insert the element 'val' at list 'l' in position given by 'ind'
   # while preserving the rest of the list.

@@ -18,7 +18,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                                               w      = .WIDTH,
                                               h      = .HEIGHT),
                             figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
-                            sowtitle   = TRUE,         # Show the main title on the plot
+                            showtitle  = TRUE,         # Show the main title on the plot
                             burnthin   = list(0,1), # List of two elements, burnin and thinning
                             exFactor        = 1.5,
                             showEntirePrior = TRUE,
@@ -185,13 +185,16 @@ plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, sh
     cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
     return(NULL)
   }
-  numParams <- ncol(mcmcData)
-  # The next line is a simple algorithm, just generate the smallest square grid
-  # that will hold all of the parameter trace plots.
-  nrows <- ncols <- ceiling(sqrt(numParams))
-	par(mfrow=c(nrows, ncols), las=1)
+  # np is number of parameters
+  np <- ncol(mcmcData)
+  nside <- getRowsCols(np)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
+
+  #numParams <- ncol(mcmcData)
+  #nrows <- ncols <- ceiling(sqrt(numParams))
+	#par(mfrow = nside, las=1)
   mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
-  for(param in 1:numParams){
+  for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     mcmcTrace <- as.matrix(mcmcData[,param])
     plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",axes=F)
@@ -221,13 +224,11 @@ plotAutocor <- function(mcmcData = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
     return(NULL)
   }
-  numParams <- ncol(mcmcData)
-  # The next line is a simple algorithm, just generate the smallest square grid
-  # that will hold all of the parameter trace plots.
-  nrows <- ncols <- ceiling(sqrt(numParams))
-	par(mfrow=c(nrows, ncols), las=1)
+  np <- ncol(mcmcData)
+  nside <- getRowsCols(np)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
-  for(param in 1:numParams){
+  for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     mcmcAutocor <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
     autocorr.plot(mcmcAutocor, lag.max = 100, main = colnames(mcmcData)[param], auto.layout = FALSE)
@@ -250,13 +251,11 @@ plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity =
     cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
     return(NULL)
   }
-  numParams <- ncol(mcmcData)
-  # The next line is a simple algorithm, just generate the smallest square grid
-  # that will hold all of the parameter trace plots.
-  nrows <- ncols <- ceiling(sqrt(numParams))
-	par(mfrow=c(nrows, ncols), las=1)
+  np <- ncol(mcmcData)
+  nside <- getRowsCols(np)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
-  for(param in 1:numParams){
+  for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
     dens <- density(dat)

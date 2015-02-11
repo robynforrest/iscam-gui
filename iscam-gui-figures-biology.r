@@ -343,10 +343,10 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
   }
 
   if(nAgearsobs[1] > 0){
-    compData <-  as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
-    fitData <- as.data.frame(op[[scenario]]$outputs$mpd$A_hat)
+    compData  <- as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
+    fitData   <- as.data.frame(op[[scenario]]$outputs$mpd$A_hat)
     residData <- as.data.frame(op[[scenario]]$outputs$mpd$A_nu)
-    gears <- unique(compData[,2])
+    gears     <- unique(compData[,2])
 
     if(is.element(index, gears)){
       # Get the index for the gear associated with the index number so the correct sage and nage can be extracted
@@ -495,40 +495,7 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   on.exit(par(oldPar))
 
   nyrs <- nrow(prop)
-  # Packing algorithm
-  if(nyrs <= 36 && nyrs > 25){
-    if(nyrs <= 30){
-      nside <- c(6,5)
-    }else{
-      nside <- c(6,6)
-    }
-  }else if(nyrs <= 25 && nyrs > 16){
-    if(nyrs <= 20){
-      nside <- c(5,4)
-    }else{
-      nside <- c(5,5)
-    }
-  }else if(nyrs <= 16 && nyrs > 9){
-    if(nyrs <= 12){
-      nside <- c(4,3)
-    }else{
-      nside <- c(4,4)
-    }
-  }else if(nyrs <=  9 && nyrs > 4){
-    if(nyrs <= 6){
-      nside <- c(3,2)
-    }else{
-      nside <- c(3,3)
-    }
-  }else if(nyrs <=  4 && nyrs > 1){
-    if(nyrs == 2){
-      nside <- c(2,1)
-    }else{
-      nside <- c(2,2)
-    }
-  }else{
-    nside <- c(1,1)
-  }
+  nside <- getRowsCols(nyrs)
   par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
   # Get max proportion so all plots can be scaled the same
