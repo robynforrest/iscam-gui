@@ -809,7 +809,6 @@ plotIndexMPD <- function(scenario  = NULL,
 
   for(model in 1:length(out)){
     gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
-    #browser()
     if(is.na(gearnum)){
       # Remove the gear from the legend lists, using the property that if a list
       # element is set to NULL, it will be removed completely from the list.
@@ -819,7 +818,11 @@ plotIndexMPD <- function(scenario  = NULL,
     }else{
       inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
       outputit     <- as.data.frame(out[[model]]$mpd$it_hat)
-      dat          <- as.numeric(outputit[gearnum,])
+      if(ncol(outputit) == 1){
+        dat          <- as.numeric(outputit[,1])
+      }else{
+        dat          <- as.numeric(outputit[gearnum,])
+      }
       tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearnum]])
       yrs          <- tmpindices$iyr
       cv           <- 1 / inputindices$wt

@@ -190,9 +190,6 @@ plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, sh
   nside <- getRowsCols(np)
   par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
-  #numParams <- ncol(mcmcData)
-  #nrows <- ncols <- ceiling(sqrt(numParams))
-	#par(mfrow = nside, las=1)
   mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
   for(param in 1:np){
     par(mar=.MCMC_MARGINS)
@@ -383,10 +380,9 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
 
   priorNames <- rownames(priorSpecs)
   numWithPriors <- length(priorNames)
+  nside <- getRowsCols(numWithPriors)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
-  # Make a square grid of plots. TODO: Improve this plot fill algorithm
-  nrows <- ncols <- ceiling(sqrt(numWithPriors))
-	par(mfrow=c(nrows, ncols), las=1)
 
   for(postInd in 1:ncol(mcmcData)){
     # Find the parameter name from mcmcData in the priorSpecs table

@@ -863,7 +863,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   paramNames <- vector()
   # Lazy matching with # so that the first instance matches, not any other
   #pattern <- "^.*#[[:blank:]]*([[:alnum:]]+_*[[:alnum:]]*) +.*"
-  pattern <- "^.*#([[:alnum:]]+_*[[:alnum:]]*).*"
+  pattern <- "^.*?#([[:alnum:]]+_*[[:alnum:]]*).*"
   for(paramName in 1:npar){
     # Each parameter line in dat which starts at index 2,
     # retrieve the parameter name for that line
