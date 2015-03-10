@@ -157,11 +157,13 @@ plotObjFunVal <- function(out       = NULL,
   for(model in 2:length(out)){
     dat <- rbind(dat,out[[model]]$mpd$ObjectiveFunction)
   }
+  browser()
   dat <- t(dat)
   colnames(dat) <- 1:length(out)
   rownames(dat) <- ""
+  datvals <- dat
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","black"),xaxt='n',yaxt='n')
-  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1.04,datvals,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
   if(showtitle){
     title("Objective function values")
@@ -215,10 +217,11 @@ plotMaxGrad <- function(out       = NULL,
   dat <- t(dat)
   colnames(dat) <- 1:length(out)
   rownames(dat) <- ""
+  datvals <- dat
   dat <- ifelse(dat>.MAXGRAD,0,dat)
   dat <- ifelse(dat<.MAXGRAD,dat,-dat)
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
-  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1.04,datvals,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
   if(showtitle){
     title(paste0("Maximum gradient values (<",.MAXGRAD,")"))
@@ -272,9 +275,10 @@ plotFuncEvals <- function(out       = NULL,
   dat <- t(dat)
   colnames(dat) <- 1:length(out)
   rownames(dat) <- ""
+  datvals <- dat
   dat <- ifelse(dat<.FUNEVALS,-dat,dat)
   plotBubbles(dat,dnam=F,cpro=F,ylab="",clrs=c("green","red","red"),xaxt='n',yaxt='n')
-  text(1:length(out),1.04,dat,srt=-45,adj=1)
+  text(1:length(out),1.04,datvals,srt=-45,adj=1)
   text(1:length(out),1,1:length(out))
   if(showtitle){
     title(paste0("Number of function evaluations (<",.FUNEVALS,")"))
