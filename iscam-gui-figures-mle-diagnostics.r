@@ -157,7 +157,6 @@ plotObjFunVal <- function(out       = NULL,
   for(model in 2:length(out)){
     dat <- rbind(dat,out[[model]]$mpd$ObjectiveFunction)
   }
-  browser()
   dat <- t(dat)
   colnames(dat) <- 1:length(out)
   rownames(dat) <- ""
