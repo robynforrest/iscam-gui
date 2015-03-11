@@ -237,10 +237,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   lty[sapply(lty, is.na)] <- NULL
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
-  # iscam outputs ages 1 to max age even if the minimum age is set to be greater than 1.
-  # So this plot call must use 1 to max age instead of min age to max age
-  plotages <- seq(1,max(age))
-  matplot(plotages, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1,
+  matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1,
           main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="", xlab="Age")
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
