@@ -214,7 +214,14 @@ plotCatchFit<-function(inp     = NULL,
   lines(years, predCt, col=colors[[1]], lty=lty[[1]])
   if(length(out) > 1){
     for(line in 2:length(out)){
+      catchData <- as.data.frame(inp[[line]]$catch)
+      years <- catchData$year
+      obsCt <- catchData$value
+      xlim <- range(years)
+      ylim <- c(0,yUpper)
       predCt <- out[[line]]$mpd$ct
+      # Plot the obseverd catch points. Note these will be different for models with different areas
+      points(years, obsCt, pch=19, col=colors[[line]], lty=lty[[line]], xlim=xlim, ylim=ylim, type="p", xlab="Year", ylab="Catch (1000 mt)", main=titletext)
       lines(years, predCt, col=colors[[line]], lty=lty[[line]])
     }
   }
