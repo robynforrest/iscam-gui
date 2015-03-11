@@ -180,7 +180,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
+      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle)
+      #cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
       plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle)
     }
@@ -978,6 +979,79 @@ plotFMPD <- function(out       = NULL,
     legend(leg, legend=legendNames, col=legendCols, lty=legendLines, lwd=2)
   }
 }
+
+plotFMCMC <- function(out       = NULL,
+                      colors    = NULL,
+                      names     = NULL,
+                      ci        = NULL,
+                      burnthin  = list(0,1),
+                      pch       = 20,
+                      pointSize = 0.2,
+                      verbose   = FALSE,
+                      showtitle = TRUE,
+                      leg = "topright"){
+  # Fishing mortality plot for mcmc models
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # Calculate quantiles for the posterior data
+  quants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    # the following has a f[[1]]. The correct way would be to have iscam only output gear 1 instead of all gears,
+    # similar to sbt output.
+    ft <- window(mcmc(out[[model]]$mcmc$ft[[1]][[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(ft, ci)
+  }
+  yUpper <- max(quants[[1]])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]])
+  }
+  # Get last four digits of the names
+  ynames <- names(out[[1]]$mcmc$ft[[1]][[1]])
+  pattern <- ".*_([0-9]+)"
+  yrs <- as.numeric(sub(pattern,"\\1",ynames))
+  par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    title <- "Fishing Mortality"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="F\n", xlab="Year", main=title, las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+    }
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
+
+}
+
 
 plotReferencePointsMCMC <- function(out       = NULL,
                                     colors    = NULL,

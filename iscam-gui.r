@@ -274,7 +274,6 @@ iscam <- function(reloadScenarios      = FALSE,
            # Only MPD for Index
            "sTSIndex"                               = {plotTS(s,7,savefig,"Index",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
-           # Only MPD for Fishing mortality
            "sFishingMortality"                      = {plotTS(s,9,savefig,"Fishing Mortality",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sRefPoints"                             = {plotTS(s,10,savefig,"ReferencePoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            # From iscam-gui-figures-biology.r
@@ -325,7 +324,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,savefig,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
-           "sSensF"                                 = {plotTS(s,9,savefig,"MeanF",FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sSensF"                                 = {plotTS(s,9,savefig,"F",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensRefPoints"                         = {plotTS(s,10,savefig,"ReferencePoints",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensRecruitDev"                        = {plotTS(s,11,savefig,"RecruitmentDevsAllAreas",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},

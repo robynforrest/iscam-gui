@@ -213,7 +213,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #7
-          radio name=viewPlotType value=sSensF              text="Mean F (MPD only)"                 function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensF              text="Fishing mortality"                 function=.subView mode=character sticky=W
           null
           null
           null
