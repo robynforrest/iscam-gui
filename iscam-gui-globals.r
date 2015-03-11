@@ -108,7 +108,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 # Messages
 .TELL_USER_HOW_TO_START_GUI      <- "Type iscam() to start iscam-gui\n"
 .TELL_USER_ABOUT_GUI_ARGUMENTS   <- paste0("Optional ",.PROJECT_NAME," arguments: ",.MAIN_FUNCTION_CALL,
-                                           "(reloadScenarios = FALSE, silent = FALSE, copyModelExecutables = FALSE)\n\n")
+                                           "(reloadScenarios = FALSE, silent = FALSE)\n\n")
 
 # Model run command line outputs
 .LOG_FILE_NAME                   <- "runoutput.log"  # This is the name of the logfile which holds all command line output.
