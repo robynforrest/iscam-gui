@@ -228,7 +228,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
         out[[model]]    <- op[[retroScenario]]$outputs$retros[[model-1]]$outputs[type]
         names[[model]]  <- op[[retroScenario]]$outputs$retros[[model-1]]$names$scenario
         inputs[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$data
-        inputs[[model]]$sel <- op[[retroScenario]]$outputs$retros[[mode-1]]$inputs$control$sel
+        inputs[[model]]$sel <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$control$sel
         linetypes[[model]] <- op[[retroScenario]]$outputs$retros[[model-1]]$inputs$linetype
         parout[[model]] <- op[[retroScenario]]$outputs$par
         controlinputs[[model]] <- op[[retroScenario]]$inputs$control

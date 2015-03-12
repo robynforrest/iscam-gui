@@ -468,7 +468,6 @@ plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
 
   posteriorNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
   xvals <- seq(min(posteriorNoPlot$breaks)/exFactor, max(posteriorNoPlot$breaks)/exFactor, length=1000)
-
   pd <- xx$fn(xvals, xx$p1, xx$p2)
   z <- cbind(xvals, pd)
 

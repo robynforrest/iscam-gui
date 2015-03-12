@@ -816,7 +816,13 @@ iscam <- function(reloadScenarios      = FALSE,
   for(retro in 1:retroYears){
     # Copy the current model's directory 'retroYears' times, with
     #  each new directory being the number of years subtracted
-    destDir <- file.path(srcDir,paste0(.RETRO_DIR_BASE,retro))
+
+    # Must make retro number a two-character string so that Retrospective10 is not after Retrospective1 which causes issues later
+    retrostr <- as.character(retro)
+    if(nchar(retrostr) == 1){
+      retrostr <- paste0("0",retrostr)
+    }
+    destDir <- file.path(srcDir,paste0(.RETRO_DIR_BASE,retrostr))
     files <- dir(srcDir)
     for(ind in 1:length(.OUTPUT_FILES)){
       # Remove any output files from the copy source so as not to mess up the retro directory
@@ -860,7 +866,12 @@ iscam <- function(reloadScenarios      = FALSE,
   cat("Don't touch the GUI - wait until a message appears stating the retrospective runs have finished.\n\n")
   tcl("update") # updates window text
   for(retro in 1:retroYears){
-    retroDir <- file.path(currDir, op[[scenario]]$names$dir, paste0(.RETRO_DIR_BASE,retro))
+    # Must make retro number a two-character string so that Retrospective10 is not after Retrospective1 which causes issues later
+    retrostr <- as.character(retro)
+    if(nchar(retrostr) == 1){
+      retrostr <- paste0("0",retrostr)
+    }
+    retroDir <- file.path(currDir, op[[scenario]]$names$dir, paste0(.RETRO_DIR_BASE,retrostr))
     # change to this scenario's directory
     setwd(retroDir)
     modelCall <- .EXE_FILE_NAME
