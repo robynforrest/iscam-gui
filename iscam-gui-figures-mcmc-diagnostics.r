@@ -395,7 +395,9 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
     if(length(priorInd) > 0){
       # The posterior name is in the list of priors..
       dat <- mcmcData[,postInd]
-      dat <- log(dat)
+      if(postName != "h"){  # HACK!!! iScam should output ist results in the same space as input parameters
+        dat <- log(dat)
+      }
       dat <- window(mcmc(as.ts(dat), start = burnin, thin = thinning))
 
       specs <- unlist(priorSpecs[priorInd,])
@@ -465,7 +467,6 @@ convertLogParams <- function(paramSpecs = NULL){
 plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   # xx is a list(p=samples, p1=prior param 1, p2=prior param 2, fn=prior distribution)
   #  and ignore posterior distribution limits
-
   posteriorNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
   xvals <- seq(min(posteriorNoPlot$breaks)/exFactor, max(posteriorNoPlot$breaks)/exFactor, length=1000)
   pd <- xx$fn(xvals, xx$p1, xx$p2)
