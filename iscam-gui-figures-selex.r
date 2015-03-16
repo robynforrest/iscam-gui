@@ -141,7 +141,8 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   # Get a list of unique index names across all models to be included in this plot
   agegearnames <- NULL
   for(model in 1:length(inputs)){
-    agegearnames <- c(agegearnames, inputs[[model]]$ageGearNames)
+    #agegearnames <- c(agegearnames, inputs[[model]]$ageGearNames)
+    agegearnames <- c(agegearnames, inputs[[model]]$gearNames)
   }
   if(is.null(agegearnames)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply age gear names in the data files to plot selectivities across models.")
@@ -166,7 +167,8 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
     # For each model, chek to see that it matches the current gear to be plotted,
     # then check for selectivity blocks and add them
     age <- out[[model]]$mpd$age
-    gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
+#    gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
+    gearnum      <- match(curragegearname, inputs[[model]]$gearNames)
     logselData   <- out[[model]]$mpd$log_sel
     if(is.na(gearnum)){
       # The gear being plotted is not in this model, so remove the gear from the
@@ -179,7 +181,8 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       tb           <- controlinputs[[model]]$syrtimeblock[gearnum,]
       nsex         <- inputs[[model]]$nsex
       age          <- out[[model]]$mpd$age
-      agegearnames <- inputs[[model]]$ageGearNames
+      #agegearnames <- inputs[[model]]$ageGearNames
+      agegearnames <- inputs[[model]]$gearNames
       logselData   <- logselData[which(logselData[,1] == gearnum),]
       nb <- controlinputs[[model]]$sel["nselblocks",][gearnum]
       yrs <- logselData[,3]
@@ -237,6 +240,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   lty[sapply(lty, is.na)] <- NULL
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
+browser()
   matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1,
           main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="", xlab="Age")
   if(!is.null(leg)){

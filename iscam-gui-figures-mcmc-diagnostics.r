@@ -194,7 +194,11 @@ plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, sh
   for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     mcmcTrace <- as.matrix(mcmcData[,param])
-    plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",axes=F)
+#    if(param==5){
+#      plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",ylim=c(0,1), axes=F)
+#    }else{
+      plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",axes=F)
+#    }
     box()
     at <- labels <- seq(0,nrow(mcmcData), axis.lab.freq)
     axis(1, at=at, labels=labels)
