@@ -331,10 +331,10 @@ plotBiomassMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
     }
   }
   if(!is.null(leg)){
@@ -459,10 +459,10 @@ plotDepletionMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Reletive Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
     }
   }
   if(!is.null(leg)){
@@ -691,33 +691,27 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
   thin <- burnthin[[2]]
 
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
-  ##########################################################################
-  ##########################################################################
-  ##########################################################################
-  ##########################################################################
-  ##########################################################################
-  # BELOW is cut and paste from biomass plot.
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
-    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
-    bo <- as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin))
-    depl <- sbt / bo
-    quants[[model]] <- getQuants(depl, ci)
+    rdev <- window(mcmc(out[[model]]$mcmc$rdev[[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(rdev, ci)
   }
+  yLower <- min(quants[[1]])
   yUpper <- max(quants[[1]])
   for(model in 1:length(out)){
+    yLower <- min(yLower, quants[[model]])
     yUpper <- max(yUpper, quants[[model]])
   }
 
-  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  yrs <- as.numeric(names(out[[1]]$mcmc$rdev[[1]]))
   title <- ""
   if(showtitle){
-    title <- "Reletive Spawning Biomass"
+    title <- "Recruitment Deviations"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yLower, yUpper, first=TRUE, ylab="Recruitment Deviations", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], yLower, yUpper, first=FALSE)
     }
   }
   if(!is.null(leg)){
@@ -865,27 +859,42 @@ plotIndexMPD <- function(scenario  = NULL,
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  # Get a list of unique index names across all models to be included in this plot
-  inpvec <- unlist(inputs)
-  indexnames <- unique(inpvec[grep("indexGearNames",names(inpvec))])
-  if(is.null(indexnames)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply index names in the data files to plot indices across models.")
-    return(NULL)
-  }
-  indexnames <- unique(indexnames)
-  if(index > length(indexnames)){
-    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number less or equal to ",length(indexnames)," (index).")
-    return(NULL)
-  }
-  currindexname <- indexnames[index]
-  # The 'indexnames' vector will be used as the index to scroll through,
-  # i.e. when the user changes to the next index, the next name in this list will
-  # be matched.
-  gearTitle <- indexnames[index]
-  mat <- NULL
+  ## For future: No assumption of first model having all indices
+  # Get the names of all models' input indices so that the plot will work
+  # even if some indices are not included in the first one.
+  ## indexnames <- NULL
+  ## for(model in 1:length(inputs)){
+  ##   indices <- inputs[[model]]$indices
+  ##   gearnames <- inputs[[model]]$gearNames
+  ##   for(ind in 1:length(indices)){
+  ##     indexmat <- as.data.frame(indices[[ind]])
+  ##     gearindex <- unique(indexmat$gear)
+  ##     indexnames <- c(indexnames, gearnames[gearindex])
+  ##   }
+  ## }
+  ## indexnames <- unique(indexnames)
+  # At this point, indexnames holds the names of all indices used in
+  # all models. Each name is unique in the vector.
 
+  # Get index names included in the model
+  indices <- inputs[[1]]$indices
+  gearindices <- NULL
+  for(ind in 1:length(indices)){
+    indexmat <- as.data.frame(indices[[ind]])
+    gearindices <- c(gearindices, unique(indexmat$gear))
+  }
+  if(!is.element(index,gearindices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }
+
+  currindexname <- inputs[[1]]$gearNames[index]
+  mat <- NULL
   for(model in 1:length(out)){
-    gearnum <- match(currindexname, inputs[[model]]$indexGearNames)
+    # For each model, match the data with the gear name 'currgearname'
+    # If it does not match, it will be skipped
+    indexnames <- inputs[[1]]$gearNames[index]
+    gearnum <- match(currindexname, inputs[[1]]$gearNames)
     if(is.na(gearnum)){
       # Remove the gear from the legend lists, using the property that if a list
       # element is set to NULL, it will be removed completely from the list.
@@ -893,23 +902,41 @@ plotIndexMPD <- function(scenario  = NULL,
       colors[[model]] <- NA
       names[[model]] <- NA
     }else{
-      inputindices <- as.data.frame(inputs[[model]]$indices[[gearnum]])
-      outputit     <- as.data.frame(out[[model]]$mpd$it_hat)
-      if(ncol(outputit) == 1){
-        dat          <- as.numeric(outputit[,1])
-      }else{
-        dat          <- as.numeric(outputit[gearnum,])
+      # Get correct ind for the given gear
+      indices <- inputs[[model]]$indices
+      gearindreal <- NA
+      for(ind in 1:length(indices)){
+        indexmat <- as.data.frame(indices[[ind]])
+        gearindex <- unique(indexmat$gear)
+        if(gearindex == gearnum){
+          gearindreal <- ind
+        }
       }
-      tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearnum]])
-      yrs          <- tmpindices$iyr
-      cv           <- 1 / inputindices$wt
-      dat          <- dat[!is.na(dat)]
-      mat          <- cbind(mat, dat)
+      if(!is.na(gearindreal)){
+        inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+        outputit     <- as.data.frame(out[[model]]$mpd$it_hat)
+        if(ncol(outputit) == 1){
+          dat          <- as.numeric(outputit[,1])
+        }else{
+          dat          <- as.numeric(outputit[gearindreal,])
+        }
+        tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+        yrs          <- tmpindices$iyr
+        cv           <- 1 / inputindices$wt
+        dat          <- dat[!is.na(dat)]
+        mat          <- cbind(mat, dat)
+      }else{
+        # Remove the gear from the legend lists, using the property that if a list
+        # element is set to NULL, it will be removed completely from the list.
+        lty[[model]] <- NA
+        colors[[model]] <- NA
+        names[[model]] <- NA
+      }
     }
   }
   title <- ""
   if(showtitle){
-    title <- paste0("Index fit - ",gearTitle)
+    title <- paste0("Index fit - ",currindexname)
   }
   # Change the NAs to NULLs for the legend variables, using the property that if a list
   # element is set to NULL, it will be removed completely from the list.
@@ -1116,10 +1143,10 @@ plotFMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Fishing Mortality"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="F\n", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="F\n", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
     }
   }
   if(!is.null(leg)){

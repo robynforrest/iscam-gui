@@ -335,11 +335,12 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
   nAgearsobs <- op[[scenario]]$input$data$nagearsvec
   # ageLengthFlags, 0 = length data 1= age data, if two-sex model this will be length 2 vector
   ageLengthFlags <- op[[scenario]]$input$data$agecompflag
-  gearNames <- op[[scenario]]$inputs$data$ageGearNames
-  if(op[[scenario]]$inputs$data$hasAgeGearNames){
+  #gearNames <- op[[scenario]]$inputs$data$ageGearNames
+  gearNames <- op[[scenario]]$inputs$data$gearNames
+  if(op[[scenario]]$inputs$data$hasGearNames){
     titleText <- gearNames[index]
   }else{
-    titleText <- paste0("Gear ",gearNames[index])
+    titleText <- paste0("Gear ", index)
   }
 
   if(nAgearsobs[1] > 0){
@@ -347,7 +348,6 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
     fitData   <- as.data.frame(op[[scenario]]$outputs$mpd$A_hat)
     residData <- as.data.frame(op[[scenario]]$outputs$mpd$A_nu)
     gears     <- unique(compData[,2])
-
     if(is.element(index, gears)){
       # Get the index for the gear associated with the index number so the correct sage and nage can be extracted
       # For example, if the two gears with data are 1 and 3, when the user selects index 3 on the GUI,
@@ -367,15 +367,15 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
       startRowThisGear <- 1
       if(index > 1){
         # If index = 1, then we want it to start at row 1
-        for(ind in 1:(index-1)){
+        for(ind in 1:(gearindex-1)){
           # Add all the gear's number of rows together to get the starting row for this gear
           startRowThisGear <- startRowThisGear + op[[scenario]]$inputs$data$nagearsvec[ind]
         }
       }
-      numages <- op[[scenario]]$inputs$data$agearsN[[index]]
+      numages <- op[[scenario]]$inputs$data$agearsN[[gearindex]]
       if(nsex == 2){
         # Get odd elements
-          tmpagen <- op[[scenario]]$inputs$data$agearsN[[index]]
+          tmpagen <- op[[scenario]]$inputs$data$agearsN[[gearindex]]
         if(sex == 1){
           # Males are odd
           numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
@@ -384,8 +384,9 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
           numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
         }
       }
-      nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[index]
+      nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[gearindex]
       endRowThisGear <- startRowThisGear + nrowsThisGear - 1
+
       residData <- residData[startRowThisGear:endRowThisGear, ]   # Get only the residual data for the current index
       fitData <- fitData[startRowThisGear:endRowThisGear, ]
 

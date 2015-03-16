@@ -144,7 +144,7 @@ getQuants <- function(data=NULL, ci=NULL){
   return(quants)
 }
 
-drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
+drawEnvelope <- function(yrs, quants, color, yLower = 0, yUpper, first, ...){
   # Draw a time series envelope on a device on which plot.new has already been called
   # Assumptions: quants is a 3-row matrix,
   #  where the middle row is the median and the other two are the lower and upper
@@ -156,9 +156,9 @@ drawEnvelope <- function(yrs, quants, color, yUpper, first, ...){
   upper  <- quants[3,]
 
   if(first){
-    plot(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(0,yUpper), ...)
+    plot(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
   }else{
-    lines(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(0,yUpper), ...)
+    lines(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
   }
 
   shade <- .getShade(color, 30)

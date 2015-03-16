@@ -240,7 +240,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   lty[sapply(lty, is.na)] <- NULL
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
-browser()
   matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1,
           main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="", xlab="Age")
   if(!is.null(leg)){

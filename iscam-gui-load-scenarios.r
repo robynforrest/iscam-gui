@@ -641,26 +641,26 @@ readData <- function(file = NULL, verbose = FALSE){
   }
 
   # Get the element number for the "IndexGears" names if present
-  dat <- grep("^#.*IndexGears:.+",data)
-  tmp$hasIndexGearNames <- FALSE
-  if(length(dat >0)){
-    # The gear names were in the file
-    indexGearNamesStr <- gsub("^#.*IndexGears:(.+)","\\1",data[dat])
-    indexGearNames <- strsplit(indexGearNamesStr,",")[[1]]
-    tmp$indexGearNames <- gsub("^[[:blank:]]+","",indexGearNames)
-    tmp$hasIndexGearNames <- TRUE
-  }
+  ## dat <- grep("^#.*IndexGears:.+",data)
+  ## tmp$hasIndexGearNames <- FALSE
+  ## if(length(dat >0)){
+  ##   # The gear names were in the file
+  ##   indexGearNamesStr <- gsub("^#.*IndexGears:(.+)","\\1",data[dat])
+  ##   indexGearNames <- strsplit(indexGearNamesStr,",")[[1]]
+  ##   tmp$indexGearNames <- gsub("^[[:blank:]]+","",indexGearNames)
+  ##   tmp$hasIndexGearNames <- TRUE
+  ## }
 
-  # Get the element number for the "AgeGears" names if present (gears with age comp data)
-  dat <- grep("^#.*AgeGears:.+",data)
-  tmp$hasAgeGearNames <- FALSE
-  if(length(dat >0)){
-    # The gear names were in the file
-    ageGearNamesStr <- gsub("^#.*AgeGears:(.+)","\\1",data[dat])
-    ageGearNames <- strsplit(ageGearNamesStr,",")[[1]]
-    tmp$ageGearNames <- gsub("^[[:blank:]]+","",ageGearNames)
-    tmp$hasAgeGearNames <- TRUE
-  }
+  ## # Get the element number for the "AgeGears" names if present (gears with age comp data)
+  ## dat <- grep("^#.*AgeGears:.+",data)
+  ## tmp$hasAgeGearNames <- FALSE
+  ## if(length(dat >0)){
+  ##   # The gear names were in the file
+  ##   ageGearNamesStr <- gsub("^#.*AgeGears:(.+)","\\1",data[dat])
+  ##   ageGearNames <- strsplit(ageGearNamesStr,",")[[1]]
+  ##   tmp$ageGearNames <- gsub("^[[:blank:]]+","",ageGearNames)
+  ##   tmp$hasAgeGearNames <- TRUE
+  ## }
 
   # Get the element number for the "CatchUnits" if present
   dat <- grep("^#.*CatchUnits:.+",data)
@@ -679,7 +679,7 @@ readData <- function(file = NULL, verbose = FALSE){
   }
 
   # Save the number of specimens per year (comment at end of each age comp
-  # line), eg. #135 means 135 specimens contributed to the age propoirtions for that year
+  # line), eg. #135 means 135 specimens contributed to the age proportions for that year
   agen <- vector()
   # Match age comp lines which have N's as comments
   tmp$hasAgeCompN <- FALSE
@@ -760,9 +760,9 @@ readData <- function(file = NULL, verbose = FALSE){
   }
   # Age composition data are a ragged object and are stored as a list of matrices
   tmp$nagears     <- as.numeric(dat[ind <- ind + 1])
-  if(!tmp$hasAgeGearNames){
-    tmp$ageGearNames <- 1:length(tmp$nagears)
-  }
+  #if(!tmp$hasAgeGearNames){
+  #  tmp$ageGearNames <- 1:length(tmp$nagears)
+  #}
   tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
