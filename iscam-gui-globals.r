@@ -94,6 +94,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .MCMC_FILE_NAME                  <- "iscam_mcmc.csv"
 .MCMC_BIOMASS_FILE_NAME          <- "iscam_sbt_mcmc.csv"
 .MCMC_RECRUITMENT_FILE_NAME      <- "iscam_rt_mcmc.csv"
+.MCMC_RECRUITMENT_DEVS_FILE_NAME <- "iscam_rdev_mcmc.csv"
 .MCMC_FISHING_MORT_FILE_NAME     <- "iscam_ft_mcmc.csv"
 
 # MCMC convergence plot margins

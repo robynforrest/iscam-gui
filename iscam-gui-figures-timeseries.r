@@ -636,7 +636,6 @@ plotRecruitmentMCMC <- function(out       = NULL,
       incOffset <- incOffset + offset
     }
   }
-  #RF added median and mean for 1 scenario plot
   if(length(out) == 1){
     abline(h=median(as.matrix(rt)),col=2, lty=1)
     abline(h=mean(as.matrix(rt)),col=3,lty=1)
@@ -646,6 +645,84 @@ plotRecruitmentMCMC <- function(out       = NULL,
     if(!is.null(leg))  legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 
+}
+
+plotRecruitmentDevsMCMC <- function(out       = NULL,
+                                    colors    = NULL,
+                                    names     = NULL,
+                                    ci        = NULL,
+                                    burnthin  = list(0,1),
+                                    offset    = 0.1,
+                                    verbose   = FALSE,
+                                    showtitle = TRUE,
+                                    leg = "topright"){
+  # Recruitment deviations plot for an MCMC
+  # out is a list of the mcmc outputs to show on the plot
+  # colors is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval in percent, eg 95
+  # offset is the number of years to offset the points and bars
+  #  for clarity on the plot, i.e. so that there is no overlapping.
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  ##########################################################################
+  ##########################################################################
+  ##########################################################################
+  ##########################################################################
+  ##########################################################################
+  # BELOW is cut and paste from biomass plot.
+  quants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    bo <- as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin))
+    depl <- sbt / bo
+    quants[[model]] <- getQuants(depl, ci)
+  }
+  yUpper <- max(quants[[1]])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]])
+  }
+
+  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  title <- ""
+  if(showtitle){
+    title <- "Reletive Spawning Biomass"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], yUpper, first=FALSE)
+    }
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
 }
 
 plotRecruitmentDevsMPD <- function(out       = NULL,

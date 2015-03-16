@@ -1087,10 +1087,11 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a directory name (dired). Returning NULL.")
     return(NULL)
   }
-  mcmcfn    <- file.path(dired,.MCMC_FILE_NAME)
-  mcmcsbtfn <- file.path(dired,.MCMC_BIOMASS_FILE_NAME)
-  mcmcrtfn  <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
-  mcmcftfn  <- file.path(dired,.MCMC_FISHING_MORT_FILE_NAME)
+  mcmcfn     <- file.path(dired,.MCMC_FILE_NAME)
+  mcmcsbtfn  <- file.path(dired,.MCMC_BIOMASS_FILE_NAME)
+  mcmcrtfn   <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
+  mcmcrdevfn <- file.path(dired,.MCMC_RECRUITMENT_DEVS_FILE_NAME)
+  mcmcftfn   <- file.path(dired,.MCMC_FISHING_MORT_FILE_NAME)
 
   tmp        <- list()
   tmp$params <- read.csv(mcmcfn)
@@ -1100,6 +1101,8 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$rt     <- extractGroupMatrices(rt, prefix = "rt")
   ft         <- read.csv(mcmcftfn)
   tmp$ft     <- extractAreaSexMatrices(ft, prefix = "ft")
+  rdev       <- read.csv(mcmcrdevfn)
+  tmp$rdev   <- extractGroupMatrices(rdev, prefix = "rdev")
   return(tmp)
 }
 
