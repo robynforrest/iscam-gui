@@ -157,7 +157,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   # The 'agegearnames' vector will be used as the gear to scroll through,
   # i.e. when the user changes to the next gear, the next name in this list will
   # be matched.
-  titleText    <- agegearnames[index]
+  titleText       <- agegearnames[index]
 
   # mat will hold all rows to be plotted. These can be different models, multiple time blocks
   # within a model, two sexes, or any combination of these.
@@ -167,7 +167,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
     # For each model, chek to see that it matches the current gear to be plotted,
     # then check for selectivity blocks and add them
     age <- out[[model]]$mpd$age
-#    gearnum      <- match(curragegearname, inputs[[model]]$ageGearNames)
     gearnum      <- match(curragegearname, inputs[[model]]$gearNames)
     logselData   <- out[[model]]$mpd$log_sel
     if(is.na(gearnum)){
@@ -181,7 +180,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
       tb           <- controlinputs[[model]]$syrtimeblock[gearnum,]
       nsex         <- inputs[[model]]$nsex
       age          <- out[[model]]$mpd$age
-      #agegearnames <- inputs[[model]]$ageGearNames
       agegearnames <- inputs[[model]]$gearNames
       logselData   <- logselData[which(logselData[,1] == gearnum),]
       nb <- controlinputs[[model]]$sel["nselblocks",][gearnum]

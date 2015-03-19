@@ -32,7 +32,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    btarg      = 0.4,          # Biomass target line for depletion plots
                    blim       = 0.25,         # Biomass limit line for depletion plots
                    units      = .UNITS,       # Units to use in plotting
-                   silent     = .SILENT){
+                   silent     = .SILENT,
+                   showSbio   = FALSE){       # Show Spawning biomass on Vulnerable biomass plot
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -49,7 +50,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   #  res (on-screen resolution), w (on-screen width),h (on-screen height)
 
   # If plotNum must be one of:
-  # 1 Spawning biomass total
+  # 1 Spawning biomass all areas
   # 2 Spawning biomass by area
   # 3 Spawning depletion total
   # 4 Spawning depletion by area
@@ -60,6 +61,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 9 Fishing mortality
   #10 Reference Points
   #11 Recruitment deviations
+  #12 Vulnerable biomass all areas (+Spawning biomass all areas)
 
   currFuncName <- getCurrFunc()
 
@@ -115,8 +117,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 11){
-    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 10. You passed ",plotNum)
+  if(plotNum < 1 || plotNum > 12){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 12. You passed ",plotNum)
     return(FALSE)
   }
   if(multiple || retros){
@@ -181,7 +183,6 @@ plotTS <- function(scenario   = 1,         # Scenario number
   if(plotNum == 9){
     if(plotMCMC){
       plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle)
-      #cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for F not implemented.")
     }else{
       plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle)
     }
@@ -198,6 +199,14 @@ plotTS <- function(scenario   = 1,         # Scenario number
       plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle)
     }else{
       plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+    }
+  }
+  if(plotNum == 12){
+    # Vulnerable biomass
+    if(plotMCMC){
+      plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio)
+    }else{
+      plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio)
     }
   }
 
@@ -469,6 +478,212 @@ plotDepletionMCMC <- function(out       = NULL,
     legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
+
+
+
+plotVBiomassMPD <- function(out       = NULL,
+                            colors    = NULL,
+                            names     = NULL,
+                            lty       = NULL,
+                            verbose   = FALSE,
+                            showtitle = TRUE,
+                            leg = "topright",
+                            showSbio  = FALSE){
+  # Vulnerable biomass plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # showSbio is whether or not to add the spawning biomass to the plot
+  currFuncName <- getCurrFunc()
+
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+  # For vbt from the report file, 1st column is gear number, 2nd column is group, 3rd is year, and 4th is vbt
+  # This code will assume only one group, and will ignore the 2nd column
+  # Also, only one gear is assumed, which is gear==1 in the first column
+
+  sbt <- out[[1]]$mpd$sbt
+  vbt <- out[[1]]$mpd$vbt
+  vbt <- vbt[vbt[,1]==1,] # Filters only gear #1
+  if(showSbio){
+    yUpper <- max(vbt[,4],sbt)
+  }else{
+    yUpper <- max(vbt[,4])
+  }
+  for(model in 1:length(out)){
+    sbt <- out[[model]]$mpd$sbt
+    vbt <- out[[model]]$mpd$vbt
+    vbt <- vbt[vbt[,1]==1,] # Filters only gear #1
+    if(showSbio){
+      yUpper <- max(yUpper, vbt[,4], sbt)
+    }else{
+      yUpper <- max(yUpper, vbt[,4])
+    }
+  }
+  par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    if(showSbio){
+      title <- "Vulnerable vs. Spawning Biomass"
+    }else{
+      title <- "Vulnerable Biomass"
+    }
+  }
+  sbt <- out[[1]]$mpd$sbt
+  vbt <- out[[1]]$mpd$vbt
+  vbt <- vbt[vbt[,1]==1,] # Filters only gear #1
+  yrs <- vbt[,3]
+  vbt <- vbt[,4]
+  plot(yrs, vbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  if(length(out) == 1 && showSbio){
+    # Make the spawning biomass the same color as the vulnerable, but up one linetype
+    lines(yrs, sbt, type="l", col=colors[[1]], lty=lty[[1]]+1, lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+    vbioname <- paste0("VBio - ",names[[1]])
+    sbioname <- paste0("Sbio - ",names[[1]])
+    names[[1]] <- vbioname
+    names[[2]] <- sbioname
+    lty[[2]] <- lty[[1]] + 1
+    colors[[2]] <- colors[[1]]
+  }
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      vbt <- out[[line]]$mpd$vbt
+      vbt <- vbt[vbt[,1]==1,] # Filters only gear #1
+      yrs <- vbt[,3]
+      vbt <- vbt[,4]
+      lines(yrs, vbt, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
+    }
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+  }
+}
+
+plotVBiomassMCMC <- function(out       = NULL,
+                             colors    = NULL,
+                             names     = NULL,
+                             ci        = NULL,
+                             burnthin  = list(0,1),
+                             verbose   = FALSE,
+                             showtitle = TRUE,
+                             leg = "topright",
+                             showSbio  = FALSE){
+  # Vulnerable biomass plot for an MCMC
+  # out is a list of the mcmc outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # showSbio is whether or not to add the spawning biomass to the plot
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  squants <- vector("list", length(out))
+  vquants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    vbt <- window(mcmc(out[[model]]$mcmc$vbt[[1]][[1]]), start=burn, thin=thin)
+    squants[[model]] <- getQuants(sbt, ci)
+    vquants[[model]] <- getQuants(vbt, ci)
+  }
+  yUpper <- 0
+  for(model in 1:length(out)){
+    if(showSbio){
+      yUpper <- max(yUpper, squants[[model]], vquants[[model]])
+    }else{
+      yUpper <- max(yUpper, vquants[[model]])
+    }
+  }
+  syrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  vyrs <- syrs[1:(length(syrs)-1)]
+  par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    if(showSbio){
+      title <- "Vulnerable vs. Spawning Biomass"
+    }else{
+      title <- "Vulnerable Biomass"
+    }
+  }
+  if(length(out) == 1){
+    if(showSbio){
+      # Make the spawning biomass the same linetype as the vulnerable, but up one color
+      drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      vbioname <- paste0("VBio - ",names[[1]])
+      sbioname <- paste0("Sbio - ",names[[1]])
+      names[[1]] <- vbioname
+      names[[2]] <- sbioname
+      colors[[2]] <- colors[[1]] + 1
+    }else{
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+    }
+  }
+  if(length(out) > 1 && !showSbio){
+    for(line in 1:length(out)){
+      vbt <- window(mcmc(out[[model]]$mcmc$vbt[[1]][[1]]), start=burn, thin=thin)
+      vquants[[model]] <- getQuants(vbt, ci)
+      if(line==1){
+        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=TRUE)
+      }else{
+        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+      }
+    }
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
+}
+
+
+
+
+########################################
 
 plotRecruitmentMPD <- function(out       = NULL,
                                colors    = NULL,

@@ -1092,6 +1092,7 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   mcmcrtfn   <- file.path(dired,.MCMC_RECRUITMENT_FILE_NAME)
   mcmcrdevfn <- file.path(dired,.MCMC_RECRUITMENT_DEVS_FILE_NAME)
   mcmcftfn   <- file.path(dired,.MCMC_FISHING_MORT_FILE_NAME)
+  mcmcvbtfn  <- file.path(dired,.MCMC_VULN_BIOMASS_FILE_NAME)
 
   tmp        <- list()
   tmp$params <- read.csv(mcmcfn)
@@ -1103,6 +1104,8 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$ft     <- extractAreaSexMatrices(ft, prefix = "ft")
   rdev       <- read.csv(mcmcrdevfn)
   tmp$rdev   <- extractGroupMatrices(rdev, prefix = "rdev")
+  vbt        <- read.csv(mcmcvbtfn)
+  tmp$vbt    <- extractAreaSexMatrices(vbt, prefix = "vbt")
   return(tmp)
 }
 

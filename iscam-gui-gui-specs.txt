@@ -97,11 +97,13 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 4 relief=raised
-          grid 8 1 sticky=N relief=raised
+          grid 10 1 sticky=N relief=raised
                label text="Time series" font="bold 10" sticky=N
                radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass"            function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sTSSpawningBiomassByArea            text="Spawning biomass"           function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSSpawningDepletionAllAreas        text="Spawning depletion"          function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSVulnerableBiomassAllAreas        text="Vulnerable biomass"          function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sTSVSBiomassAllAreas                text="S & V biomass"               function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sTSSpawningDepletionByArea          text="Spawning depletion by area" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment"                 function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSRecruitmentDevsAllAreas          text="Recruitment deviations"      function=.subView sticky=W mode=character
@@ -201,25 +203,25 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #5
+          radio name=viewPlotType value=sSensVB             text="Vulnerable biomass"                  function=.subView mode=character sticky=W
+          null
+          null
+          null
+          null
+          #6
           radio name=viewPlotType value=sSensBRatio         text="Depletion"                         function=.subView mode=character sticky=W
           label text="B target" sticky=W
           entry name=entryBtarg function=.subView action="changeBtarg" width=5  padx=10 entryfont="10" value=0.4 sticky=W
           null
           null
-          #6
+          #7
           radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
           label text="Bar offset" sticky=W
           entry name=entryRecrOffset function=.subView action="changeRecrOffset" width=5  padx=10 entryfont="10" value=0.1 sticky=W
           null
           null
-          #7
-          radio name=viewPlotType value=sSensF              text="Fishing mortality"                 function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
           #8
-          radio name=viewPlotType value=sSensSPRRatio       text="SPR ratio"                         function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensF              text="Fishing mortality"                 function=.subView mode=character sticky=W
           null
           null
           null

@@ -266,6 +266,8 @@ iscam <- function(reloadScenarios      = FALSE,
            # From iscam-gui-figures-timeseries.r
            "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SpawningBiomassAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SpawningBiomassByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sTSVulnerableBiomassAllAreas"           = {plotTS(s,12,savefig,"VulnerableBiomass",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sTSVSBiomassAllAreas"                   = {plotTS(s,12,savefig,"VulnerableBiomass",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, showSbio=TRUE)},
            "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"SpawningDepletionAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"SpawningDepletionByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"RecruitmentAllAreas",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
@@ -317,6 +319,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(s,1,savefig,"SpawningBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sSensVB"                                = {plotTS(s,12,savefig,"VulnerableBiomass",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensBRatio"                            = {plotTS(s,3,savefig,"Depletion",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensRecruit"                           = {plotTS(s,5,savefig,"Recruitment",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,recrOffset=val$entryRecrOffset)},
            # No sensitivity plot for MCMC Indices
