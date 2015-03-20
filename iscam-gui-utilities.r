@@ -140,7 +140,13 @@ getQuants <- function(data=NULL, ci=NULL){
   }
   ciprop <- ci / 100
   probs <- c((1-ciprop)/2,0.5,1-((1-ciprop)/2))
-  quants <- apply(data, 2, quantile, probs)
+  if(is.null(dim(data))){
+    # It is a single posterior, e.g. sbo
+    quants <- quantile(data, probs)
+  }else{
+    # It is a timeseries posterior, e.g. sbt
+    quants <- apply(data, 2, quantile, probs)
+  }
   return(quants)
 }
 

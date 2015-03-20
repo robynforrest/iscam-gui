@@ -290,6 +290,7 @@ plotBiomassMCMC <- function(out       = NULL,
                             names     = NULL,
                             ci        = NULL,
                             burnthin  = list(0,1),
+                            offset    = 0.1,
                             verbose   = FALSE,
                             showtitle = TRUE,
                             leg = "topright"){
@@ -298,6 +299,7 @@ plotBiomassMCMC <- function(out       = NULL,
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
   # ci is the confidence interval to use in percent, eg. 95
+  # offset is the number of years to offset the points and bars
 
   currFuncName <- getCurrFunc()
   if(is.null(out)){
@@ -328,13 +330,16 @@ plotBiomassMCMC <- function(out       = NULL,
 
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
+  boquants <- vector("list", length(out))
   for(model in 1:length(out)){
+    sbo <- window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)
     sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
     quants[[model]] <- getQuants(sbt, ci)
+    boquants[[model]] <- getQuants(sbo, ci)
   }
-  yUpper <- max(quants[[1]])
+  yUpper <- max(quants[[1]], boquants[[1]][3])
   for(model in 1:length(out)){
-    yUpper <- max(yUpper, quants[[model]])
+    yUpper <- max(yUpper, quants[[model]], boquants[[1]][3])
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
@@ -344,9 +349,16 @@ plotBiomassMCMC <- function(out       = NULL,
     title <- "Spawning Biomass"
   }
   drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  # Draw SB0 and uncertainty over top
+  incOffset <- offset
+  points(yrs[1] - incOffset, boquants[[1]][2], pch = 19, col = colors[[1]])
+  arrows(yrs[1] - incOffset, boquants[[1]][1], yrs[1] - incOffset, boquants[[1]][3], lwd = 2, code = 0, col = colors[[1]])
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+      incOffset <- incOffset + offset
+      points(yrs[1] - incOffset, boquants[[line]][2], pch = 19, col = colors[[line]])
+      arrows(yrs[1] - incOffset, boquants[[line]][1], yrs[1] - incOffset, boquants[[line]][3], lwd = 2, code = 0, col = colors[[line]])
     }
   }
   if(!is.null(leg)){
