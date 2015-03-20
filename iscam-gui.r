@@ -227,6 +227,7 @@ iscam <- function(reloadScenarios      = FALSE,
   # Following 2 are to scale all index x-axis to the same to make visual comparison easier
   indfixaxis <- val$xaxisfix
   sensindfixaxis <- val$sensxaxisfix
+  priorsonly <- val$priorsonly
 
   plotMCMC  <- val$plotMCMC
   ci        <- val$entryConfidence  # Confidence interval
@@ -324,7 +325,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sMCMCAutocor"                           = {plotConvergence(s,2,savefig,"Autocor",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle)},
            "sMCMCDensity"                           = {plotConvergence(s,3,savefig,"Density",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle)},
            "sParameterPairs"                        = {plotConvergence(s,4,savefig,"Pairs",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle)},
-           "sPriorsVsPosts"                         = {plotConvergence(s,5,savefig,"PriorsPosts",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,exFactor=1.5,showEntirePrior=T)},
+           "sPriorsVsPosts"                         = {plotConvergence(s,5,savefig,"PriorsPosts",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,exFactor=1.5,showEntirePrior=T, priorsonly=priorsonly)},
            "sVariancePartitions"                    = {plotConvergence(s,6,savefig,"VariancePartitions",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle)},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
            #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},

@@ -23,7 +23,8 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                             exFactor        = 1.5,
                             showEntirePrior = TRUE,
                             units           = .UNITS,
-                            silent          = .SILENT){
+                            silent          = .SILENT,
+                            priorsonly      = FALSE){ # Plot priors only in the priors vs posts function
 
   # Plot a convergence plot for an MCMC model run
   # plotNum must be one of:
@@ -52,7 +53,11 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  filenameRaw  <- paste0(scenarioName,"_",fileText,figtype)
+  if(priorsonly){
+    filenameRaw <- paste0(scenarioName,"_priorsOnly",figtype)
+  }else{
+    filenameRaw  <- paste0(scenarioName,"_",fileText,figtype)
+  }
   filename     <- file.path(figDir,filenameRaw)
   if(savefig){
     graphics.off()
@@ -88,7 +93,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
     plotPairs(mcmcData, burnthin=burnthin, showtitle = showtitle)
   }
   if(plotNum == 5){
-    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin, showtitle = showtitle)
+    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin, showtitle = showtitle, priorsonly = priorsonly)
   }
   if(plotNum == 6){
     plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle)
@@ -305,7 +310,7 @@ plotPairs <- function(mcmcData = NULL, burnthin = c(0,1), showtitle = TRUE){
   pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
 }
 
-plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE){
+plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE, priorsonly=FALSE){
   # Produce a grid of the parameters' posteriors with their priors overlaid.
   # mpdData is used to get the MLE estimates for each parameter
 	oldPar	<- par(no.readonly=T)
@@ -357,7 +362,6 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
     priorSpecs <- rbind(priorSpecs, c(qParams[2,q], qParams[1,q], qParams[2,q], qParams[3,q]))
     rownames(priorSpecs)[nrow(priorSpecs)] <- paste0("log_q",q)
   }
-
   priorNames <- rownames(priorSpecs)
   postNames <- names(mcmcData)
 
@@ -424,9 +428,40 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1),
       }
       xx <- list(p = dat, p1 = specs[3], p2 = specs[4], fn = priorfn, nm = priorNames[priorInd], mle=mle)
       par(mar=.MCMC_MARGINS)
-      plot.marg(xx, breaks = "sturges", col = "wheat")
+      if(priorsonly){
+        func <- function(x){xx$fn(x,xx$p1,xx$p2)}
+        if(specs[2] == 0){
+          # Uniform, plot from p1-1 to p2+1
+          curve(func, from = xx$p1 - 1, to = xx$p2 + 1, xlab="", ylab="", col="green", lwd=2)
+        }else if(specs[2] == 1){
+          # Normal, plot from -(p1-p2*4) to (p1+p2*4)
+          curve(func, from = xx$p1 - 4 * xx$p2, to = xx$p2 + 4 * xx$p2, xlab="", ylab="", col="green", lwd=2)
+        }else{
+          curve(func, xlab="", ylab="", col="green", lwd=2)
+        }
+        abline(v = xx$mle, lwd=2, lty=2, col=2)
+        title(xx$nm)
+      }else{
+        plot.marg(xx, breaks = "sturges", col = "wheat")
+      }
     }
   }
+}
+
+plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
+  # xx is a list(p=samples, p1=prior param 1, p2=prior param 2, fn=prior distribution)
+  #  and ignore posterior distribution limits
+  posteriorNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
+  xvals <- seq(min(posteriorNoPlot$breaks)/exFactor, max(posteriorNoPlot$breaks)/exFactor, length=1000)
+  pd <- xx$fn(xvals, xx$p1, xx$p2)
+  z <- cbind(xvals, pd)
+
+  xlim <- c(min(xvals), max(xvals))
+  ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
+  #ss <- barplot(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
+  func <- function(x){xx$fn(x,xx$p1,xx$p2)}
+  curve(func, xlim[1], xlim[2], xlab="", ylab="", col="green", lwd=2, add=TRUE, axes=FALSE)
+  abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
 
 convertLogParams <- function(paramSpecs = NULL){
@@ -466,23 +501,6 @@ convertLogParams <- function(paramSpecs = NULL){
   # paramSpecs now holds the input values for all parameters in regular (non-log) space with
   # names to reflect this (log_) has been removed from the names of the log parameters
   return(paramSpecs)
-}
-
-plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
-  # xx is a list(p=samples, p1=prior param 1, p2=prior param 2, fn=prior distribution)
-  #  and ignore posterior distribution limits
-  posteriorNoPlot <- hist(xx$p, breaks = breaks, plot=FALSE)
-  xvals <- seq(min(posteriorNoPlot$breaks)/exFactor, max(posteriorNoPlot$breaks)/exFactor, length=1000)
-  pd <- xx$fn(xvals, xx$p1, xx$p2)
-  z <- cbind(xvals, pd)
-
-  xlim <- c(min(xvals), max(xvals))
-  ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
-  par(new=T)
-  func <- function(x){xx$fn(x,xx$p1,xx$p2)}
-  curve(func, -10, 10, xlab="", ylab="", col="green", lwd=2, axes=FALSE)
-  #curve(func, xlim[1], xlim[2], xlab="", ylab="", col="green", lwd=2, axes=FALSE)
-  abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
 
 plotVariancePartitions <- function(mcmcData, burnthin = c(0,1), showtitle = TRUE){
