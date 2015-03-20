@@ -34,7 +34,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    units      = .UNITS,       # Units to use in plotting
                    silent     = .SILENT,
                    showSbio   = FALSE,        # Show Spawning biomass on Vulnerable biomass plot
-                   plotU      = FALSE){       # Plot U instead of F for the fishing mortality plot
+                   plotU      = FALSE,        # Plot U instead of F for the fishing mortality plot
+                   indfixaxis = FALSE){       # Fix the index x-axis so that all indices or plotted on the same year scale
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -171,7 +172,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
     }else{
-      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle, indfixaxis=indfixaxis)
     }
   }
   if(plotNum == 8){
@@ -1038,7 +1039,8 @@ plotIndexMPD <- function(scenario  = NULL,
                          lty       = NULL,
                          verbose   = FALSE,
                          showtitle = TRUE,
-                         leg = "topright"){
+                         leg = "topright",
+                         indfixaxis = FALSE){
   # Index fits plot for an MPD
   # scenario is the sccenario number. Only used if 'out' is of length 1.
   # out is a list of the mpd outputs to show on the plot
@@ -1049,6 +1051,7 @@ plotIndexMPD <- function(scenario  = NULL,
   #   The solution is to match them by name if plotting multiple (sensitivity plots)
   #   by creating a unique vector of names which is the union of all names across all models
   #   and using that to match to the names in each model, only plotting if the name is found.
+  # indfixaxis, if TRUE then all index plots will be scaled to the overall year span of all indices
 
   currFuncName <- getCurrFunc()
   if(is.null(scenario)){
@@ -1170,8 +1173,27 @@ plotIndexMPD <- function(scenario  = NULL,
   lty[sapply(lty, is.na)] <- NULL
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
-  matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
-          las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year", ylab="x 1000 metric tonnes")
+  # If user requests a fixed scale x-axis, go through all indices to get year range
+  if(indfixaxis){
+    xmin <- NULL
+    xmax <- NULL
+    for(ind in 1:length(indices)){
+      xmin <- min(xmin, indices[[ind]][,1])
+      xmax <- max(xmax, indices[[ind]][,1])
+    }
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, xlim = c(xmin, xmax),
+            ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year",
+            ylab="x 1000 metric tonnes") #, axes=FALSE)
+    #axis(1, at = seq(xmin,xmax))
+    #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
+  }else{
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)),
+            xlab="Year", ylab="x 1000 metric tonnes") #, axes=FALSE)
+    #axis(1, at = yrs)
+    #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
+  }
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
