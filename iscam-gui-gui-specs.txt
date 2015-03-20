@@ -119,7 +119,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sFishingMortalityU                   text="Fishing mortality (U)"            function=.subView sticky=W mode=character
                null
                radio name=viewPlotType value=sRefPoints                          text="Reference Points (MCMC)"       function=.subView sticky=W mode=character
-               null
+               check name=umsy         checked=F                                 text="Umsy"                          function=.subView
           grid 5 1 sticky=N relief=raised
                label text="Catch" font="bold 10" sticky=N
                radio name=viewPlotType value=sCatchLandings                  text="Landings" function=.subView sticky=W mode=character
@@ -260,7 +260,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           #13
           radio name=viewPlotType value=sSensRefPoints       text="Reference Points"                  function=.subView mode=character sticky=W
-          null
+          check name=sensumsy     checked=F                  text="Umsy"                              function=.subView
           null
           null
           null

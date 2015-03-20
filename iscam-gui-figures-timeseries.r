@@ -35,7 +35,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    silent     = .SILENT,
                    showSbio   = FALSE,        # Show Spawning biomass on Vulnerable biomass plot
                    plotU      = FALSE,        # Plot U instead of F for the fishing mortality plot
-                   indfixaxis = FALSE){       # Fix the index x-axis so that all indices or plotted on the same year scale
+                   indfixaxis = FALSE,        # Fix the index x-axis so that all indices or plotted on the same year scale
+                   showumsy   = FALSE){       # Plot Umsy instead of Fmsy for reference point plot
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -191,7 +192,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 10){
     if(plotMCMC){
-      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle)
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle, showumsy=showumsy)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
@@ -1447,12 +1448,14 @@ plotReferencePointsMCMC <- function(out       = NULL,
                                     pointSize = 0.2,
                                     verbose   = FALSE,
                                     showtitle = TRUE,
-                                    leg = "topright"){
+                                    leg = "topright",
+                                    showumsy  = FALSE){
   # Reference points plot for an MCMC model
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
   # ci is the confidence interval to use in percent, eg. 95
   # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+  # showumsy if TRUE will plot Umsy instead of Fmsy
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -1484,7 +1487,7 @@ plotReferencePointsMCMC <- function(out       = NULL,
   bo   <- as.vector(window(mcmc(out[[1]]$mcmc$params$bo), start=burn, thin=thin))
   bmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin))
   msy  <- as.vector(window(mcmc(out[[1]]$mcmc$params$msy1), start=burn, thin=thin))
-  #fmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$fmsy1), start=burn, thin=thin))
+  fmsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$fmsy1), start=burn, thin=thin))
   umsy <- as.vector(window(mcmc(out[[1]]$mcmc$params$umsy1), start=burn, thin=thin))
 
   if(length(out) > 1){
@@ -1492,8 +1495,8 @@ plotReferencePointsMCMC <- function(out       = NULL,
       bo   <- cbind(bo, as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)))
       bmsy <- cbind(bmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$bmsy), start=burn, thin=thin)))
       msy  <- cbind(msy, as.vector(window(mcmc(out[[model]]$mcmc$params$msy1), start=burn, thin=thin)))
-      #fmsy <- cbind(fmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$fmsy1), start=burn, thin=thin)))
-      umsy <- cbind(fmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$umsy1), start=burn, thin=thin)))
+      fmsy <- cbind(fmsy, as.vector(window(mcmc(out[[model]]$mcmc$params$fmsy1), start=burn, thin=thin)))
+      umsy <- cbind(umsy, as.vector(window(mcmc(out[[model]]$mcmc$params$umsy1), start=burn, thin=thin)))
     }
   }
 
@@ -1501,11 +1504,14 @@ plotReferencePointsMCMC <- function(out       = NULL,
   names  <- c(do.call("cbind",names))
 
   par(mfrow=c(2,2), mai=c(0.3,0.5,0.4,0.2), oma=c(1.,1.2,0.2,0.1))
- # ymax <- max(fmsy)
-  #boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
-  ymax <- 1.1
-  boxplot(umsy, pch=pch, range = ci/100, names=names, border=colors, main="UMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
- ymax <- max(msy)
+  if(showumsy){
+    ymax <- 1.1
+    boxplot(umsy, pch=pch, range = ci/100, names=names, border=colors, main="UMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  }else{
+    ymax <- max(fmsy)
+    boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+  }
+  ymax <- max(msy)
   boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   ymax <- max(bo)
   boxplot(bo, pch=pch, range = ci/100, names=names, border=colors, main="B0 (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))

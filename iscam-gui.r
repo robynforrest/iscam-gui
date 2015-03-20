@@ -228,6 +228,9 @@ iscam <- function(reloadScenarios      = FALSE,
   indfixaxis <- val$xaxisfix
   sensindfixaxis <- val$sensxaxisfix
   priorsonly <- val$priorsonly
+  # Following 2 are to plot Umsy in reference point calcs instead of Fmsy
+  showumsy <- val$umsy
+  sensshowumsy <- val$sensumsy
 
   plotMCMC  <- val$plotMCMC
   ci        <- val$entryConfidence  # Confidence interval
@@ -289,7 +292,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sFishingMortality"                      = {plotTS(s,9,savefig,"F",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sFishingMortalityU"                     = {plotTS(s,9,savefig,"U",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, plotU=TRUE)},
-           "sRefPoints"                             = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sRefPoints"                             = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, showumsy=showumsy)},
            # From iscam-gui-figures-biology.r
            "sBiologyMeanWtAtAge"                    = {plotBiology(1,compFitSex,savefig,"MeanWtAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sBiologyMaturityAtAge"                  = {plotBiology(2,compFitSex,savefig,"MatAtAge",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
@@ -341,7 +344,7 @@ iscam <- function(reloadScenarios      = FALSE,
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
            "sSensF"                                 = {plotTS(s,9,savefig,"F",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensU"                                 = {plotTS(s,9,savefig,"U",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, plotU=TRUE)},
-           "sSensRefPoints"                         = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sSensRefPoints"                         = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, showumsy=sensshowumsy)},
            "sSensRecruitDev"                        = {plotTS(s,11,savefig,"RecrDevs",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            #"sSensIndexLog"                          = {plotTS(12,savefig,"IndexLog",plotMCMC,ci,TRUE)},
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
