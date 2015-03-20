@@ -398,7 +398,7 @@ plotDepletionMPD <- function(out       = NULL,
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   title <- ""
   if(showtitle){
-    title <- "Reletive Spawning Biomass"
+    title <- "Relative Spawning Biomass"
   }
   plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main=title, las=1)
   if(length(out) > 1){
@@ -469,7 +469,7 @@ plotDepletionMCMC <- function(out       = NULL,
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
   title <- ""
   if(showtitle){
-    title <- "Reletive Spawning Biomass"
+    title <- "Relative Spawning Biomass"
   }
   drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
   if(length(out) > 1){
