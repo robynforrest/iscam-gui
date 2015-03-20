@@ -97,7 +97,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 4 relief=raised
-          grid 10 1 sticky=N relief=raised
+          grid 11 1 sticky=N relief=raised
                label text="Time series" font="bold 10" sticky=N
                radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass"            function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sTSSpawningBiomassByArea            text="Spawning biomass"           function=.subView sticky=W mode=character
@@ -109,7 +109,8 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sTSRecruitmentDevsAllAreas          text="Recruitment deviations"      function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sTSRecruitmentByArea                text="Recruitment by area"          function=.subView sticky=W mode=character
                radio name=viewPlotType value=sTSIndex                            text="Index fits"                   function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sFishingMortality                   text="Fishing mortality"            function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sFishingMortality                   text="Fishing mortality (F)"            function=.subView sticky=W mode=character
+               radio name=viewPlotType value=sFishingMortalityU                   text="Fishing mortality (U)"            function=.subView sticky=W mode=character
                radio name=viewPlotType value=sRefPoints                          text="Reference Points (MCMC)"       function=.subView sticky=W mode=character
                #radio name=viewPlotType value=sSPRRatio                           text="SPR ratio"                    function=.subView sticky=W mode=character
           grid 5 1 sticky=N relief=raised
@@ -177,7 +178,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--                      Notebook Tab: ComparisonFigs              --#
 #--------------------------------------------------------------------#
    grid 1 2
-     grid 14 5 byrow=T sticky=N relief=raised
+     grid 15 5 byrow=T sticky=N relief=raised
           #1
           label text="Comparison Groups"     font="bold 10" sticky=W
           null
@@ -221,42 +222,48 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #8
-          radio name=viewPlotType value=sSensF              text="Fishing mortality"                 function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensF              text="Fishing mortality (F)"                 function=.subView mode=character sticky=W
           null
           null
           null
           null
           #9
-          radio name=viewPlotType value=sSensRecruitDev     text="Recruitment deviations"            function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensU              text="Fishing mortality (U)"                 function=.subView mode=character sticky=W
           null
           null
           null
           null
           #10
-          radio name=viewPlotType value=sSensIndex          text="Index fits (MPD only)"             function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensRecruitDev     text="Recruitment deviations"            function=.subView mode=character sticky=W
           null
           null
           null
           null
           #11
-          radio name=viewPlotType value=sSensDensity        text="Densities"                         function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensIndex          text="Index fits (MPD only)"             function=.subView mode=character sticky=W
           null
           null
           null
           null
           #12
-          radio name=viewPlotType value=sSensRefPoints       text="Reference Points"                  function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensDensity        text="Densities"                         function=.subView mode=character sticky=W
           null
           null
           null
           null
           #13
-          radio name=viewPlotType value=sSensCatchFit       text="Catch Fit"                         function=.subView mode=character sticky=W
+          radio name=viewPlotType value=sSensRefPoints       text="Reference Points"                  function=.subView mode=character sticky=W
           null
           null
           null
           null
           #14
+          radio name=viewPlotType value=sSensCatchFit       text="Catch Fit"                         function=.subView mode=character sticky=W
+          null
+          null
+          null
+          null
+          #15
           radio name=viewPlotType value=sSensSelex          text="Selectivity"                        function=.subView mode=character sticky=W
           null
           null

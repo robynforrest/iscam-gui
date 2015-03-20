@@ -33,7 +33,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    blim       = 0.25,         # Biomass limit line for depletion plots
                    units      = .UNITS,       # Units to use in plotting
                    silent     = .SILENT,
-                   showSbio   = FALSE){       # Show Spawning biomass on Vulnerable biomass plot
+                   showSbio   = FALSE,        # Show Spawning biomass on Vulnerable biomass plot
+                   plotU      = FALSE){       # Plot U instead of F for the fishing mortality plot
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -58,7 +59,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   # 6 Recruitment by area
   # 7 Index fit
   # 8 SPR ratio
-  # 9 Fishing mortality
+  # 9 Fishing mortality (F or U depending on the plotU argument)
   #10 Reference Points
   #11 Recruitment deviations
   #12 Vulnerable biomass all areas (+Spawning biomass all areas)
@@ -182,9 +183,9 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU)
     }else{
-      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU)
     }
   }
   if(plotNum == 10){
@@ -1187,12 +1188,14 @@ plotFMPD <- function(out       = NULL,
                      pointSize = 0.2,
                      verbose   = FALSE,
                      showtitle = TRUE,
-                     leg = "topright"){
+                     leg       = "topright",
+                     plotU     = FALSE){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
   # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+  # plotU if TRUE plot Ut, if FALSE, plot Ft
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -1223,9 +1226,15 @@ plotFMPD <- function(out       = NULL,
   # by gear, i.e. two, three-row groupings.
   numModels <- length(out)
   f         <- out[[1]]$mpd$ft
-  yUpper    <- max(f)
-  for(model in 1:length(out)){
-    yUpper <- max(yUpper, out[[model]]$mpd$ft)
+  if(plotU){
+    # U is always between 0 and 1, and f will become U with the transformation
+    f <- 1.0 - exp(-f)
+    yUpper <- 1.1
+  }else{
+    yUpper    <- max(f)
+    for(model in 1:length(out)){
+      yUpper <- max(yUpper, out[[model]]$mpd$ft)
+    }
   }
   legendNames <- NULL
   legendLines <- NULL
@@ -1248,7 +1257,12 @@ plotFMPD <- function(out       = NULL,
           if(showtitle){
             title <- "Fishing Mortality"
           }
-          plot(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab="Mean F", xlab="Year", main=title, las=1)
+          if(plotU){
+            ylabel <- "U"
+          }else{
+            ylabel <- "F"
+          }
+          plot(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2, ylim=c(0,yUpper), ylab=ylabel, xlab="Year", main=title, las=1)
         }else{
           lines(yrs, meanF, type = "o", col=color, pch=pch, cex=pointSize, lty=sex, lwd=2)
         }
@@ -1285,6 +1299,10 @@ plotFMPD <- function(out       = NULL,
       nyear  <- length(yrs)
       ngear  <- out[[line]]$mpd$ngear
       f      <- out[[line]]$mpd$ft
+      if(plotU){
+        # U is always between 0 and 1, and f will become U with the transformation
+        f <- 1.0 - exp(-f)
+      }
       for(sex in 1:nsex){
         for(gear in 1:ngear){
           meanF <- f[((sex-1) * ngear + gear),]
@@ -1318,12 +1336,14 @@ plotFMCMC <- function(out       = NULL,
                       pointSize = 0.2,
                       verbose   = FALSE,
                       showtitle = TRUE,
-                      leg = "topright"){
+                      leg       = "topright",
+                      plotU     = FALSE){
   # Fishing mortality plot for mcmc models
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
   # ci is the confidence interval to use in percent, eg. 95
   # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
+  # plotU if TRUE plot Ut, if FALSE, plot Ft
 
   currFuncName <- getCurrFunc()
   if(is.null(out)){
@@ -1353,12 +1373,21 @@ plotFMCMC <- function(out       = NULL,
   for(model in 1:length(out)){
     # the following has a f[[1]]. The correct way would be to have iscam only output gear 1 instead of all gears,
     # similar to sbt output.
-    ft <- window(mcmc(out[[model]]$mcmc$ft[[1]][[1]]), start=burn, thin=thin)
+    f <- out[[model]]$mcmc$ft[[1]][[1]]
+    if(plotU){
+      # U is always between 0 and 1, and f will become U with the transformation
+      f <- 1.0 - exp(-f)
+    }
+    ft <- window(mcmc(f), start=burn, thin=thin)
     quants[[model]] <- getQuants(ft, ci)
   }
-  yUpper <- max(quants[[1]])
-  for(model in 1:length(out)){
-    yUpper <- max(yUpper, quants[[model]])
+  if(plotU){
+    yUpper <- 1.1
+  }else{
+    yUpper <- max(quants[[1]])
+    for(model in 1:length(out)){
+      yUpper <- max(yUpper, quants[[model]])
+    }
   }
   # Get last four digits of the names
   ynames <- names(out[[1]]$mcmc$ft[[1]][[1]])
@@ -1369,7 +1398,12 @@ plotFMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Fishing Mortality"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="F\n", xlab="Year", main=title, las=1)
+  if(plotU){
+    ylabel <- "U\n"
+  }else{
+    ylabel <- "F\n"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab=ylabel, xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
