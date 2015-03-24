@@ -73,9 +73,14 @@ source(.FIGURES_MLE_SOURCE)
 source(.FIGURES_RETROSPECTIVES_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
+                  showgui              = TRUE,
                   silent               = TRUE){
   # loads model outputs and launches the main iscam-gui GUI.
   # - reloadScenarios TRUE/FALSE - reload the data from all model output files in all scenarios.
+  # - showgui allows the gui to be shown. If FALSE, the gui will not be shown but the scenarios
+  #   will be loaded, regardless of the value of reloadscenarios. This functionality
+  #   is available so that latex scripts can use the R package knitr to load the scenarios
+  #   and make the plots and tables.
   # - silent TRUE/FALSE - show messages on command line
 
   # Create a global variable which tells the program whether or not to be silent
@@ -84,13 +89,21 @@ iscam <- function(reloadScenarios      = FALSE,
 
   graphics.off()  # Destroy graphics window if it exists
 
-  .loadData(reloadScenarios = reloadScenarios)
+  if(!showgui){
+    .loadData(reloadScenarios = TRUE)
+  }else{
+    .loadData(reloadScenarios = reloadScenarios)
+  }
 
   if(!exists("sens")){
     sens <<- .loadSensitivityGroups(op = op)
   }
   dir.create(.SENS_FIGURES_DIR_NAME, showWarnings=FALSE)
-  return(.GUIsetup("mainGui"))
+  if(showgui){
+    return(.GUIsetup("mainGui"))
+  }else{
+    invisible(NULL)
+  }
 }
 
 .GUIsetup <- function(win, silent = .SILENT){
