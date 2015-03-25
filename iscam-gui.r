@@ -255,7 +255,7 @@ iscam <- function(reloadScenarios      = FALSE,
              res = val$entryResolutionScreen,
              w = val$entryWidthScreen,
              h = val$entryHeightScreen)
-  burnthin <- c(val$burn, val$thin)
+  burnthin <- list(val$burn, val$thin)
   showtitle <- val$showTitle
   if(op[[s]]$inputs$data$hasGearNames){
     currIndexName <- op[[s]]$inputs$data$gearNames[ind]

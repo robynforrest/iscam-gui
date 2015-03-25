@@ -172,15 +172,15 @@ stripStaticParams <- function(scenario, dat){
   return(dat)
 }
 
-plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, showtitle = TRUE){
+plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200, showtitle = TRUE){
   # Traceplots for an mcmc matrix, mcmcData
   # axis.lab.freq is the frequency of x-axis labelling
 
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  burnin       <- burnthin[1]
-  thinning     <- burnthin[2]
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -212,15 +212,15 @@ plotTraces <- function(mcmcData = NULL, burnthin = c(0,1), axis.lab.freq=200, sh
 }
 
 plotAutocor <- function(mcmcData = NULL,
-                        burnthin = c(0,1),
+                        burnthin = list(0,1),
                         lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50),
                         showtitle = TRUE){
   # Plot autocorrelations for all mcmc parameters
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  burnin       <- burnthin[1]
-  thinning     <- burnthin[2]
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -241,13 +241,13 @@ plotAutocor <- function(mcmcData = NULL,
   }
 }
 
-plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE){
+plotDensity <- function(mcmcData = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE){
   # Plot densities for the mcmc parameters in the matrix mcmcData
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
 
-  burnin       <- burnthin[1]
-  thinning     <- burnthin[2]
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -273,14 +273,14 @@ plotDensity <- function(mcmcData = NULL, burnthin = c(0,1), color = 1, opacity =
   }
 }
 
-plotPairs <- function(mcmcData = NULL, burnthin = c(0,1), showtitle = TRUE){
+plotPairs <- function(mcmcData = NULL, burnthin = list(0,1), showtitle = TRUE){
   # Pairs plots for an mcmc matrix, mcmcData
 
   oldPar <- par(no.readonly=TRUE)
   on.exit(par(oldPar))
 
-  burnin       <- burnthin[1]
-  thinning     <- burnthin[2]
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -310,14 +310,14 @@ plotPairs <- function(mcmcData = NULL, burnthin = c(0,1), showtitle = TRUE){
   pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
 }
 
-plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = c(0,1), color = 1, opacity = 30, showtitle = TRUE, priorsonly=FALSE){
+plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE, priorsonly=FALSE){
   # Produce a grid of the parameters' posteriors with their priors overlaid.
   # mpdData is used to get the MLE estimates for each parameter
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
 
-  burnin       <- burnthin[1]
-  thinning     <- burnthin[2]
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
@@ -503,7 +503,7 @@ convertLogParams <- function(paramSpecs = NULL){
   return(paramSpecs)
 }
 
-plotVariancePartitions <- function(mcmcData, burnthin = c(0,1), showtitle = TRUE){
+plotVariancePartitions <- function(mcmcData, burnthin = list(0,1), showtitle = TRUE){
   # Produce a grid of pairs plots for the variance parameters' posteriors
   # Assumes that there are an equal number of each rho and vartheta
   #  parameters, i.e. each group must have both rho and vartheta and
@@ -513,8 +513,8 @@ plotVariancePartitions <- function(mcmcData, burnthin = c(0,1), showtitle = TRUE
   on.exit(par(oldPar))
 
   val          <- getWinVal()
-  burnin       <- val$burn
-  thinning     <- val$thin
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
   currFuncName <- getCurrFunc()
   if(is.null(mcmcData)){
     cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
