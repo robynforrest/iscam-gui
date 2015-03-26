@@ -17,7 +17,7 @@ grid 3 1 padx=10 pady=5 sticky=W
            button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
            button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
-     notebook name=nbPage tabs="RunModel ScenarioFigs ComparisonFigs DiagnosticFigs SaveFigs Retrospectives BioTool" font="8"
+     notebook name=nbPage tabs="RunModel ScenarioFigs ComparisonFigs DiagnosticFigs Tables Retrospectives BioTool" font="8"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: RunModel                    --#
@@ -326,21 +326,17 @@ grid 3 1 padx=10 pady=5 sticky=W
                #null
 
 #--------------------------------------------------------------------#
-#--                      Notebook Tab: OutputFigures               --#
+#--                      Notebook Tab: Tables                      --#
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 3 1 relief=sunken padx=20
+          grid 2 1 relief=sunken padx=20
                grid 1 2
-                    button name=writePlots      function=.subView action="writePlots"          width=25 text="Write scenario figures"
-                    button name=writeTables     function=.subView action="writeTables"         width=25 text="Write scenario tables"
+                    button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
+                    check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
                grid 1 2
-                    button name=writeAllPlots    function=.subView action="writeAllPlots"       width=25 text="Write ALL figures"
-                    button name=writeAllTables   function=.subView action="writeAllTables"      width=25 text="Write ALL tables"
-               grid 1 2
-                    button name=writeSensPlots   function=.subView action="writeSensPlots"      width=25 text="Write sensitivity figures" fg="chocolate4"
-                    button name=writeRetroPlots  function=.subView action="writeRetroPlots"      width=25 text="Write retrospective figures" fg="chocolate4"
-
+                    button name=refPointsTable      function=.subView action="refPointsTable"       width=25 text="Reference points" fg="chocolate4"
+                    check  name=writeRefPointsTable checked=T         text="Write to file"          function=.subView
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Retrospectives              --#
 #--------------------------------------------------------------------#

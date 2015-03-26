@@ -44,6 +44,7 @@ require(coda)
 require(ggplot2) # Only used for Observed landings plot.
 require(reshape2)
 require(Hmisc)
+require(xtable) # For tables which can be inserted into latex docs with knitr
 
 options(stringsAsFactors = FALSE)
 options(warn = -1)
@@ -71,6 +72,7 @@ source(.FIGURES_CATCH_SOURCE)
 source(.FIGURES_MCMC_SOURCE)
 source(.FIGURES_MLE_SOURCE)
 source(.FIGURES_RETROSPECTIVES_SOURCE)
+source(.TABLES_SOURCE)
 
 iscam <- function(reloadScenarios      = FALSE,
                   showgui              = TRUE,
@@ -152,71 +154,6 @@ iscam <- function(reloadScenarios      = FALSE,
     return(FALSE)
   }
   return(TRUE)
-}
-
-.writeAllPlots <- function(silent=.SILENT){
-  # write all figures for all scenarios to disk
-  #scenarioList <- as.numeric(rownames(viewHeader))
-  #for(scenario in scenarioList){
-  #  assignGlobals(scenario)
-  #  .writePlots(scenario)
-  #}
-}
-
-.writeAllTables <- function(silent=.SILENT){
-  # write all tables for all scenarios to disk
-  #scenarioList <- as.numeric(rownames(viewHeader))
-  #for(scenario in scenarioList){
-  #  assignGlobals(scenario)
-  #  .writeTables()
-  #}
-}
-
-.writeRetroPlots <- function(silent=.SILENT){
-  #assign("saveon",T,envir=.GlobalEnv)
-  #val <- getWinVal()
-  #fig.retro(whichPlot="biomass",
-  #          ylimit=val$biomassYlim,
-  #          useMaxYlim=val$maxBiomassYlim,
-  #          scenario=val$entryScenario)
-  #fig.retro(whichPlot="depletion",
-  #          ylimit=val$depletionYlim,
-  #          useMaxYlim=val$maxDepletionYlim,
-  #          scenario=val$entryScenario)
-  #fig.retro(whichPlot="recruits",
-  #          ylimit=val$recruitmentYlim,
-  #          useMaxYlim=val$maxRecruitmentYlim,
-  #          scenario=val$entryScenario)
-  #assign("saveon",FALSE,envir=.GlobalEnv)
-}
-
-.writeSensPlots <- function(silent=.SILENT){
-##   # write overlay sensitivity plots
-##   assignGlobals(1)
-##   assign("saveon",T,envir=.GlobalEnv)
-##   val <- getWinVal()
-##   uniqueSensitivityGroups <- c()  # base must be 0
-##   for(scenario in 1:length(op)){
-##     # count number of unique sensitivity groups
-##     if(!is.element(op[[scenario]][[4]]$SensitivityGroup,uniqueSensitivityGroups) && op[[scenario]][[4]]$SensitivityGroup != 0){
-##         uniqueSensitivityGroups <- c(uniqueSensitivityGroups,op[[scenario]][[4]]$SensitivityGroup)
-##     }
-##   }
-##   for(sensitivityGroup in uniqueSensitivityGroups){
-##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-##                      whichPlot="biomass",
-##                      ylimit=val$biomassYlim,
-##                      useMaxYlim=val$maxBiomassYlim)
-##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-##                      whichPlot="depletion",
-##                      ylimit=val$depletionYlim,
-##                      useMaxYlim=val$maxDepletionYlim)
-##     fig.base.vs.sens(sensitivityGroup=sensitivityGroup,
-##                      whichPlot="recruits",
-##                      ylimit=val$recruitmentYlim,
-##                      useMaxYlim=val$maxRecruitmentYlim)
-##   }
-##   assign("saveon",FALSE,envir=.GlobalEnv)
 }
 
 .doPlots <- function(savefig=.SAVEFIG){
@@ -401,6 +338,14 @@ iscam <- function(reloadScenarios      = FALSE,
   # See iscam-gui-gui-specs.r
   triggerPlot <- FALSE
 
+  val <- getWinVal()
+  s   <- scenario
+  sgr <- val$entrySensitivityGroup
+  sensindfixaxis <- val$sensxaxisfix
+
+  ci        <- val$entryConfidence  # Confidence interval
+  burnthin <- list(val$burn, val$thin)
+
   switch(act,
          # Change the scenario number using three different methods
          "prevScenario" = {
@@ -516,24 +461,13 @@ iscam <- function(reloadScenarios      = FALSE,
            ## }
            setWinVal(c(entryIndex=nextGroup))
          },
-         # Write the plots and tables to disk
-         "writePlots" = {
-           .writePlots(val$entryScenario)
+         "paramEstTable" = {
+           savetable <- val$writeParamEstTable
+           makeTable(s,1,savetable,"ParamEst",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
          },
-         "writeTables" = {
-           .writeTables()
-         },
-         "writeAllPlots" = {
-           .writeAllPlots()
-         },
-         "writeAllTables" = {
-           .writeAllTables()
-         },
-         "writeSensPlots" = {
-           .writeSensPlots()
-         },
-         "writeRetroPlots" = {
-           .writeRetroPlots()
+         "refPointsTable" = {
+           savetable <- val$writeRefPointsTable
+           makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
          },
          "runCurrScenario" = {
            runMCMC <- FALSE

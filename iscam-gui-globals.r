@@ -44,6 +44,7 @@ if(.OS == "Darwin"){
 .FIGURES_MCMC_SOURCE             <- paste0(.PROJECT_NAME,"-figures-mcmc-diagnostics.r")
 .FIGURES_MLE_SOURCE              <- paste0(.PROJECT_NAME,"-figures-mle-diagnostics.r")
 .FIGURES_RETROSPECTIVES_SOURCE   <- paste0(.PROJECT_NAME,"-figures-retrospectives.r")
+.TABLES_SOURCE                   <- paste0(.PROJECT_NAME,"-tables.r")
 
 # Plotting theme (ggplot). Only used in observed catch plot at this point.
 .PLOT_THEME                      <- theme_bw(11)
@@ -164,7 +165,8 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .PNG_TYPE                        <- ".png"
 .EPS_TYPE                        <- ".eps"
 .FIGURE_TYPE                     <- .EPS_TYPE # This must match the default radio entry
-.SAVEFIG                         <- FALSE
+.SAVEFIG                         <- FALSE # Save figures?
+.SAVETAB                         <- FALSE # Save tables?
 .DEPLETION_FIGURE                <- 1
 
 # Plotting
