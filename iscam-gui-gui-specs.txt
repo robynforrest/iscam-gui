@@ -330,13 +330,25 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 2 1 relief=sunken padx=20
+          grid 5 1 relief=sunken padx=20
                grid 1 2
                     button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
                     check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
                grid 1 2
                     button name=refPointsTable      function=.subView action="refPointsTable"       width=25 text="Reference points" fg="chocolate4"
                     check  name=writeRefPointsTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=biomassTable      function=.subView action="biomassTable"       width=25 text="Spawning biomass" fg="chocolate4"
+                    check  name=writeBiomassTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=recruitmentTable      function=.subView action="recruitmentTable"       width=25 text="Recruitment" fg="chocolate4"
+                    check  name=writeRecruitmentTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=fTable      function=.subView action="fTable"       width=25 text="Fishing mortality (F)" fg="chocolate4"
+                    check  name=writeFTable checked=T         text="Write to file"          function=.subView
+               #grid 1 2
+               #     button name=uTable      function=.subView action="uTable"       width=25 text="Fishing mortality (U)" fg="chocolate4"
+               #     check  name=writeUTable checked=T         text="Write to file"          function=.subView
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Retrospectives              --#
 #--------------------------------------------------------------------#

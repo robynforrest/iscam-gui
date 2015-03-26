@@ -469,6 +469,22 @@ iscam <- function(reloadScenarios      = FALSE,
            savetable <- val$writeRefPointsTable
            makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
          },
+         "biomassTable" = {
+           savetable <- val$writeBiomassTable
+           makeTable(s,3,savetable,"Biomass",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+         },
+         "recruitmentTable" = {
+           savetable <- val$writeRecruitmentTable
+           makeTable(s,4,savetable,"Recruitment",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+         },
+         "fTable" = {
+           savetable <- val$writeFTable
+           makeTable(s,5,savetable,"F",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+         },
+         "uTable" = {
+           savetable <- val$writeUTable
+           makeTable(s,6,savetable,"U",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+         },
          "runCurrScenario" = {
            runMCMC <- FALSE
            if(!is.na(val$mcmc)){
