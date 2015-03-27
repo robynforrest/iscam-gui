@@ -1,4 +1,4 @@
-.getShade <- function(color,opacity){
+.getShade <- function(color, opacity){
   # If color is a single R color string or single number,
   #  returns an rgb string of the specified color and opacity
   # If color is a vector of cR color strings or numbers,
@@ -433,7 +433,7 @@ testile <- function(){
 
   l <- list(1,2,4)
   ind <- 3
-  val<- 3
+  val <-3
   out <- ile(l,ind,val)
   cat0("**********************************************")
   cat0(.PROJECT_NAME,"->",currFuncName,"Insert value in middle of list")

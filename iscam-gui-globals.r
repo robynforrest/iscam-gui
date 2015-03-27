@@ -98,6 +98,8 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .MCMC_RECRUITMENT_DEVS_FILE_NAME <- "iscam_rdev_mcmc.csv"
 .MCMC_FISHING_MORT_FILE_NAME     <- "iscam_ft_mcmc.csv"
 .MCMC_VULN_BIOMASS_FILE_NAME     <- "iscam_vbt_mcmc.csv"
+.MCMC_PROJ_FILE_NAME             <- "iscammcmc_proj_Gear1.csv" # Note that projections only work for gear 1
+.MPD_PROJ_FILE_NAME              <- "iscammpd_proj_Gear1.csv" # Note that projections only work for gear 1
 
 # MCMC convergence plot margins
 .MCMC_MARGINS                    <- c(2,4,2,2)

@@ -346,6 +346,9 @@ iscam <- function(reloadScenarios      = FALSE,
   ci        <- val$entryConfidence  # Confidence interval
   burnthin <- list(val$burn, val$thin)
 
+  # Number of decimal places to report in tables
+  ndigits <- val$numTableDigits
+
   switch(act,
          # Change the scenario number using three different methods
          "prevScenario" = {
@@ -463,27 +466,31 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "paramEstTable" = {
            savetable <- val$writeParamEstTable
-           makeTable(s,1,savetable,"ParamEst",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,1,savetable,"ParamEst",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "refPointsTable" = {
            savetable <- val$writeRefPointsTable
-           makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "biomassTable" = {
            savetable <- val$writeBiomassTable
-           makeTable(s,3,savetable,"Biomass",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,3,savetable,"Biomass",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "recruitmentTable" = {
            savetable <- val$writeRecruitmentTable
-           makeTable(s,4,savetable,"Recruitment",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,4,savetable,"Recruitment",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "fTable" = {
            savetable <- val$writeFTable
-           makeTable(s,5,savetable,"F",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,5,savetable,"F",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "uTable" = {
            savetable <- val$writeUTable
-           makeTable(s,6,savetable,"U",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin)
+           makeTable(s,6,savetable,"U",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+         },
+         "decisionTable" = {
+           savetable <- val$writeDecisionTable
+           makeTable(s,7,savetable,"Decision",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
          "runCurrScenario" = {
            runMCMC <- FALSE
