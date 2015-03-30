@@ -97,6 +97,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .MCMC_RECRUITMENT_FILE_NAME      <- "iscam_rt_mcmc.csv"
 .MCMC_RECRUITMENT_DEVS_FILE_NAME <- "iscam_rdev_mcmc.csv"
 .MCMC_FISHING_MORT_FILE_NAME     <- "iscam_ft_mcmc.csv"
+.MCMC_FISHING_MORT_U_FILE_NAME   <- "iscam_ut_mcmc.csv"
 .MCMC_VULN_BIOMASS_FILE_NAME     <- "iscam_vbt_mcmc.csv"
 .MCMC_PROJ_FILE_NAME             <- "iscammcmc_proj_Gear1.csv" # Note that projections only work for gear 1
 .MPD_PROJ_FILE_NAME              <- "iscammpd_proj_Gear1.csv" # Note that projections only work for gear 1
@@ -113,7 +114,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 # Messages
 .TELL_USER_HOW_TO_START_GUI      <- "Type iscam() to start iscam-gui\n"
 .TELL_USER_ABOUT_GUI_ARGUMENTS   <- paste0("Optional ",.PROJECT_NAME," arguments: ",.MAIN_FUNCTION_CALL,
-                                           "(reloadScenarios = FALSE, silent = FALSE)\n\n")
+                                           "(reloadScenarios = FALSE, showgui = TRUE, silent = TRUE)\n\n")
 
 # Model run command line outputs
 .LOG_FILE_NAME                   <- "runoutput.log"  # This is the name of the logfile which holds all command line output.

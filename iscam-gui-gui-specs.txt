@@ -330,7 +330,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 7 1 relief=sunken padx=20
+          grid 8 1 relief=sunken padx=20
                grid 1 2
                     button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
                     check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
@@ -346,6 +346,9 @@ grid 3 1 padx=10 pady=5 sticky=W
                grid 1 2
                     button name=fTable      function=.subView action="fTable"       width=25 text="Fishing mortality (F)" fg="chocolate4"
                     check  name=writeFTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=uTable      function=.subView action="uTable"       width=25 text="Fishing mortality (U)" fg="chocolate4"
+                    check  name=writeUTable checked=T         text="Write to file"          function=.subView
                grid 1 2
                     button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decision table" fg="chocolate4"
                     check  name=writeDecisionTable checked=T         text="Write to file"          function=.subView

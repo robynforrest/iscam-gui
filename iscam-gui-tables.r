@@ -99,6 +99,15 @@ makeTable <- function(scenario   = 1,         # Scenario number
     names(ft) <- yrs
     valueTable(outMPD[[1]]$mpd$ft[1,], ft, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
   }
+  if(tableNum == 6){
+    # send U output for mcmc and mpd - NOTE only for gear 1
+    # Special because the years are embedded in text, and they must be extracted first..
+    ut <- outMCMC[[1]]$mcmc$ut[[1]][[1]]
+    unames <- names(ut)
+    yrs <- gsub(".*_([[:digit:]]+)","\\1",unames)
+    names(ut) <- yrs
+    valueTable(outMPD[[1]]$mpd$ut[1,], ut, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+  }
   if(tableNum == 7){
     # Decision table based on projection runs
     decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
@@ -141,10 +150,30 @@ decisionTable <- function(outMCMC   = NULL,
   thin <- burnthin[[2]]
   # Code assumes that the fields are in the order show here. The names (years) may change from year to year,
   # but they must be in this order:
-  #   1,    2,    3, 4,    5,         6,      7,         8,    9,   10,        11,   12,        13,  14,       15,
-  # TAC,B2015,B2016,B0,B1996,B2016B2015,B2016B0,B2016B1996,F2014,F2015,F2015F2014,U2015,U2015U2014,BMSY,B2016BMSY,
-  #          16,         17,  18,       19,  20,       21
-  # B201608BMSY,B201604BMSY,FMSY,F2015FMSY,UMSY,U2015UMSY
+  # 1  TAC
+  # 2  B2015
+  # 3  B2016
+  # 4  B0
+  # 5  04B0
+  # 6  02B0
+  # 7  B1996
+  # 8  B2016B2015
+  # 9  B201604B0
+  # 10 B201602B0
+  # 11 B2016B1996
+  # 12 F2014
+  # 13 F2015
+  # 14 F2015F2014
+  # 15 U2015
+  # 16 U2015U2014
+  # 17 BMSY
+  # 18 B2016BMSY
+  # 19 B201608BMSY
+  # 20 B201604BMSY
+  # 21 FMSY
+  # 22 F2015FMSY
+  # 23 UMSY
+  # 24 U2015UMSY
 
   probs <- data.frame()
   probsnames <- NULL
@@ -155,15 +184,19 @@ decisionTable <- function(outMCMC   = NULL,
     dlen <- length(dat[,1])
     probs <- rbind(probs,
                    c(tac[t],
-                     length(which(dat[,6]<1))/dlen,   # B2016/B2015
-                     length(which(dat[,8]<1))/dlen,   # B2016/B1996
-                     length(which(dat[,15]<1))/dlen,  # B2016/Bmsy
-                     length(which(dat[,16]<1))/dlen,  # B2016/0.8Bmsy
-                     length(which(dat[,17]<1))/dlen,  # B2016/0.4Bmsy
-                     length(which(dat[,11]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
-                     length(which(dat[,19]>1))/dlen)) # F2015/Fmsy
+                     length(which(dat[,8]<1))/dlen,   # B2016/B2015
+                     length(which(dat[,9]<1))/dlen,   # B2016/0.4B0
+                     length(which(dat[,10]<1))/dlen,  # B2016/0.2B0
+                     length(which(dat[,11]<1))/dlen,  # B2016/B1996
+                     length(which(dat[,18]<1))/dlen,  # B2016/Bmsy
+                     length(which(dat[,19]<1))/dlen,  # B2016/0.8Bmsy
+                     length(which(dat[,20]<1))/dlen,  # B2016/0.4Bmsy
+                     length(which(dat[,14]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
+                     length(which(dat[,22]>1))/dlen,  # F2015/Fmsy
+                     length(which(dat[,16]>1))/dlen,  # U2015/U2014
+                     length(which(dat[,24]>1))/dlen)) # U2015/Umsy
   }
-  tmp <- projdat[,c(1,6,8,15,16,17,11,19)] # Same numbers as in loop above
+  tmp <- projdat[,c(1,8,9,10,11,18,19,20,14,22,16,24)] # Same numbers as in loop above
   names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
 
   # Round values and make all the same number of digits
