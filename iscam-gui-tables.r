@@ -35,6 +35,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
   # 5 Fishing mortality (F)
   # 6 Fishing mortality (U)
   # 7 Decision table
+  # 8 Indices table (Input indices)
 
   currFuncName <- getCurrFunc()
 
@@ -65,6 +66,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
   }
 
   tableDir <- op[[scenario]]$names$tableDir
+  inputs <- op[[scenario]]$inputs
   outMPD <- validModelsMPD[[1]]
   outMCMC <- validModelsMCMC[[1]]
   namesMCMC  <- validModelsMCMC[[3]]
@@ -112,6 +114,57 @@ makeTable <- function(scenario   = 1,         # Scenario number
     # Decision table based on projection runs
     decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
   }
+  if(tableNum == 8){
+    # Indices table for current scenario only
+    gearnames <- op[[scenario]]$inputs$data$gearNames
+    indicesTable(inputs, gearnames=gearnames, savetable=savetable, filename=filename, digits=digits)
+  }
+}
+
+indicesTable <- function(inputs    = NULL,
+                         gearnames = NULL,
+                         savetable = FALSE,
+                         filename  = "default",
+                         digits    = 1,            # Number of digits to round the index to
+                         verbose   = FALSE){
+  currFuncName <- getCurrFunc()
+  if(is.null(inputs)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an inputs vector.")
+    return(NULL)
+  }
+  indices <- inputs$data$indices
+  if(is.null(indices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Your inputs list must contain data$indices.")
+    return(NULL)
+  }
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  tabledf <- NULL
+  # bind the index list into a single data frame, since the list elements are all the same shape
+  indicesdf <- as.data.frame(do.call(rbind, indices))
+  # Strip index names from the gearnames vector by using gear number from the indices table
+  gearnums <- unique(indicesdf$gear)
+  indnames <- gearnames[gearnums]
+  for(gear in 1:length(gearnums)){
+    header <- c(indnames[gear], "Index", "CV")
+    index <- indicesdf[indicesdf$gear == gearnums[gear],]
+    index <- as.matrix(cbind(index$iyr, index$it, index$wt))
+    # Round values and make all the same number of digits
+    pattern <- paste0("%0.",digits,"f")
+    indexPretty <- apply(index, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
+    tabledf <- rbind(tabledf, header, indexPretty)
+  }
+
+  if(savetable){
+    write.table(tabledf, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
+  }else{
+    print(tabledf)
+  }
+
+
 }
 
 decisionTable <- function(outMCMC   = NULL,
@@ -208,7 +261,6 @@ decisionTable <- function(outMCMC   = NULL,
   }else{
     print(probs)
   }
-
 }
 
 valueTable <- function(outMPD    = NULL,

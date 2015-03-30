@@ -492,6 +492,10 @@ iscam <- function(reloadScenarios      = FALSE,
            savetable <- val$writeDecisionTable
            makeTable(s,7,savetable,"Decision",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
          },
+         "indicesTable" = {
+           savetable <- val$writeIndicesTable
+           makeTable(s,8,savetable,"Indices",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+         },
          "runCurrScenario" = {
            runMCMC <- FALSE
            if(!is.na(val$mcmc)){

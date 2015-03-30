@@ -330,7 +330,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 8 1 relief=sunken padx=20
+          grid 9 1 relief=sunken padx=20
                grid 1 2
                     button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
                     check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
@@ -352,6 +352,9 @@ grid 3 1 padx=10 pady=5 sticky=W
                grid 1 2
                     button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decision table" fg="chocolate4"
                     check  name=writeDecisionTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=indicesTable      function=.subView action="indicesTable"       width=25 text="Indices table" fg="chocolate4"
+                    check  name=writeIndicesTable checked=T         text="Write to file"          function=.subView
                grid 1 2
                     label text="Number of decimal places" font="bold 12" sticky=E
                     entry name=numTableDigits  function=.subView value=3   entryfont="12" sticky=W width=10
