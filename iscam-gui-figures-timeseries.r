@@ -36,7 +36,12 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    showSbio   = FALSE,        # Show Spawning biomass on Vulnerable biomass plot
                    plotU      = FALSE,        # Plot U instead of F for the fishing mortality plot
                    indfixaxis = FALSE,        # Fix the index x-axis so that all indices or plotted on the same year scale
-                   showumsy   = FALSE){       # Plot Umsy instead of Fmsy for reference point plot
+                   indletter  = NULL,         # A letter to plot on the panel. If NULL, no letter will be printed.
+                   showumsy   = FALSE,        # Plot Umsy instead of Fmsy for reference point plot
+                   colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
+                   linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
+                   names      = NULL          # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                   ){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
   #  chosen sensitivity number in the GUI will be plotted.
@@ -98,10 +103,16 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
 
   out    <- validModels[[1]]
-  colors <- validModels[[2]]
-  names  <- validModels[[3]]
+  if(is.null(colors)){
+    colors <- validModels[[2]]
+  }
+  if(is.null(names)){
+    names  <- validModels[[3]]
+  }
   inputs <- validModels[[4]]
-  linetypes <- validModels[[5]]
+  if(is.null(linetypes)){
+    linetypes <- validModels[[5]]
+  }
   parout <- validModels[[6]]
 
   if(is.null(validModels)){
@@ -211,6 +222,10 @@ plotTS <- function(scenario   = 1,         # Scenario number
     }else{
       plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio)
     }
+  }
+
+  if(!is.null(indletter)){
+    .gletter(indletter)
   }
 
   if(savefig){
@@ -1053,7 +1068,7 @@ plotIndexMPD <- function(scenario  = NULL,
                          verbose   = FALSE,
                          showtitle = TRUE,
                          leg = "topright",
-                         indfixaxis = FALSE){
+                         indfixaxis = FALSE){         # A letter to plot on the panel. If NULL, no letter will be printed.
   # Index fits plot for an MPD
   # scenario is the sccenario number. Only used if 'out' is of length 1.
   # out is a list of the mpd outputs to show on the plot
@@ -1210,9 +1225,11 @@ plotIndexMPD <- function(scenario  = NULL,
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
-
+  if(!is.null(indletter)){
+    .gletter(indletter)
+  }
   if(!is.null(leg)){
-    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
   }
 }
 

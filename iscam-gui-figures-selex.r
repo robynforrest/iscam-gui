@@ -28,7 +28,11 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                       figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                       showtitle  = TRUE,         # Show the main title on the plot
                       units      = .UNITS,       # Units to use in plotting
-                      silent     = .SILENT
+                      silent     = .SILENT,
+                      colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
+                      linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
+                      names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                      indletter  = NULL          # A letter to plot on the panel. If NULL, no letter will be printed.
                       ){
 
   # plotNum must be one of:
@@ -61,10 +65,16 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   }
 
   out    <- validModels[[1]]
-  colors <- validModels[[2]]
-  names  <- validModels[[3]]
+  if(is.null(colors)){
+    colors <- validModels[[2]]
+  }
+  if(is.null(names)){
+    names  <- validModels[[3]]
+  }
   inputs <- validModels[[4]]
-  linetypes <- validModels[[5]]
+  if(is.null(linetypes)){
+    linetypes <- validModels[[5]]
+  }
   parout <- validModels[[6]]
   controlinputs <- validModels[[7]]
 
@@ -107,9 +117,13 @@ plotSelex <- function(scenario   = 1,            # Scenario number
 
   if(plotNum==1){
     plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
-                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle)
+                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, indletter=indletter)
   }
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
+
+  if(!is.null(indletter)){
+    .gletter(indletter)
+  }
 
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")

@@ -349,6 +349,9 @@ iscam <- function(reloadScenarios      = FALSE,
   # Number of decimal places to report in tables
   ndigits <- val$numTableDigits
 
+  # For returning XTables for latex
+  retxtable <- val$returnXTable
+
   switch(act,
          # Change the scenario number using three different methods
          "prevScenario" = {
@@ -466,35 +469,35 @@ iscam <- function(reloadScenarios      = FALSE,
          },
          "paramEstTable" = {
            savetable <- val$writeParamEstTable
-           makeTable(s,1,savetable,"ParamEst",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,1,savetable,"ParamEst",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "refPointsTable" = {
            savetable <- val$writeRefPointsTable
-           makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,2,savetable,"RefPoints",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "biomassTable" = {
            savetable <- val$writeBiomassTable
-           makeTable(s,3,savetable,"Biomass",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,3,savetable,"Biomass",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "recruitmentTable" = {
            savetable <- val$writeRecruitmentTable
-           makeTable(s,4,savetable,"Recruitment",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,4,savetable,"Recruitment",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "fTable" = {
            savetable <- val$writeFTable
-           makeTable(s,5,savetable,"F",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,5,savetable,"F",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "uTable" = {
            savetable <- val$writeUTable
-           makeTable(s,6,savetable,"U",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,6,savetable,"U",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "decisionTable" = {
            savetable <- val$writeDecisionTable
-           makeTable(s,7,savetable,"Decision",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,7,savetable,"Decision",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "indicesTable" = {
            savetable <- val$writeIndicesTable
-           makeTable(s,8,savetable,"Indices",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits)
+           makeTable(s,8,savetable,"Indices",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
          "runCurrScenario" = {
            runMCMC <- FALSE

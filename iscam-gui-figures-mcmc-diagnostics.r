@@ -378,14 +378,13 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
     priorSpecs <- rbind(mSpec1,mSpec2,priorSpecs)
   }else{
     # Only one m, so make it log_m
-    mSpecInd <- grep("m",priorNames)
-    mSpec <- priorSpecs[mSpecInd,]
-    priorSpecs <- priorSpecs[-mSpecInd,]
+#    mSpecInd <- grep("m",priorNames)
+#    mSpec <- priorSpecs[mSpecInd,]
+#    priorSpecs <- priorSpecs[-mSpecInd,]
     # Add each m1 and m2 in
-    rownames(mSpec) <- "log_m"
-    priorSpecs <- rbind(mSpec,priorSpecs)
+#    rownames(mSpec) <- "log_m"
+#    priorSpecs <- rbind(mSpec,priorSpecs)
   }
-
   priorNames <- rownames(priorSpecs)
   numWithPriors <- length(priorNames)
   nside <- getRowsCols(numWithPriors)
@@ -399,11 +398,14 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
     # and log_ is optional
     postName <- names(mcmcData)[postInd]
     priorPattern <- paste0("^[log_]*",postName,"$")
+    if(postName == "m1"){
+      priorPattern <- "log_m"
+    }
     priorInd <- grep(priorPattern, priorNames)
     if(length(priorInd) > 0){
       # The posterior name is in the list of priors..
       dat <- mcmcData[,postInd]
-      if(postName != "h"){  # HACK!!! iScam should output ist results in the same space as input parameters
+      if(postName != "h"){  # HACK!!! iScam should output its results in the same space as input parameters
         dat <- log(dat)
       }
       dat <- window(mcmc(as.ts(dat), start = burnin, thin = thinning))
@@ -417,6 +419,8 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
       if(pName == "log_m1"){
         mle <- mpdData$m[1]
       }else if(pName == "log_m2"){
+        mle <- mpdData$m[2]
+      }else if(pName == "log_m"){
         mle <- mpdData$m[2]
       }else if(pName == "h"){
         mle <- mpdData$steepness
@@ -439,7 +443,9 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
         }else{
           curve(func, xlab="", ylab="", col="green", lwd=2)
         }
-        abline(v = xx$mle, lwd=2, lty=2, col=2)
+        if(!priorsonly){
+          abline(v = xx$mle, lwd=2, lty=2, col=2)
+        }
         title(xx$nm)
       }else{
         plot.marg(xx, breaks = "sturges", col = "wheat")

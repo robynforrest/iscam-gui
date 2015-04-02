@@ -16,6 +16,9 @@ makeTable <- function(scenario   = 1,         # Scenario number
                       sensGroup  = 1,         # Sensitivity group to use if multiple==TRUE
                       burnthin   = list(0,1), # List of two elements, burnin and thinning for mcmc tables
                       digits     = 3,         # Number of decimal places to report in tables
+                      retxtable  = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
+                      xcaption   = "default", # Caption to use in an xtable
+                      xlabel     = "default", # Reference label to use in an xtable
                       silent     = .SILENT){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -78,19 +81,22 @@ makeTable <- function(scenario   = 1,         # Scenario number
     filenameRaw  <- paste0(scenarioName,"_",fileText,".csv")
     filename     <- file.path(tableDir, filenameRaw)
   }
+  if(retxtable){
+    savetable <- FALSE
+  }
   if(tableNum == 1){
-    paramEstTable(outMPD, outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    paramEstTable(outMPD, outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 2){
-    refPointsTable(outMPD, outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    refPointsTable(outMPD, outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 3){
     # send biomass output for mcmc and mpd
-    valueTable(outMPD[[1]]$mpd$sbt, outMCMC[[1]]$mcmc$sbt[[1]], names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    valueTable(outMPD[[1]]$mpd$sbt, outMCMC[[1]]$mcmc$sbt[[1]], names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 4){
     # send recruitment output for mcmc and mpd
-    valueTable(outMPD[[1]]$mpd$rt, outMCMC[[1]]$mcmc$rt[[1]], names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    valueTable(outMPD[[1]]$mpd$rt, outMCMC[[1]]$mcmc$rt[[1]], names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 5){
     # send F output for mcmc and mpd - NOTE only for gear 1
@@ -99,7 +105,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
     fnames <- names(ft)
     yrs <- gsub(".*_([[:digit:]]+)","\\1",fnames)
     names(ft) <- yrs
-    valueTable(outMPD[[1]]$mpd$ft[1,], ft, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    valueTable(outMPD[[1]]$mpd$ft[1,], ft, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 6){
     # send U output for mcmc and mpd - NOTE only for gear 1
@@ -108,16 +114,16 @@ makeTable <- function(scenario   = 1,         # Scenario number
     unames <- names(ut)
     yrs <- gsub(".*_([[:digit:]]+)","\\1",unames)
     names(ut) <- yrs
-    valueTable(outMPD[[1]]$mpd$ut[1,], ut, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    valueTable(outMPD[[1]]$mpd$ut[1,], ut, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 7){
     # Decision table based on projection runs
-    decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits)
+    decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable)
   }
   if(tableNum == 8){
     # Indices table for current scenario only
     gearnames <- op[[scenario]]$inputs$data$gearNames
-    indicesTable(inputs, gearnames=gearnames, savetable=savetable, filename=filename, digits=digits)
+    indicesTable(inputs, gearnames=gearnames, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
 }
 
@@ -125,7 +131,10 @@ indicesTable <- function(inputs    = NULL,
                          gearnames = NULL,
                          savetable = FALSE,
                          filename  = "default",
-                         digits    = 1,            # Number of digits to round the index to
+                         digits    = 3,          # Number of digits to round the index to
+                         retxtable = FALSE,      # Return an xtable object, if TRUE, savetable will be ignored
+                         xcaption   = "default", # Caption to use in an xtable
+                         xlabel     = "default", # Reference label to use in an xtable
                          verbose   = FALSE){
   currFuncName <- getCurrFunc()
   if(is.null(inputs)){
@@ -147,24 +156,26 @@ indicesTable <- function(inputs    = NULL,
   # Strip index names from the gearnames vector by using gear number from the indices table
   gearnums <- unique(indicesdf$gear)
   indnames <- gearnames[gearnums]
+  pattern <- paste0("% 9.",digits,"f")                             # Pattern for pretty output
+  pretty <- function(d){d <- round(d,digits);sprintf(pattern, d)} # For pretty output
   for(gear in 1:length(gearnums)){
-    header <- c(indnames[gear], "Index", "CV")
+    header <- c(indnames[gear], "", "")
     index <- indicesdf[indicesdf$gear == gearnums[gear],]
-    index <- as.matrix(cbind(index$iyr, index$it, index$wt))
-    # Round values and make all the same number of digits
-    pattern <- paste0("%0.",digits,"f")
-    indexPretty <- apply(index, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
-    tabledf <- rbind(tabledf, header, indexPretty)
+    index <- as.matrix(cbind(index$iyr, pretty(index$it), pretty(index$wt)))
+    tabledf <- rbind(tabledf, header, index)
   }
-
+  # Remove residual row names
+  rownames(tabledf) <- NULL
+  colnames(tabledf) <- c("Survey/Year","Index","CV")
+  if(retxtable){
+    return(print(xtable(tabledf, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE))
+  }
   if(savetable){
     write.table(tabledf, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
   }else{
     print(tabledf)
   }
-
-
 }
 
 decisionTable <- function(outMCMC   = NULL,
@@ -174,6 +185,9 @@ decisionTable <- function(outMCMC   = NULL,
                           savetable = FALSE,
                           filename  = "default",
                           digits    = 3,          # Number of digits to round the output table to
+                          retxtable = FALSE,      # Return an xtable object, if TRUE, savetable will be ignored
+                          xcaption   = "default", # Caption to use in an xtable
+                          xlabel     = "default", # Reference label to use in an xtable
                           verbose   = FALSE){
 
   currFuncName <- getCurrFunc()
@@ -253,8 +267,12 @@ decisionTable <- function(outMCMC   = NULL,
   names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
 
   # Round values and make all the same number of digits
-  pattern <- paste0("%0.",digits,"f")
+  pattern <- paste0("% 1.",digits,"f")
   probs <- apply(probs, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
+  probs <- as.data.frame(probs)
+  if(retxtable){
+    return(print(xtable(probs, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE))
+  }
   if(savetable){
     write.table(probs, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=FALSE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
@@ -271,6 +289,9 @@ valueTable <- function(outMPD    = NULL,
                        savetable = FALSE,
                        filename  = "default",
                        digits    = 3,
+                       retxtable = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
+                       xcaption   = "default", # Caption to use in an xtable
+                       xlabel     = "default", # Reference label to use in an xtable
                        verbose   = FALSE){
 
   currFuncName <- getCurrFunc()
@@ -323,11 +344,14 @@ valueTable <- function(outMPD    = NULL,
   rownames(alltable) <- rown
 
   # Round values and make all the same number of digits
-  pattern <- paste0("%0.",digits,"f")
+  pattern <- paste0("% 9.",digits,"f")
   alltable <- apply(alltable, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
-
+  alltable <- t(alltable)
+  if(retxtable){
+    return(print(xtable(alltable, caption=xcaption, label=xlabel), caption.placement = "top"))
+  }
   if(savetable){
-    write.table(t(alltable), filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
+    write.table(alltable, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
   }else{
     print(t(alltable))
@@ -342,6 +366,9 @@ refPointsTable <- function(outMPD    = NULL,
                            savetable = FALSE,
                            filename  = "default",
                            digits    = 3,
+                           retxtable = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
+                           xcaption   = "default", # Caption to use in an xtable
+                           xlabel     = "default", # Reference label to use in an xtable
                            verbose   = FALSE){
 
   currFuncName <- getCurrFunc()
@@ -428,9 +455,11 @@ refPointsTable <- function(outMPD    = NULL,
   }
 
   # Round values and make all the same number of digits
-  pattern <- paste0("%0.",digits,"f")
+  pattern <- paste0("% 9.",digits,"f")
   quants <- apply(quants[[1]], c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
-
+  if(retxtable){
+    return(print(xtable(quants, caption=xcaption, label=xlabel), caption.placement = "top"))
+  }
   if(savetable){
     write.table(quants, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
@@ -447,6 +476,9 @@ paramEstTable <- function(outMPD    = NULL,
                           savetable = FALSE,
                           filename  = "default",
                           digits    = 3,
+                          retxtable = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
+                          xcaption   = "default", # Caption to use in an xtable
+                          xlabel     = "default", # Reference label to use in an xtable
                           verbose   = FALSE){
 
   currFuncName <- getCurrFunc()
@@ -554,9 +586,64 @@ paramEstTable <- function(outMPD    = NULL,
   alltable <- t(alltable)
 
   # Round values and make all the same number of digits
-  pattern <- paste0("%0.",digits,"f")
+  pattern <- paste0("% 9.",digits,"f")
   alltable <- apply(alltable, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
 
+  if(retxtable){
+    # Modify headers so that they are in nice latex format
+    pnames <- rownames(alltable)
+    for(name in 1:length(pnames)){
+      if(pnames[name] == "ro"){
+        pnames[name] <- "R_0"
+      }
+      if(pnames[name] == "h"){
+        pnames[name] <- "Steepness (h)"
+      }
+      if(pnames[name] == "m1"){
+        pnames[name] <- "M"
+      }
+      if(pnames[name] == "rbar"){
+        pnames[name] <- "R_{AVG}"
+      }
+      if(pnames[name] == "rinit"){
+        pnames[name] <- "R_{AVG_init}"
+      }
+      if(pnames[name] == "q1"){
+        pnames[name] <- "Q_1"
+      }
+      if(pnames[name] == "q2"){
+        pnames[name] <- "Q_2"
+      }
+      if(pnames[name] == "q3"){
+        pnames[name] <- "Q_3"
+      }
+      if(pnames[name] == "q4"){
+        pnames[name] <- "Q_4"
+      }
+      if(pnames[name] == "q5"){
+        pnames[name] <- "Q_5"
+      }
+      if(pnames[name] == "sel1"){
+        pnames[name] <- "Sel_1"
+      }
+      if(pnames[name] == "sel2"){
+        pnames[name] <- "Sel_2"
+      }
+      if(pnames[name] == "sel3"){
+        pnames[name] <- "Sel_3"
+      }
+      if(pnames[name] == "sel4"){
+        pnames[name] <- "Sel_4"
+      }
+      if(pnames[name] == "sel5"){
+        pnames[name] <- "Sel_5"
+      }
+      rownames(alltable) <- pnames
+    }
+    return(print(xtable(alltable, caption=xcaption, label=xlabel),
+                 caption.placement = "top")) #, sanitize.rownames=FALSE,
+#                 sanitize.rownames.function = function(x) paste0("{",x,"}")))
+  }
   if(savetable){
     write.table(alltable, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)

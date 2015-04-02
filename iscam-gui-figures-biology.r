@@ -26,7 +26,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         leg        = "topright",   # Legend location. If NULL, none will be drawn
                         figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                         showtitle  = TRUE,         # Showe the main title on the plot
-                        units      = .UNITS){
+                        units      = .UNITS,
+                        scenario   = NULL){
 
   # plotNum must be one of:
   # 1  Mean weight at length for last year
@@ -52,7 +53,9 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
 #  }
   val          <- getWinVal()
   currFuncName <- getCurrFunc()
-  scenario     <- val$entryScenario
+  if(is.null(scenario)){
+    scenario     <- val$entryScenario
+  }
   isMCMC       <- op[[scenario]]$inputs$log$isMCMC
   figDir       <- op[[scenario]]$names$figDir
   out          <- op[[scenario]]$outputs$mpd
