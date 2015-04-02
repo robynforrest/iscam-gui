@@ -117,7 +117,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
 
   if(plotNum==1){
     plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
-                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, indletter=indletter)
+                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle)
   }
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 

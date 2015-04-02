@@ -555,7 +555,6 @@ paramEstTable <- function(outMPD    = NULL,
       if(pname == "bo"){
         pname <- "sbo"
       }
-
       matchsel <- grep("sel[[:digit:]]+",pname)
       matchq <- grep("q[[:digit:]]+",pname)
       selpars <- tmpMPD$sel_par[,3] # Age value at 50% only, not Age SD at 50% (that would be column 4)

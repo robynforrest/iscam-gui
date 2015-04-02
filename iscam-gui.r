@@ -93,7 +93,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
   if(!showgui){
     .loadData(reloadScenarios = TRUE)
-  }else{
+  }else if(reloadScenarios){
     .loadData(reloadScenarios = reloadScenarios)
   }
 

@@ -1225,9 +1225,7 @@ plotIndexMPD <- function(scenario  = NULL,
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
-  if(!is.null(indletter)){
-    .gletter(indletter)
-  }
+
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
   }
