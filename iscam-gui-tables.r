@@ -31,14 +31,15 @@ makeTable <- function(scenario   = 1,         # Scenario number
   # Assumes that 'sens' list exists and has been populated correctly.
 
   # tableNum must be one of (all tables include MPD, MCMC lower bound, median, and upper bound):
-  # 1 Parameter estimates
-  # 2 Reference points
-  # 3 Spawning biomass
-  # 4 Recruitment
-  # 5 Fishing mortality (F)
-  # 6 Fishing mortality (U)
-  # 7 Decision table
-  # 8 Indices table (Input indices)
+  # 1  Parameter estimates
+  # 2  Reference points
+  # 3  Spawning biomass
+  # 4  Recruitment
+  # 5  Fishing mortality (F)
+  # 6  Fishing mortality (U)
+  # 7  Decision table
+  # 8  Indices table (Input indices)
+  # 9  Reletive Spawning Biomass (Depletion)
 
   currFuncName <- getCurrFunc()
 
@@ -53,7 +54,6 @@ makeTable <- function(scenario   = 1,         # Scenario number
   }else{
     models <- scenario # For the non-multiple and retro cases
   }
-
 
   # Remove models which do not have MCMC outputs, or MPD outputs
   validModelsMPD <- getValidModelsList(models, type = "mpd")
@@ -118,12 +118,23 @@ makeTable <- function(scenario   = 1,         # Scenario number
   }
   if(tableNum == 7){
     # Decision table based on projection runs
-    decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable)
+    decisionTable(outMCMC, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
   if(tableNum == 8){
     # Indices table for current scenario only
     gearnames <- op[[scenario]]$inputs$data$gearNames
     indicesTable(inputs, gearnames=gearnames, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+  }
+  if(tableNum == 9){
+    # send depletion output for mcmc and mpd
+    depmpd <- outMPD[[1]]$mpd$bt / outMPD[[1]]$mpd$bo
+    sbt <- outMCMC[[1]]$mcmc$sbt[[1]]
+    bo <- outMCMC[[1]]$mcmc$params$bo
+    depmcmc <- data.frame()
+    for(row in 1:nrow(sbt)){
+      depmcmc <- rbind(depmcmc, sbt[row,] / bo[row])
+    }
+    valueTable(depmpd, depmcmc, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
   }
 }
 
@@ -160,6 +171,9 @@ indicesTable <- function(inputs    = NULL,
   pretty <- function(d){d <- round(d,digits);sprintf(pattern, d)} # For pretty output
   for(gear in 1:length(gearnums)){
     header <- c(indnames[gear], "", "")
+    if(retxtable){
+      header <- c(paste0("\\textbf{",indnames[gear],"}"), "", "")
+    }
     index <- indicesdf[indicesdf$gear == gearnums[gear],]
     index <- as.matrix(cbind(index$iyr, pretty(index$it), pretty(index$wt)))
     tabledf <- rbind(tabledf, header, index)
@@ -168,7 +182,8 @@ indicesTable <- function(inputs    = NULL,
   rownames(tabledf) <- NULL
   colnames(tabledf) <- c("Survey/Year","Index","CV")
   if(retxtable){
-    return(print(xtable(tabledf, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE))
+    colnames(tabledf) <- c("\\textbf{Survey/Year}","\\textbf{Index}","\\textbf{CV}")
+    return(print(xtable(tabledf, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(tabledf, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
@@ -255,23 +270,51 @@ decisionTable <- function(outMCMC   = NULL,
                      length(which(dat[,9]<1))/dlen,   # B2016/0.4B0
                      length(which(dat[,10]<1))/dlen,  # B2016/0.2B0
                      length(which(dat[,11]<1))/dlen,  # B2016/B1996
-                     length(which(dat[,18]<1))/dlen,  # B2016/Bmsy
+                     #length(which(dat[,18]<1))/dlen,  # B2016/Bmsy
                      length(which(dat[,19]<1))/dlen,  # B2016/0.8Bmsy
                      length(which(dat[,20]<1))/dlen,  # B2016/0.4Bmsy
-                     length(which(dat[,14]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
-                     length(which(dat[,22]>1))/dlen,  # F2015/Fmsy
+                     #length(which(dat[,14]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
+                     #length(which(dat[,22]>1))/dlen,  # F2015/Fmsy
                      length(which(dat[,16]>1))/dlen,  # U2015/U2014
                      length(which(dat[,24]>1))/dlen)) # U2015/Umsy
   }
-  tmp <- projdat[,c(1,8,9,10,11,18,19,20,14,22,16,24)] # Same numbers as in loop above
-  names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
-
+  #tmp <- projdat[,c(1,8,9,10,11,18,19,20,14,22,16,24)] # Same numbers as in loop above
+  tmp <- projdat[,c(1,8,9,10,11,19,20,16,24)] # Same numbers as in loop above
   # Round values and make all the same number of digits
   pattern <- paste0("% 1.",digits,"f")
-  probs <- apply(probs, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
-  probs <- as.data.frame(probs)
+  # Make all columns have three 'digits' decimal places except for TAC (column 1)
+  probs <- cbind(probs[,1], apply(probs[,2:ncol(probs)], c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)}))
+  probs <- as.data.frame(probs, stringsAsFactors=FALSE)
   if(retxtable){
-    return(print(xtable(probs, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE))
+    # HACK! Set names with proper latex markup
+    names(probs) <- c("\\specialcell{\\textbf{2015 Catch}\\\\\\textbf{(1000 t)}}", "\\specialcell{$P(B_{2016}<$\\\\$B_{2015})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.4B_0)$}", "\\specialcell{$P(B_{2016}<$\\\\$0.2B_0)$}","\\specialcell{$P(B_{2016}<$\\\\$B_{1996})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.8B_{MSY})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.4B_{MSY})$}", "\\specialcell{$P(U_{2015}>$\\\\$U_{2014})$}", "\\specialcell{$P(U_{2015}>$\\\\$U_{MSY})$}")
+    # Make TAC==11 and TAC==15 boldface (Last year's catch and this year's TAC)
+    # Add a star for last year's catch value (item 1)
+    tprob <- probs[probs[,1]==11,]
+    tname <- tprob[1]
+    tdata <- tprob[-1]
+    tname <- paste0("\\textbf{",tname,"*}")
+    tdata <- paste0("\\textbf{",tdata,"}")
+    probs[probs[,1]==11,] <- c(tname,tdata)
+    # Add two stars for current TAC value (item 2)
+    tprob <- probs[probs[,1]==15,]
+    tname <- tprob[1]
+    tdata <- tprob[-1]
+    tname <- paste0("\\textbf{",tname,"**}")
+    tdata <- paste0("\\textbf{",tdata,"}")
+    probs[probs[,1]==15,] <- c(tname,tdata)
+  }else{
+    names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
+  }
+
+  if(retxtable){
+    comment <- list()
+    comment$pos <- list()
+    comment$pos[[1]] <- c(nrow(probs))
+    comment$command <- c(paste("\\hline \n",
+                               "\\textbf{* Approximate 2014 catch; ** 2014 TAC}.\n",
+                               sep = ""))
+    return(print(xtable(probs, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}, scalebox="0.75", add.to.row=comment, hline.after=c(-1,0)))
   }
   if(savetable){
     write.table(probs, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=FALSE)
@@ -420,6 +463,10 @@ refPointsTable <- function(outMPD    = NULL,
     # Change then name 'ssb' to B followed by the final year.
     yrs <- names(outMCMC[[1]]$mcmc$sbt[[1]])
     mcmcnames[mcmcnames=="ssb"] = paste0("B",yrs[length(yrs)])
+
+    # Add 0.2B0, 0.4B0, 0.4BMSY, and 0.8BMSY
+    mcmcData <- cbind(mcmcData, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
+    mcmcnames <- c(mcmcnames, "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
 
     # Add the initial year biomass (first column of sbt)
     sbt <- outMCMC[[model]]$mcmc$sbt[[1]]

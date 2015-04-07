@@ -330,7 +330,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 10 1 relief=sunken padx=20
+          grid 11 1 relief=sunken padx=20
                grid 1 2
                     button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
                     check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
@@ -340,6 +340,9 @@ grid 3 1 padx=10 pady=5 sticky=W
                grid 1 2
                     button name=biomassTable      function=.subView action="biomassTable"       width=25 text="Spawning biomass" fg="chocolate4"
                     check  name=writeBiomassTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=depletionTable      function=.subView action="depletionTable"       width=25 text="Relative spawning biomass" fg="chocolate4"
+                    check  name=writeDepletionTable checked=T         text="Write to file"          function=.subView
                grid 1 2
                     button name=recruitmentTable      function=.subView action="recruitmentTable"       width=25 text="Recruitment" fg="chocolate4"
                     check  name=writeRecruitmentTable checked=T         text="Write to file"          function=.subView
