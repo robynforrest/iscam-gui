@@ -97,10 +97,14 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 4 relief=raised
-          grid 11 2 sticky=N relief=raised
+          grid 13 2 sticky=N relief=raised
                label text="Time series" font="bold 10" sticky=N
                null
                radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass"            function=.subView sticky=W mode=character
+               null
+               check name=showB0Ref    checked=T                                 text="B0 ref lines"           function=.subView sticky=W
+               null
+               check name=showBMSYRef  checked=F                                 text="BMSY ref lines"         function=.subView sticky=W
                null
                radio name=viewPlotType value=sTSSpawningDepletionAllAreas        text="Spawning depletion"          function=.subView sticky=W mode=character
                null

@@ -227,7 +227,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
    switch(pType,
            # From iscam-gui-figures-timeseries.r
-           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+           "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,showB0Ref=val$showB0Ref,showBMSYRef=val$showBMSYRef)},
            "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SBByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sTSVulnerableBiomassAllAreas"           = {plotTS(s,12,savefig,"VB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sTSVSBiomassAllAreas"                   = {plotTS(s,12,savefig,"VB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, showSbio=TRUE)},

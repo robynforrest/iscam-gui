@@ -40,7 +40,9 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    showumsy   = FALSE,        # Plot Umsy instead of Fmsy for reference point plot
                    colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
                    linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
-                   names      = NULL          # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                   names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                   showB0Ref  = TRUE,         # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
+                   showBMSYRef= FALSE         # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
                    ){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -161,9 +163,12 @@ plotTS <- function(scenario   = 1,         # Scenario number
 
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, showBMSYRef = showBMSYRef)
     }else{
-      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+      if(showBMSYRef){
+        cat0(.PROJECT_NAME,"->",currFuncName,"BMSY reference line not available in MPD mode.")
+      }
+      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref)
     }
   }
   if(plotNum == 3){
@@ -241,6 +246,7 @@ plotBiomassMPD <- function(out       = NULL,
                            lty       = NULL,
                            verbose   = FALSE,
                            showtitle = TRUE,
+                           showB0Ref = TRUE,
                            leg = "topright"){
   # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -295,19 +301,28 @@ plotBiomassMPD <- function(out       = NULL,
       points(out[[line]]$mpd$yr[1], out[[line]]$mpd$sbo, col=colors[[line]], pch=20)
     }
   }
+  # Add 0.2B0, and 0.4B0 lines for the reference case [[1]] to plot
+  if(showB0Ref){
+    abline(h=0.2*out[[1]]$mpd$sbo, col="red", lty=2)
+    mtext("0.2B0",2,at=0.2*out[[1]]$mpd$sbo,col="red",las=1)
+    abline(h=0.4*out[[1]]$mpd$sbo, col="green", lty=2)
+    mtext("0.4B0",2,at=0.4*out[[1]]$mpd$sbo,col="green",las=1)
+  }
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }
 }
 
-plotBiomassMCMC <- function(out       = NULL,
-                            colors    = NULL,
-                            names     = NULL,
-                            ci        = NULL,
-                            burnthin  = list(0,1),
-                            offset    = 0.1,
-                            verbose   = FALSE,
-                            showtitle = TRUE,
+plotBiomassMCMC <- function(out         = NULL,
+                            colors      = NULL,
+                            names       = NULL,
+                            ci          = NULL,
+                            burnthin    = list(0,1),
+                            offset      = 0.1,
+                            verbose     = FALSE,
+                            showtitle   = TRUE,
+                            showB0Ref   = TRUE,   # Show the 0.2 and 0.4 B0 lines on the plot
+                            showBMSYRef = FALSE,  # # Show the 0.4 and 0.8 BMSY lines on the plot
                             leg = "topright"){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -375,6 +390,23 @@ plotBiomassMCMC <- function(out       = NULL,
       points(yrs[1] - incOffset, boquants[[line]][2], pch = 19, col = colors[[line]])
       arrows(yrs[1] - incOffset, boquants[[line]][1], yrs[1] - incOffset, boquants[[line]][3], lwd = 2, code = 0, col = colors[[line]])
     }
+  }
+  # Add 0.4BMSY, 0.8BMSY, 0.2B0, and 0.4B0 lines for the reference case [[1]] to plot
+  # B0
+  if(showB0Ref){
+    abline(h=0.2*boquants[[1]][2], col="red", lty=1)  # sbo1 set above in loop through models
+    mtext("0.2B0",2,at=0.2*boquants[[1]][2],col="red",las=1)
+    abline(h=0.4*boquants[[1]][2], col="green", lty=1)
+    mtext("0.4B0",2,at=0.4*boquants[[1]][2],col="green",las=1)
+  }
+  # BMSY
+  if(showBMSYRef){
+    bmsy <- window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin)
+    bmsyquants <- getQuants(bmsy, ci)
+    abline(h=0.4*bmsyquants[2], col="red", lty=2)
+    mtext("0.4BMSY",2,at=0.4*bmsyquants[2],col="red",las=1)
+    abline(h=0.8*bmsyquants[2], col="green", lty=2)
+    mtext("0.8BMSY",2,at=0.8*bmsyquants[2],col="green",las=1)
   }
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
