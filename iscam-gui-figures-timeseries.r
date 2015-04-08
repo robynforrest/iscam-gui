@@ -459,7 +459,7 @@ plotDepletionMPD <- function(out       = NULL,
   if(showtitle){
     title <- "Relative Spawning Biomass"
   }
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Depletion", xlab="Year", main=title, las=1)
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
@@ -530,7 +530,7 @@ plotDepletionMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Relative Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Depletion", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
@@ -985,9 +985,8 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Recruitment Deviations"
   }
-	plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(yLower,yUpper), xlab="Year", ylab="Recruitment Deviations", main=title, las=1)
+	plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(yLower,yUpper), xlab="Year", ylab="Log recruitment deviations", main=title, las=1)
   	arrows(yrs, quants[[1]][1,], yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
-	  
 		  #drawEnvelope(yrs, quants[[1]], colors[[1]], yLower, yUpper, first=TRUE, ylab="Recruitment Deviations", xlab="Year", main=title, las=1)
 		  #if(length(out) > 1){
 		   # for(line in 2:length(out)){
@@ -1076,7 +1075,7 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
   }
 
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=ylim, xlim=xlim,
-       ylab="Recruitment deviations (millions)", xlab="Year", main=title, las=1)
+       ylab="Log recruitment deviations (millions)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       ryr   <- out[[line]]$mpd$yr
