@@ -121,6 +121,7 @@ stripAreasGroups <- function(dat){
   pnames <- gsub("msy1","msy",pnames)
   pnames <- gsub("fmsy1","fmsy",pnames)
   pnames <- gsub("SSB1","ssb",pnames)
+  pnames <- gsub("sel_sd([0-9]+)","selsd\\1",pnames)
   pnames <- gsub("sel_g([0-9]+)","sel\\1",pnames)
   # Remove underscores
   names(dat) <- gsub("_+.*","",pnames)
@@ -157,14 +158,17 @@ stripStaticParams <- function(scenario, dat){
   selParams <- as.data.frame(op[[scenario]]$inputs$control$sel)
   estphase <- selParams["estphase",]
   staticSel <- estphase<1
-  selPostNames <- names(dat)[grep("sel",names(dat))]
+  selPostNames <- names(dat)[grep("sel[0-9]+",names(dat))]
   selPostNames <- selPostNames[staticSel]
+  selSDPostNames <- names(dat)[grep("selsd[0-9]+",names(dat))]
+  selSDPostNames <- selSDPostNames[staticSel]
   datNames <- names(dat)
   staticSelInds <- NULL
   if(length(selPostNames) > 0){
     # If there are static parameters, remove them.
     for(staticSel in 1:length(selPostNames)){
       staticSelInds <- c(staticSelInds, grep(selPostNames[staticSel], datNames))
+      staticSelInds <- c(staticSelInds, grep(selSDPostNames[staticSel], datNames))
     }
     dat <- dat[,-staticSelInds]
   }

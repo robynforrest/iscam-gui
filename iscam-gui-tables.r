@@ -505,7 +505,15 @@ refPointsTable <- function(outMPD    = NULL,
   pattern <- paste0("% 9.",digits,"f")
   quants <- apply(quants[[1]], c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
   if(retxtable){
-    return(print(xtable(quants, caption=xcaption, label=xlabel), caption.placement = "top"))
+    # Put the latex-pretty names in another column of the table. It doesn't like it when they are actual rownames
+    quants <- as.data.frame(quants)
+    rownames(quants) <- c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}","B\\subscr{2015}",
+                          "0.2B\\subscr{0}","0.4B\\subscr{0}","0.4B\\subscr{MSY}","0.8B\\subscr{MSY}","B\\subscr{1996}","F\\subscr{2014}")
+    # Must preceed any '%' signs with a backslash
+    names(quants) <- gsub("%","\\\\%",names(quants))
+    return(print(xtable(quants, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
+    # Try to align decimal points in table:
+#    return(print(xtable.decimal(quants, caption=xcaption, label=xlabel, digits=digits), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(quants, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
@@ -591,6 +599,7 @@ paramEstTable <- function(outMPD    = NULL,
     tmpMPD <- outMPD[[model]]$mpd
     mpdnames <- names(tmpMPD)
     mpdparamvals <- NULL
+
     for(pname in mcmcnames){
       # This is hack code because iscam is not outputting the same parameter names for MPD and MCMC runs
       if(pname == "h"){
