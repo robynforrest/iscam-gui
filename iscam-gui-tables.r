@@ -183,7 +183,7 @@ indicesTable <- function(inputs    = NULL,
   colnames(tabledf) <- c("Survey/Year","Index","CV")
   if(retxtable){
     colnames(tabledf) <- c("\\textbf{Survey/Year}","\\textbf{Index}","\\textbf{CV}")
-    return(print(xtable(tabledf, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
+    return(print(xtable(tabledf, caption=xcaption, label=xlabel, align=getAlign(ncol(tabledf))), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(tabledf, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
@@ -286,8 +286,25 @@ decisionTable <- function(outMCMC   = NULL,
   probs <- cbind(probs[,1], apply(probs[,2:ncol(probs)], c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)}))
   probs <- as.data.frame(probs, stringsAsFactors=FALSE)
   if(retxtable){
-    # HACK! Set names with proper latex markup
-    names(probs) <- c("\\specialcell{\\textbf{2015 Catch}\\\\\\textbf{(1000 t)}}", "\\specialcell{$P(B_{2016}<$\\\\$B_{2015})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.4B_0)$}", "\\specialcell{$P(B_{2016}<$\\\\$0.2B_0)$}","\\specialcell{$P(B_{2016}<$\\\\$B_{1996})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.8B_{MSY})$}", "\\specialcell{$P(B_{2016}<$\\\\$0.4B_{MSY})$}", "\\specialcell{$P(U_{2015}>$\\\\$U_{2014})$}", "\\specialcell{$P(U_{2015}>$\\\\$U_{MSY})$}")
+    # HACK! Set names with proper latex markup.
+    names(probs) <- c("\\specialcell{\\textbf{2015 Catch}\\\\\\textbf{(1000 t)}}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{B_{2015})}$}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.4B_0)}$}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.2B_0)}$}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{B_{1996})}$}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.8B_{MSY})}$}",
+                      "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.4B_{MSY})}$}",
+                      "\\specialcell{$\\mathbf{P(U_{2015}>}$\\\\$\\mathbf{U_{2014})}$}",
+                      "\\specialcell{$\\mathbf{P(U_{2015}>}$\\\\$\\mathbf{U_{MSY})}$}")
+    ## names(probs) <- c("\\specialcell{\\textbf{2015 Catch}\\\\\\textbf{(1000 t)}}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$B_{2015})$}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$0.4B_0)$}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$0.2B_0)$}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$B_{1996})$}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$0.8B_{MSY})$}",
+    ##                   "\\specialcell{$P(B_{2016}<$\\\\$0.4B_{MSY})$}",
+    ##                   "\\specialcell{$P(U_{2015}>$\\\\$U_{2014})$}",
+    ##                   "\\specialcell{$P(U_{2015}>$\\\\$U_{MSY})$}")
     # Make TAC==11 and TAC==15 boldface (Last year's catch and this year's TAC)
     # Add a star for last year's catch value (item 1)
     tprob <- probs[probs[,1]==11,]
@@ -308,13 +325,13 @@ decisionTable <- function(outMCMC   = NULL,
   }
 
   if(retxtable){
-    comment <- list()
-    comment$pos <- list()
-    comment$pos[[1]] <- c(nrow(probs))
-    comment$command <- c(paste("\\hline \n",
-                               "\\textbf{* Approximate 2014 catch; ** 2014 TAC}.\n",
-                               sep = ""))
-    return(print(xtable(probs, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}, scalebox="0.75", add.to.row=comment, hline.after=c(-1,0)))
+    footnote <- list()
+    footnote$pos <- list()
+    footnote$pos[[1]] <- c(nrow(probs))
+    footnote$command <- c(paste0("\\hline \\multicolumn{5}{l}{\\textbf{* Approximate 2014 catch; ** 2014 TAC}.}"))
+    return(print(xtable(probs, caption=xcaption, label=xlabel, align=getAlign(ncol(probs))),
+                 caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}, scalebox="0.75",
+                 add.to.row=footnote, hline.after=c(-1,0)))
   }
   if(savetable){
     write.table(probs, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=FALSE)
@@ -391,7 +408,13 @@ valueTable <- function(outMPD    = NULL,
   alltable <- apply(alltable, c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)})
   alltable <- t(alltable)
   if(retxtable){
-    return(print(xtable(alltable, caption=xcaption, label=xlabel), caption.placement = "top"))
+    rownames <- rownames(alltable)
+    colnames <- colnames(alltable)
+    # Put the years as a column
+    alltable <- cbind(rownames, alltable)
+    colnames(alltable) <- paste0("\\textbf{",c("Year", gsub("%","\\\\%",colnames)), "}")
+    return(print(xtable(alltable, caption=xcaption, label=xlabel, align=getAlign(ncol(alltable))),
+                 caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(alltable, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
@@ -507,13 +530,16 @@ refPointsTable <- function(outMPD    = NULL,
   if(retxtable){
     # Put the latex-pretty names in another column of the table. It doesn't like it when they are actual rownames
     quants <- as.data.frame(quants)
-    rownames(quants) <- c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}","B\\subscr{2015}",
-                          "0.2B\\subscr{0}","0.4B\\subscr{0}","0.4B\\subscr{MSY}","0.8B\\subscr{MSY}","B\\subscr{1996}","F\\subscr{2014}")
+    newcol <- paste0("\\textbf{",c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}","B\\subscr{2015}",
+                "0.2B\\subscr{0}","0.4B\\subscr{0}","0.4B\\subscr{MSY}","0.8B\\subscr{MSY}","B\\subscr{1996}","F\\subscr{2014}"),"}")
+    colnames <- names(quants)
     # Must preceed any '%' signs with a backslash
-    names(quants) <- gsub("%","\\\\%",names(quants))
-    return(print(xtable(quants, caption=xcaption, label=xlabel), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
+    quants <- cbind(newcol, quants)
+    names(quants) <- paste0("\\textbf{",c("Reference Point", gsub("%","\\\\%",colnames)),"}")
+    return(print(xtable(quants, caption=xcaption, label=xlabel, align=getAlign(ncol(quants))), caption.placement = "top", include.rownames=FALSE,
+                 sanitize.text.function=function(x){x}))
     # Try to align decimal points in table:
-#    return(print(xtable.decimal(quants, caption=xcaption, label=xlabel, digits=digits), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
+    # return(print(xtable.decimal(quants, caption=xcaption, label=xlabel, digits=digits), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(quants, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
@@ -612,14 +638,21 @@ paramEstTable <- function(outMPD    = NULL,
         pname <- "sbo"
       }
       matchsel <- grep("sel[[:digit:]]+",pname)
+      matchselsd <- grep("selsd[[:digit:]]+",pname)
       matchq <- grep("q[[:digit:]]+",pname)
-      selpars <- tmpMPD$sel_par[,3] # Age value at 50% only, not Age SD at 50% (that would be column 4)
+      selpars <- tmpMPD$sel_par[,3] # Age value at 50%
+      selsdpars <- tmpMPD$sel_par[,4] # Age SD at 50%
       qpars <- tmpMPD$q
       if(length(matchsel) > 0){
         # The parameter starts with "sel"
         splitval <- strsplit(pname, "[^[:digit:]]")[[1]]
         selnum <- as.numeric(splitval[length(splitval)])
         thispar <- selpars[selnum]
+      }else if(length(matchselsd) > 0){
+        # The parameter starts with "selsd"
+        splitval <- strsplit(pname, "[^[:digit:]]")[[1]]
+        selnum <- as.numeric(splitval[length(splitval)])
+        thispar <- selsdpars[selnum]
       }else if(length(matchq) > 0){
         # The parameter starts with "q"
         splitval <- strsplit(pname, "[^[:digit:]]")[[1]]
@@ -647,57 +680,15 @@ paramEstTable <- function(outMPD    = NULL,
   if(retxtable){
     # Modify headers so that they are in nice latex format
     pnames <- rownames(alltable)
-    for(name in 1:length(pnames)){
-      if(pnames[name] == "ro"){
-        pnames[name] <- "R_0"
-      }
-      if(pnames[name] == "h"){
-        pnames[name] <- "Steepness (h)"
-      }
-      if(pnames[name] == "m1"){
-        pnames[name] <- "M"
-      }
-      if(pnames[name] == "rbar"){
-        pnames[name] <- "R_{AVG}"
-      }
-      if(pnames[name] == "rinit"){
-        pnames[name] <- "R_{AVG_init}"
-      }
-      if(pnames[name] == "q1"){
-        pnames[name] <- "Q_1"
-      }
-      if(pnames[name] == "q2"){
-        pnames[name] <- "Q_2"
-      }
-      if(pnames[name] == "q3"){
-        pnames[name] <- "Q_3"
-      }
-      if(pnames[name] == "q4"){
-        pnames[name] <- "Q_4"
-      }
-      if(pnames[name] == "q5"){
-        pnames[name] <- "Q_5"
-      }
-      if(pnames[name] == "sel1"){
-        pnames[name] <- "Sel_1"
-      }
-      if(pnames[name] == "sel2"){
-        pnames[name] <- "Sel_2"
-      }
-      if(pnames[name] == "sel3"){
-        pnames[name] <- "Sel_3"
-      }
-      if(pnames[name] == "sel4"){
-        pnames[name] <- "Sel_4"
-      }
-      if(pnames[name] == "sel5"){
-        pnames[name] <- "Sel_5"
-      }
-      rownames(alltable) <- pnames
-    }
-    return(print(xtable(alltable, caption=xcaption, label=xlabel),
-                 caption.placement = "top")) #, sanitize.rownames=FALSE,
-#                 sanitize.rownames.function = function(x) paste0("{",x,"}")))
+    # HACK! The next set of names only pertains to the ARF assessment, the q's and sel's are modified to line up with each other.
+    newcol <- paste0("$\\mathbf{",c("R_0","Steepness (h)","M","\\overline{R}","R_{init}","q_2","q_3","q_4","q_5",
+                            "sel_1","selsd_1","sel_2","selsd_2","sel_4","selsd_4","sel_5","selsd_5"),"}$")
+    colnames <- colnames(alltable)
+    alltable <- cbind(newcol, alltable)
+    # Must preceed any '%' signs with a backslash, and add the name 'Parameters'
+    colnames(alltable) <- paste0("\\textbf{",c("Parameter", gsub("%","\\\\%",colnames)), "}")
+    return(print(xtable(alltable, caption=xcaption, label=xlabel, align=getAlign(ncol(alltable))),
+                 caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(alltable, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
@@ -705,4 +696,16 @@ paramEstTable <- function(outMPD    = NULL,
   }else{
     print(alltable)
   }
+}
+
+getAlign <- function(num){
+  # return a character vector used in the align argument of the xtable command.
+  # For tables where the first column is left-aligned and the rest are right-aligned,
+  # e.g. posterior output tables, reference point tables. Most tables really.
+  # num is the number of columns in the table
+  align <- c("l","l")
+  for(i in 1:(num-1)){
+    align <- c(align, "r")
+  }
+  return(align)
 }
