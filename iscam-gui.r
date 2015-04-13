@@ -509,6 +509,10 @@ iscam <- function(reloadScenarios      = FALSE,
            savetable <- val$writeDecisionTable
            makeTable(s,7,savetable,"Decision",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)
          },
+         "catchTable" = {
+           savetable <- val$writeCatchTable
+           makeTable(s,10,savetable,"Catch", digits=ndigits, retxtable=retxtable, from=startYearCatch, to=endYearCatch)
+         },
          "indicesTable" = {
            savetable <- val$writeIndicesTable
            makeTable(s,8,savetable,"Indices",ci,multiple=FALSE,sensGroup=sgr,burnthin=burnthin, digits=ndigits, retxtable=retxtable)

@@ -318,7 +318,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 
      grid 1 1 sticky=N pady=10
-          grid 11 1 relief=sunken padx=20
+          grid 12 1 relief=sunken padx=20
                grid 1 2
                     button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
                     check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
@@ -341,11 +341,14 @@ grid 3 1 padx=10 pady=5 sticky=W
                     button name=uTable      function=.subView action="uTable"       width=25 text="Fishing mortality (U)" fg="chocolate4"
                     check  name=writeUTable checked=T         text="Write to file"          function=.subView
                grid 1 2
-                    button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decision table" fg="chocolate4"
+                    button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decisions" fg="chocolate4"
                     check  name=writeDecisionTable checked=T         text="Write to file"          function=.subView
                grid 1 2
-                    button name=indicesTable      function=.subView action="indicesTable"       width=25 text="Indices table" fg="chocolate4"
+                    button name=indicesTable      function=.subView action="indicesTable"       width=25 text="Indices" fg="chocolate4"
                     check  name=writeIndicesTable checked=T         text="Write to file"          function=.subView
+               grid 1 2
+                    button name=catchTable         function=.subView action="catchTable"     width=25 text="Landings/discards"  fg="chocolate4"
+                    check  name=writeCatchTable checked=T         text="Write to file"          function=.subView
                grid 1 2
                     label text="Number of decimal places" font="bold 12" sticky=E
                     entry name=numTableDigits  function=.subView value=3   entryfont="12" sticky=W width=10
@@ -404,7 +407,7 @@ grid 3 1 padx=10 pady=5 sticky=W
         null
         #
         radio name=viewPlotType    value=sCatchArea     text="Landings and discards by year and area"  function=.subView sticky=W mode=character
-        entry name=entryCatchAreas width=10 pady=5 value=3C entryfont="10" sticky=E mode=character function=.subView action="changeCatchArea"
+        entry name=entryCatchAreas width=10 pady=5 value="3C,3D,5A,5B,5C,5D,5E"  entryfont="10" sticky=E mode=character function=.subView action="changeCatchArea"
         null
 
 #--------------------------------------------------------------------#

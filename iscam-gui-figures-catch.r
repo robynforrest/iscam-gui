@@ -458,7 +458,7 @@ plotCatchesArea <- function(leg = "topright",
   #par(mar=c(4,4,1,1))
 
 
-  # Filter for this area only
+  # Filter for areas
   areaCodes <- getAreaCodes(areas)
   if(length(areaCodes) == 0){
     cat0(.PROJECT_NAME,"->",currFuncName,"There was a problem with your area selection.")

@@ -19,6 +19,8 @@ makeTable <- function(scenario   = 1,         # Scenario number
                       retxtable  = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
                       xcaption   = "default", # Caption to use in an xtable
                       xlabel     = "default", # Reference label to use in an xtable
+                      from      = 1996,       # Include catch starting at this year (tableNum==10 only)
+                      to        = 2014,       # Include catch ending at this year (tableNum==10 only)
                       silent     = .SILENT){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -40,6 +42,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
   # 7  Decision table
   # 8  Indices table (Input indices)
   # 9  Reletive Spawning Biomass (Depletion)
+  # 10 Catch table (from catch object in global environment)
 
   currFuncName <- getCurrFunc()
 
@@ -63,7 +66,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
     return(NULL)
   }
 
-  if(is.null(ci)){
+  if(is.null(ci) && tableNum != 10){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval (e.g. ci=95).")
     return(NULL)
   }
@@ -135,6 +138,83 @@ makeTable <- function(scenario   = 1,         # Scenario number
       depmcmc <- rbind(depmcmc, sbt[row,] / bo[row])
     }
     valueTable(depmpd, depmcmc, names, ci=ci, burnthin=burnthin, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+  }
+  if(tableNum == 10){
+    # Catch table based on catch object in global environment
+    catchTable(savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+  }
+}
+
+catchTable <- function(catchdat  = catch,      # Catch data frame. By default, it grabs the global 'catch' object
+                       savetable = FALSE,
+                       filename  = "default",
+                       digits    = 3,          # Number of digits to round the index to
+                       byarea    = FALSE,      # make the table by area groups
+                       areas     = NULL,       # if byarea is true, this must be a vector of area codes
+                       retxtable = FALSE,      # Return an xtable object, if TRUE, savetable will be ignored
+                       xcaption  = "default", # Caption to use in an xtable
+                       xlabel    = "default", # Reference label to use in an xtable
+                       from      = 1996,       # Include catch starting at this year
+                       to        = 2014,       # Include catch ending at this year
+                       scalefactor = 1000, # The catch will be divided by this
+                       verbose   = FALSE){
+  # Make the catch table, including discards. Uses getAreaCodes (from iscam-gui-figures-catch.r)
+  # areas will look like this:
+  # areas <- c(3,4) i.e. 3C and 3D together
+
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Remove month, day, area, and vessel id columns
+  catch <- catch[,-c(2:4,7)]
+
+  # Aggregate the data by year, with catch summed
+  jcat <- catch[,-c(2:4,6:7)]
+  jcat <- aggregate(catch$CatchKG, list(catch$Year), sum, na.rm=TRUE)
+
+  # Aggregate the data by year, with discards summed
+  dcat <- catch[,-c(2:5,7)]
+  dcat <- aggregate(catch$DiscardedKG, list(catch$Year), sum, na.rm=TRUE)
+
+  colnames(jcat) <- c("year","catch")
+  colnames(dcat) <- c("year","catch")
+  years <- jcat$year
+  if(from < min(years) || to > max(years)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+    return(NULL)
+  }
+  if(length(years) != length(dcat$year)){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  jcat <- jcat[jcat$year %in% from:to,]
+  years <- years[years %in% from:to]
+  jcat$catch <- jcat$catch / scalefactor
+
+  dcat <- jcat[jcat$year %in% from:to,]
+  dcat$catch <- jcat$catch / scalefactor
+
+  # Bind the two amounts by year into table
+  totcatch <- cbind(years,jcat[,2],dcat[,2])
+  colnames(totcatch) <- c("Year","Landings","Discards")
+
+  pattern <- paste0("% 9.",digits,"f")                             # Pattern for pretty output
+  pretty <- function(d){d <- round(d,digits);sprintf(pattern, d)}  # For pretty output
+
+  if(retxtable){
+    totcatchp <- NULL
+    totcatchp <- cbind(totcatch[,1], pretty(totcatch[,2]), pretty(totcatch[,3]))
+    colnames(totcatchp) <- c("\\textbf{Year}","\\textbf{Landings}","\\textbf{Discards}")
+    return(print(xtable(totcatchp, caption=xcaption, label=xlabel, align=getAlign(ncol(totcatch))), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
+  }
+  if(savetable){
+    write.table(totcatch, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
+  }else{
+    print(totcatch)
   }
 }
 
