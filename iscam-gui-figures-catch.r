@@ -310,8 +310,8 @@ plotCatches <- function(leg = "topright",
   years <- years[years %in% from:to]
   jcat$catch <- jcat$catch / scalefactor
 
-  dcat <- jcat[jcat$year %in% from:to,]
-  dcat$catch <- jcat$catch / scalefactor
+  dcat <- dcat[dcat$year %in% from:to,]
+  dcat$catch <- dcat$catch / scalefactor
 
   # Sum the two amount by year
   totcatch <- cbind(years,jcat[,2]+dcat[,2])
@@ -378,8 +378,8 @@ plotCatchesSplit <- function(leg = "topright",
   years <- years[years %in% from:to]
   jcat$catch <- jcat$catch / scalefactor
 
-  dcat <- jcat[jcat$year %in% from:to,]
-  dcat$catch <- jcat$catch / scalefactor
+  dcat <- dcat[dcat$year %in% from:to,]
+  dcat$catch <- dcat$catch / scalefactor
 
   # Make a matrix out of the two data series, and plot side-by-side
   allCatch <- as.matrix(cbind(jcat[,2],dcat[,2]))
@@ -392,7 +392,7 @@ plotCatchesSplit <- function(leg = "topright",
                axes=FALSE,
                col=c(col1,col2),
                border=c("black","black"),
-               ylim=c(0,1.1*max(allCatch)),
+               ylim=c(0,1.1*max(apply(allCatch, 1, sum))),
                las=2)
 
   cex <- 0.7

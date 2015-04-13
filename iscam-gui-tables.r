@@ -194,11 +194,12 @@ catchTable <- function(catchdat  = catch,      # Catch data frame. By default, i
   years <- years[years %in% from:to]
   jcat$catch <- jcat$catch / scalefactor
 
-  dcat <- jcat[jcat$year %in% from:to,]
-  dcat$catch <- jcat$catch / scalefactor
+  dcat <- dcat[dcat$year %in% from:to,]
+  dcat$catch <- dcat$catch / scalefactor
 
   # Bind the two amounts by year into table
   totcatch <- cbind(years,jcat[,2],dcat[,2])
+  browser()
   colnames(totcatch) <- c("Year","Landings","Discards")
 
   pattern <- paste0("% 9.",digits,"f")                             # Pattern for pretty output
