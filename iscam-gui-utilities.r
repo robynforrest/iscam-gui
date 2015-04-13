@@ -13,7 +13,7 @@
   #
   # The opacity agrument is scalar and will be applied to all colors.
   if(!(opacity %% 1 == 0) || opacity<0 || opacity>99){
-    cat(getCurrFunc(),"opacity argument must be an integer between 0 and 99.\n",sep="")
+    cat0(.PROJECT_NAME,"->",currFuncName,"opacity argument must be an integer between 0 and 99.")
     return(NULL)
   }
   colorDEC <- col2rgb(color)
@@ -150,7 +150,7 @@ getQuants <- function(data=NULL, ci=NULL){
   return(quants)
 }
 
-drawEnvelope <- function(yrs, quants, color, yLower = 0, yUpper, first, ...){
+drawEnvelope <- function(yrs, quants, color, yLower = 0, yUpper, first, opacity = 90, ...){
   # Draw a time series envelope on a device on which plot.new has already been called
   # Assumptions: quants is a 3-row matrix,
   #  where the middle row is the median and the other two are the lower and upper
@@ -167,7 +167,7 @@ drawEnvelope <- function(yrs, quants, color, yLower = 0, yUpper, first, ...){
     lines(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
   }
 
-  shade <- .getShade(color, 30)
+  shade <- .getShade(color, opacity)
   polyYears <- c(yrs, rev(yrs))
   polyCI    <- c(lower, rev(upper))
   polygon(polyYears, polyCI, col = shade)

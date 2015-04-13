@@ -17,7 +17,7 @@ grid 3 1 padx=10 pady=5 sticky=W
            button name=editReportFile   function=.subView action="editReportFile"      width=12 text="Report"          fg="blue"
            button name=editParFile      function=.subView action="editParFile"         width=12 text="Par"             fg="blue"
      grid 1 1 sticky=N
-     notebook name=nbPage tabs="RunModel ScenarioFigs ComparisonFigs DiagnosticFigs Tables Retrospectives BioTool" font="8"
+     notebook name=nbPage tabs="RunModel ScenarioFigs ComparisonFigs DiagnosticFigs Tables Retrospectives Catch BioTool" font="8"
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: RunModel                    --#
@@ -96,8 +96,8 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--                      Notebook Tab: ScenarioFigs                --#
 #--------------------------------------------------------------------#
 
-     grid 1 4 relief=raised
-          grid 13 2 sticky=N relief=raised
+     grid 1 3 relief=raised
+          grid 14 2 sticky=N relief=raised
                label text="Time series" font="bold 10" sticky=N
                null
                radio name=viewPlotType value=sTSSpawningBiomassAllAreas          text="Spawning biomass"            function=.subView sticky=W mode=character
@@ -124,24 +124,8 @@ grid 3 1 padx=10 pady=5 sticky=W
                null
                radio name=viewPlotType value=sRefPoints                          text="Reference Points (MCMC)"       function=.subView sticky=W mode=character
                check name=umsy         checked=F                                 text="Umsy"                          function=.subView
-          grid 5 1 sticky=N relief=raised
-               label text="Catch" font="bold 10" sticky=N
-               radio name=viewPlotType value=sCatchLandings                  text="Landings" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchLandingsStacked           text="Landings stacked" function=.subView sticky=W mode=character
                radio name=viewPlotType value=sCatchLandingsObsVsExpLandings  text="Catch fit" function=.subView sticky=W mode=character
-               radio name=viewPlotType value=sCatchAnnualMeanWt text="Annual mean wt/catch" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchTotal                    text="Total catch (including discards)" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchTotalStacked             text="Total catch (including discards) stacked" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchDiscards                 text="Discards" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchDiscardsStacked          text="Discards stacked" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchDiscardFraction          text="Discard fraction" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchHarvestRate              text="Harvest rate" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchLandingsSeasons          text="Landings aggregated across seasons" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchLandingsSeasonsStacked   text="Landings aggregated across sesons stacked" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchTotalSeasons             text="Total catch (if discards present) aggregated across seasons" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchTotalSeasonsStacked      text="Total catch (if discards present) aggregated across seasons stacked" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchDiscardsSeasons          text="Discards aggregated across seasons" function=.subView sticky=W mode=character
-               #radio name=viewPlotType value=sCatchDiscardsSeasonsStacked   text="Discards aggregated across seasons stacked" function=.subView sticky=W mode=character
+               null
          grid 11 1 sticky=N relief=raised
                label text="Biology" font="bold 10" sticky=N
                grid 1 3 relief=raised
@@ -406,6 +390,24 @@ grid 3 1 padx=10 pady=5 sticky=W
           button name=runAllRetros function=.subView action="runAllRetros"     width=15 padx=5 pady=5 text="Run All retros"  fg="blue"
 
 #--------------------------------------------------------------------#
+#--                      Notebook Tab: Catch                       --#
+#--------------------------------------------------------------------#
+    grid 1 1
+      grid 3 3
+        #
+        radio name=viewPlotType value=sCatch           text="Total catch by year"            function=.subView sticky=W mode=character
+        entry name=entryCatchStart width=10 pady=5 value=1996 entryfont="10" sticky=E function=.subView action="changeCatchStart"
+        entry name=entryCatchEnd   width=10 pady=5 value=2014 entryfont="10" sticky=E  function=.subView action="changeCatchEnd"
+        #
+        radio name=viewPlotType value=sCatchSplit      text="Landings and discards by year"  function=.subView sticky=W mode=character
+        null
+        null
+        #
+        radio name=viewPlotType    value=sCatchArea     text="Landings and discards by year and area"  function=.subView sticky=W mode=character
+        entry name=entryCatchAreas width=10 pady=5 value=3C entryfont="10" sticky=E mode=character function=.subView action="changeCatchArea"
+        null
+
+#--------------------------------------------------------------------#
 #--                      Notebook Tab: BioTool                     --#
 #--------------------------------------------------------------------#
      grid 2 1
@@ -486,8 +488,11 @@ grid 3 1 padx=10 pady=5 sticky=W
       radio name=legendLoc value=sLegendBotleft  text="Bottom left" function=.subView mode=character sticky=W font="bold 10"
       radio name=legendLoc value=sLegendNone     text="None" function=.subView mode=character sticky=W font="bold 10"
 
-   grid 1 3
+   grid 1 6
        button name=saveFigure1 function=.subView action="saveCurrFigure" width=40 text="Save current figure to disk" fg="black" bg="grey" pady=5 font="bold 10"
        radio name=figureType value=sEPS     text=".eps" function=.subView mode=character sticky=W font="bold 10"
        radio name=figureType value=sPNG     text=".png" function=.subView mode=character sticky=W font="bold 10"
+       label text="Opacity" font="bold 10" sticky=W
+       entry name=entryOpacity width=5 padx=5 value=10 function=.subView action="changeOpacity" entryfont="10" sticky=W
+       label text="%" font="bold 10" sticky=W
 

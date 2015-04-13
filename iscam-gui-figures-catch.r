@@ -24,6 +24,10 @@ plotCatch <- function(scenario   = 1,         # Scenario number
                                         w      = .WIDTH,
                                         h      = .HEIGHT),
                       leg        = "topright",   # Legend location. If NULL, none will be drawn
+                      from       = 1996,         # Start year for plotting catch
+                      to         = 2014,         # End year for plotting catch
+                      opacity    = 90,
+                      areas = c("3C","3D","5A","5B","5C","5D","5E"), # Areas to plot
                       figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                       showtitle  = TRUE,         # Show the main title on the plot
                       units      = .UNITS,
@@ -31,9 +35,10 @@ plotCatch <- function(scenario   = 1,         # Scenario number
 
   # Assumes that 'op' list exists and has been populated correctly.
   # plotNum must be one of:
-  # 1  Landings
-  # 2
+  # 1  Total catch (Landings + Discards)
+  # 2  Landings / Discards seperated side-by-side barplot
   # 3  Catch fit
+  # 4  Landings / Discards by area seperated side-by-side barplot
   currFuncName <- getCurrFunc()
 
   if(plotNum < 1 || plotNum > 4){
@@ -102,20 +107,16 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   }
 
   if(plotNum == 1){
-    plotCatches(inp = inputs[[1]], scenarioName, leg = leg, col = color, showtitle = showtitle)
+    plotCatches(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity)
   }
   if(plotNum == 2){
-    plotSPR(inp = inputs, scenarioName, leg = leg, col = color, showtitle = showtitle)
+    plotCatchesSplit(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity)
   }
   if(plotNum == 3){
-    if(plotMCMC){
-      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Catch fits not implemented.")
-    }else{
-      plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg, showtitle = showtitle)
-    }
+    plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg, showtitle = showtitle, opacity=opacity)
   }
   if(plotNum == 4){
-    plotExpVsObsAnnualMeanWt(inp = inputs, out=out, scenarioName, leg = leg, col = color, showtitle = showtitle)
+    plotCatchesArea(leg = leg, col = color, showtitle = showtitle, from=from, to=to, areas=areas, opacity=opacity)
   }
 
   if(savefig){
@@ -125,7 +126,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   return(TRUE)
 }
 
-plotCatches <- function(inp,
+plotCatches_OLD <- function(inp,
                         scenarioName,
                         verbose = FALSE,
                         leg = "topright",
@@ -153,15 +154,16 @@ plotSPR <-  function(inp,
 
 }
 
-plotCatchFit<-function(inp     = NULL,
-                       out     = NULL,
-                       colors  = NULL,
-                       names   = NULL,
-                       lty     = NULL,
+plotCatchFit<-function(inp       = NULL,
+                       out       = NULL,
+                       colors    = NULL,
+                       names     = NULL,
+                       lty       = NULL,
                        scenarioName,
-                       verbose = FALSE,
-                       leg = "topright",
-                       showtitle = TRUE){
+                       verbose   = FALSE,
+                       leg       = "topright",
+                       showtitle = TRUE,
+                       opacity   = 90){
   # Catch fits plot, out contains a list of models to plot,
   # it must be at least length 1.
   # Assumes only one catch gear
@@ -268,5 +270,261 @@ plotExpVsObsAnnualMeanWt<-function(inp,
 	}else{
     cat0("WARNING: No Annual Mean Weight Data")
   }
-  
 }
+
+plotCatches <- function(leg = "topright",
+                        showtitle = TRUE,
+                        col = 1,
+                        from = 1996,         # Year to plot from
+                        to   = 2014,         # Year to plot to
+                        scalefactor = 1000,  # Divide the catch and discard by this factor
+                        opacity = 90         # The transparency of the bars
+                        ){
+  # Catch plot for iscam model, plots by gear
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Aggregate the data by year, with catch summed
+  jcat <- catch[,-c(2:4,6:7)]
+  jcat <- aggregate(catch$CatchKG, list(catch$Year), sum, na.rm=TRUE)
+
+  # Aggregate the data by year, with discards summed
+  dcat <- catch[,-c(2:5,7)]
+  dcat <- aggregate(catch$DiscardedKG, list(catch$Year), sum, na.rm=TRUE)
+
+  colnames(jcat) <- c("year","catch")
+  colnames(dcat) <- c("year","catch")
+  years <- jcat$year
+  if(from < min(years) || to > max(years)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+    return(NULL)
+  }
+  if(length(years) != length(dcat$year)){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  jcat <- jcat[jcat$year %in% from:to,]
+  years <- years[years %in% from:to]
+  jcat$catch <- jcat$catch / scalefactor
+
+  dcat <- jcat[jcat$year %in% from:to,]
+  dcat$catch <- jcat$catch / scalefactor
+
+  # Sum the two amount by year
+  totcatch <- cbind(years,jcat[,2]+dcat[,2])
+
+  col1        <- .getShade(1, opacity)
+
+  b <- barplot(totcatch[,2],
+               axes=FALSE,
+               col=c(col1),
+               border=c("black"),
+               ylim=c(0,1.1*max(totcatch[,2])),
+               las=2)
+  cex <- 0.7
+  axis(2)
+  axis(1,
+       at     = b[,1],
+       labels = years,
+       tick = TRUE)
+  box()
+  xlabel <- "Year"
+  ylabel <- "Catch (t)"
+
+  mtext(side=1,line=2,xlabel)
+  mtext(side=2,line=2,ylabel)
+
+}
+
+plotCatchesSplit <- function(leg = "topright",
+                             showtitle = TRUE,
+                             col = 1,
+                             from = 1996,             # Year to plot from
+                             to   = 2014,             # Year to plot to
+                             scalefactor = 1000,      # Divide the catch and discard by this factor
+                             spaceBetweenBars = 0.5,  # space between each year's set of bars
+                             opacity = 90             # The transparency of the bars
+                             ){
+  # Catch plot for iscam model, plots by gear for landings and discards, split side-by-side bars
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Aggregate the landings data by year, with catch and discards summed for total catch
+  jcat <- catch[,-c(2:4,6:7)]
+  jcat <- aggregate(catch$CatchKG, list(catch$Year), sum, na.rm=TRUE)
+
+  # Aggregate the data by year, with discards summed
+  dcat <- catch[,-c(2:5,7)]
+  dcat <- aggregate(catch$DiscardedKG, list(catch$Year), sum, na.rm=TRUE)
+
+  colnames(jcat) <- c("year","catch")
+  colnames(dcat) <- c("year","catch")
+  years <- jcat$year
+  if(from < min(years) || to > max(years)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+    return(NULL)
+  }
+  if(length(years) != length(dcat$year)){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  jcat <- jcat[jcat$year %in% from:to,]
+  years <- years[years %in% from:to]
+  jcat$catch <- jcat$catch / scalefactor
+
+  dcat <- jcat[jcat$year %in% from:to,]
+  dcat$catch <- jcat$catch / scalefactor
+
+  # Make a matrix out of the two data series, and plot side-by-side
+  allCatch <- as.matrix(cbind(jcat[,2],dcat[,2]))
+
+  col1        <- .getShade(1, opacity)
+  col2        <- .getShade(2, opacity)
+
+  b <- barplot(t(allCatch),
+               inset=c(-0.25,0),
+               axes=FALSE,
+               col=c(col1,col2),
+               border=c("black","black"),
+               ylim=c(0,1.1*max(allCatch)),
+               las=2)
+
+  cex <- 0.7
+  axis(2)
+  axis(1,
+       at = b,
+       labels = years,
+       tick = TRUE)
+  box()
+  xlabel <- "Year"
+  ylabel <- "Catch (t)"
+
+  mtext(side=1,line=2,xlabel)
+  mtext(side=2,line=2,ylabel)
+
+  if(!is.null(leg)){
+    legendList       <- c("Catch","Discards")
+    legendShadeCols  <- c(col1,col2)
+    legendBorderCols <- c("black","black")
+    legend(leg,legendList,col=legendBorderCols,fill=legendShadeCols,bty="n")
+  }
+}
+
+getAreaCodes <- function(areas = c("3C","3D","5A","5B","5C","5D","5E")){
+  # return a vector of area codes correspponding to the areas given
+  # 3 = 3C, 4 = 3D, 5 = 5A, 6 = 5B, 7 = 5C, 8 = 5D, 9 = 5E
+  # Area hash table
+  ahash <- matrix(ncol=2,nrow=7)
+  ahash[1,] <- c(3,"3C")
+  ahash[2,] <- c(4,"3D")
+  ahash[3,] <- c(5,"5A")
+  ahash[4,] <- c(6,"5B")
+  ahash[5,] <- c(7,"5C")
+  ahash[6,] <- c(8,"5D")
+  ahash[7,] <- c(9,"5E")
+
+  result <- ahash[ahash[,2] %in% areas,]
+  if(class(result) == "character"){
+    # areas was a single value
+    ret <- result[1]
+  }else{
+    # areas was a vector
+    ret <- result[,1]
+  }
+  return(as.numeric(ret))
+}
+
+plotCatchesArea <- function(leg = "topright",
+                            showtitle = TRUE,
+                            col = 1,
+                            from = 1996,             # Year to plot from
+                            to   = 2014,             # Year to plot to,
+                            areas = c("3C","3D","5A","5B","5C","5D","5E"), # Areas to plot
+                            spaceBetweenBars = 1.5,
+                            scaleFactor = 1000, # The catch will be divided by this
+                            opacity = 90 # The transparency of the bars
+                            ){
+  # Generates side-by-side barplot by area for the input catch and discard data
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  #par(mar=c(4,4,1,1))
+
+
+  # Filter for this area only
+  areaCodes <- getAreaCodes(areas)
+  if(length(areaCodes) == 0){
+    cat0(.PROJECT_NAME,"->",currFuncName,"There was a problem with your area selection.")
+    return(NULL)
+  }
+
+  # Filter the areas
+  catch <- catch[catch$AreaCode %in% areaCodes,]
+
+  # Remove month, day, area, and vessel id columns
+  catch <- catch[,-c(2:4,7)]
+
+  # Aggregate the data by year
+  catches <- aggregate(catch$CatchKG, list(catch$Year), sum, na.rm=TRUE)
+  discards <- aggregate(catch$DiscardedKG, list(catch$Year), sum, na.rm=TRUE)
+
+  years <- catches[,1]
+
+  if(from < min(years) || to > max(years)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+    return(NULL)
+  }
+  if(length(years) != length(discards[,1])){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  catches <- catches[catches[,1] %in% from:to,]
+  discards <- discards[discards[,1] %in% from:to,]
+  years <- years[years %in% from:to]
+
+  # Bind the catches and discards and apply the scale factor to both
+  allcatch  <- apply(as.matrix(cbind(catches[,2], discards[,2])), c(1,2), function(x)x/scaleFactor)
+
+  col1        <- .getShade(1, opacity)
+  col2        <- .getShade(2, opacity)
+
+  b <- barplot(t(allcatch),
+               beside=TRUE,
+               col=c(col1,col2),
+               border=c("black","black"),
+               space=c(0,spaceBetweenBars),
+               axes=FALSE,
+               ylim=c(0,1.1*max(allcatch)),
+               las=2)
+
+  cex <- 0.7
+  xAxisSize <- length(years)*2 + spaceBetweenBars*(length(years)+1)
+  axis(2)
+  axis(1,
+       at     = b[1,]+.25*spaceBetweenBars,
+       labels = years,
+       tick = TRUE)
+  box()
+  xlabel <- "Year"
+  ylabel <- "Catch (t)"
+
+  mtext(side=1,line=2,xlabel)
+  mtext(side=2,line=2,ylabel)
+
+  if(!is.null(leg)){
+    legendList       <- c("Catch","Discards")
+    legendShadeCols  <- c(col1,col2)
+    legendBorderCols <- c("black","black")
+    legend(leg,legendList,col=legendBorderCols,fill=legendShadeCols,bty="n")
+  }
+}
+

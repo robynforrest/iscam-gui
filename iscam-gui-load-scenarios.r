@@ -20,6 +20,7 @@
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Loading data from model output files.")
     op   <<- .loadScenarios(.SCENARIOS_DIR_NAME)
     sens <<- .loadSensitivityGroups(op = op)
+    catch <<- .loadCatchdata()
     modelLoaded <<- TRUE
   }else{
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Using previously loaded data for GUI.  Use ",.MAIN_FUNCTION_CALL,"(TRUE) to reload the Scenarios.\n")

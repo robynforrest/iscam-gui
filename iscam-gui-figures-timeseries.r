@@ -42,7 +42,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
                    names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
                    showB0Ref  = TRUE,         # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
-                   showBMSYRef= FALSE         # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
+                   showBMSYRef= FALSE,        # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
+                   opacity    = 90            # Opaqueness (opposite of transparency) with which to draw envelopes
                    ){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -163,19 +164,19 @@ plotTS <- function(scenario   = 1,         # Scenario number
 
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, showBMSYRef = showBMSYRef)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, showBMSYRef = showBMSYRef, opacity=opacity)
     }else{
       if(showBMSYRef){
         cat0(.PROJECT_NAME,"->",currFuncName,"BMSY reference line not available in MPD mode.")
       }
-      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref)
+      plotBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, opacity=opacity)
     }
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity)
     }else{
-      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity)
     }
   }
   if(plotNum == 5){
@@ -201,9 +202,9 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU)
+      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity)
     }else{
-      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU)
+      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity)
     }
   }
   if(plotNum == 10){
@@ -223,9 +224,9 @@ plotTS <- function(scenario   = 1,         # Scenario number
   if(plotNum == 12){
     # Vulnerable biomass
     if(plotMCMC){
-      plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio)
+      plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity)
     }else{
-      plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio)
+      plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity)
     }
   }
 
@@ -247,7 +248,8 @@ plotBiomassMPD <- function(out       = NULL,
                            verbose   = FALSE,
                            showtitle = TRUE,
                            showB0Ref = TRUE,
-                           leg = "topright"){
+                           leg       = "topright",
+                           opacity   = 90){
   # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -323,7 +325,8 @@ plotBiomassMCMC <- function(out         = NULL,
                             showtitle   = TRUE,
                             showB0Ref   = TRUE,   # Show the 0.2 and 0.4 B0 lines on the plot
                             showBMSYRef = FALSE,  # # Show the 0.4 and 0.8 BMSY lines on the plot
-                            leg = "topright"){
+                            leg         = "topright",
+                            opacity     = 90){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -378,14 +381,14 @@ plotBiomassMCMC <- function(out         = NULL,
   if(showtitle){
     title <- "Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
   # Draw SB0 and uncertainty over top
   incOffset <- offset
   points(yrs[1] - incOffset, boquants[[1]][2], pch = 19, col = colors[[1]])
   arrows(yrs[1] - incOffset, boquants[[1]][1], yrs[1] - incOffset, boquants[[1]][3], lwd = 2, code = 0, col = colors[[1]])
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
       incOffset <- incOffset + offset
       points(yrs[1] - incOffset, boquants[[line]][2], pch = 19, col = colors[[line]])
       arrows(yrs[1] - incOffset, boquants[[line]][1], yrs[1] - incOffset, boquants[[line]][3], lwd = 2, code = 0, col = colors[[line]])
@@ -419,7 +422,8 @@ plotDepletionMPD <- function(out       = NULL,
                              lty       = NULL,
                              verbose   = FALSE,
                              showtitle = TRUE,
-                             leg = "topright"){
+                             leg       = "topright",
+                             opacity   = 90){
   # Depletion plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -478,7 +482,8 @@ plotDepletionMCMC <- function(out       = NULL,
                               burnthin  = list(0,1),
                               verbose   = FALSE,
                               showtitle = TRUE,
-                              leg = "topright"){
+                              leg       = "topright",
+                              opacity   = 90){
   # Depletion plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -530,10 +535,10 @@ plotDepletionMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Relative Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
     }
   }
   if(!is.null(leg)){
@@ -550,7 +555,8 @@ plotVBiomassMPD <- function(out       = NULL,
                             verbose   = FALSE,
                             showtitle = TRUE,
                             leg = "topright",
-                            showSbio  = FALSE){
+                            showSbio  = FALSE,
+                            opacity   = 90){
   # Vulnerable biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -649,7 +655,8 @@ plotVBiomassMCMC <- function(out       = NULL,
                              verbose   = FALSE,
                              showtitle = TRUE,
                              leg = "topright",
-                             showSbio  = FALSE){
+                             showSbio  = FALSE,
+                             opacity   = 90){
   # Vulnerable biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -702,7 +709,7 @@ plotVBiomassMCMC <- function(out       = NULL,
     }
   }
   syrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-  vyrs <- syrs[1:(length(syrs)-1)]
+  vyrs <- syrs[1:length(syrs)]
   par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
@@ -715,15 +722,16 @@ plotVBiomassMCMC <- function(out       = NULL,
   if(length(out) == 1){
     if(showSbio){
       # Make the spawning biomass the same linetype as the vulnerable, but up one color
-      drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
-      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
       vbioname <- paste0("VBio - ",names[[1]])
       sbioname <- paste0("Sbio - ",names[[1]])
       names[[1]] <- vbioname
       names[[2]] <- sbioname
       colors[[2]] <- colors[[1]] + 1
     }else{
-      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      browser()
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
     }
   }
   if(length(out) > 1 && !showSbio){
@@ -731,9 +739,9 @@ plotVBiomassMCMC <- function(out       = NULL,
       vbt <- window(mcmc(out[[model]]$mcmc$vbt[[1]][[1]]), start=burn, thin=thin)
       vquants[[model]] <- getQuants(vbt, ci)
       if(line==1){
-        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=TRUE)
+        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=TRUE, opacity=opacity)
       }else{
-        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+        drawEnvelope(vyrs, vquants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
       }
     }
   }
@@ -987,10 +995,10 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
   }
 	plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(yLower,yUpper), xlab="Year", ylab="Log recruitment deviations", main=title, las=1)
   	arrows(yrs, quants[[1]][1,], yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
-		  #drawEnvelope(yrs, quants[[1]], colors[[1]], yLower, yUpper, first=TRUE, ylab="Recruitment Deviations", xlab="Year", main=title, las=1)
+		  #drawEnvelope(yrs, quants[[1]], colors[[1]], yLower, yUpper, first=TRUE, opacity=opacity, ylab="Recruitment Deviations", xlab="Year", main=title, las=1)
 		  #if(length(out) > 1){
 		   # for(line in 2:length(out)){
-		   #   drawEnvelope(yrs, quants[[line]], colors[[line]], yLower, yUpper, first=FALSE)
+		   #   drawEnvelope(yrs, quants[[line]], colors[[line]], yLower, yUpper, first=FALSE, opacity=opacity)
 		   # }
                     #}
   	 if(length(out) > 1){
@@ -1270,7 +1278,8 @@ plotFMPD <- function(out       = NULL,
                      verbose   = FALSE,
                      showtitle = TRUE,
                      leg       = "topright",
-                     plotU     = FALSE){
+                     plotU     = FALSE,
+                     opacity   = 90){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
   # col is a list of the colors to use in the plot
@@ -1418,7 +1427,8 @@ plotFMCMC <- function(out       = NULL,
                       verbose   = FALSE,
                       showtitle = TRUE,
                       leg       = "topright",
-                      plotU     = FALSE){
+                      plotU     = FALSE,
+                      opacity   = 90){
   # Fishing mortality plot for mcmc models
   # col is a list of the colors to use in the plot
   # names is a list of the names to use in the legend
@@ -1484,10 +1494,10 @@ plotFMCMC <- function(out       = NULL,
   }else{
     ylabel <- "F\n"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, ylab=ylabel, xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab=ylabel, xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
-      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE)
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
     }
   }
   if(!is.null(leg)){

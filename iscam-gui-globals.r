@@ -34,6 +34,7 @@ if(.OS == "Darwin"){
 .UTILITIES_SOURCE                <- paste0(.PROJECT_NAME,"-utilities.r")
 .LOAD_SCENARIOS_SOURCE           <- paste0(.PROJECT_NAME,"-load-scenarios.r")
 .LOAD_BIODATA_SOURCE             <- paste0(.PROJECT_NAME,"-load-biodata.r")
+.LOAD_CATCHDATA_SOURCE           <- paste0(.PROJECT_NAME,"-load-catchdata.r")
 .FILE_CONTROL_SOURCE             <- paste0(.PROJECT_NAME,"-file-control.r")
 .REP_PARSER_SOURCE               <- paste0(.PROJECT_NAME,"-reptorlist.r")
 .FIGURES_SOURCE                  <- paste0(.PROJECT_NAME,"-figures.r")
@@ -87,6 +88,11 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .MA_DAT_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".dat")
 .MA_TPL_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".tpl")
 .MA_REP_FILE_NAME                <- paste0(.MA_EXE_BASE_NAME,".rep")
+
+# Catch data directory and file name(s)
+.CATCHDATA_DIR_NAME              <- "Catchdata"
+.CATCHDATA_FILE_TYPES            <- list(c("rda"),c("rdata"))
+.CATCHDATA_FILE_NAME             <- file.path(.CATCHDATA_DIR_NAME, "catch.rdata.")
 
 # Sensitivity file name (for grouping sensitivities together on plots)
 .SCENARIO_INFO_FILE_NAME         <- "ScenarioInfo.txt"
