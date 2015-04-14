@@ -19,8 +19,9 @@ makeTable <- function(scenario   = 1,         # Scenario number
                       retxtable  = FALSE,     # Return an xtable object, if TRUE, savetable will be ignored
                       xcaption   = "default", # Caption to use in an xtable
                       xlabel     = "default", # Reference label to use in an xtable
-                      from      = 1996,       # Include catch starting at this year (tableNum==10 only)
-                      to        = 2014,       # Include catch ending at this year (tableNum==10 only)
+                      from       = 1996,       # Include catch starting at this year (tableNum==10 and 11 only)
+                      to         = 2014,       # Include catch ending at this year (tableNum==10 and 11 only)
+                      areas      = list(c(3,4),c(5,6,7,8,9)), # Area groups for (tablenum==11 only)
                       silent     = .SILENT){
 
   # If multiple==TRUE, whatever is in the sensitivity list (sens) for the currently
@@ -42,7 +43,8 @@ makeTable <- function(scenario   = 1,         # Scenario number
   # 7  Decision table
   # 8  Indices table (Input indices)
   # 9  Reletive Spawning Biomass (Depletion)
-  # 10 Catch table (from catch object in global environment)
+  # 10 Catch table (uses catch object in global environment)
+  # 11 Catch table by area groups (uses catch object in global environment)
 
   currFuncName <- getCurrFunc()
 
@@ -66,7 +68,7 @@ makeTable <- function(scenario   = 1,         # Scenario number
     return(NULL)
   }
 
-  if(is.null(ci) && tableNum != 10){
+  if(is.null(ci) && tableNum != 10 && tableNum != 11){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval (e.g. ci=95).")
     return(NULL)
   }
@@ -141,7 +143,144 @@ makeTable <- function(scenario   = 1,         # Scenario number
   }
   if(tableNum == 10){
     # Catch table based on catch object in global environment
-    catchTable(savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+    catchTable(from=from, to=to, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+  }
+  if(tableNum == 11){
+    # Catch table based on catch object in global environment
+    catchAreaTable(from=from, to=to, areas=areas, savetable=savetable, filename=filename, digits=digits, retxtable=retxtable, xcaption=xcaption, xlabel=xlabel)
+  }
+}
+
+catchAreaTable <- function(catchdat    = catch,      # Catch data frame. By default, it grabs the global 'catch' object
+                           savetable   = FALSE,
+                           filename    = "default",
+                           digits      = 3,          # Number of digits to round the index to
+                           retxtable   = FALSE,      # Return an xtable object, if TRUE, savetable will be ignored
+                           xcaption    = "default",  # Caption to use in an xtable
+                           xlabel      = "default",  # Reference label to use in an xtable
+                           from        = 1996,       # Include catch starting at this year
+                           to          = 2014,       # Include catch ending at this year
+                           areas       = NULL,       # This is a list of vectors of area codes
+                           scalefactor = 1000,       # The catch will be divided by this
+                           verbose     = FALSE){
+  # Make the catch table, including discards. Uses getAreaCodes (from iscam-gui-figures-catch.r)
+  # areas will be a list of vectors of areas to group together, e.g.:
+  # areas <- list(c(3,4),c(5,6,7,8,9) means: 3CD together, and 5ABCDE together as two groups
+
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  if(is.null(areas) || is.na(areas)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The areas list was not defined and is required for this function.")
+    return(NULL)
+  }
+
+  # Remove month, day, and vessel id columns
+  catch <- catch[,-c(2,3,7)]
+
+  # Aggregate the data by area grouping and make a new entry chunk in the table for each
+  out <- NULL # Placeholder for the output table
+  for(areagrp in 1:length(areas)){
+    currareagrp <- areas[[areagrp]]
+    # Filter data for the areas in the current areagroup
+    tmp <- catch[catch$AreaCode %in% currareagrp,]
+
+    # Remove area from the data as it is now correct
+    tmp <- tmp[,-2]
+
+    # Aggregate the data by year, with catch summed
+    jcat <- aggregate(tmp$CatchKG, list(tmp$Year), sum, na.rm=TRUE)
+    # Aggregate the data by year, with discards summed
+    dcat <- aggregate(tmp$DiscardedKG, list(tmp$Year), sum, na.rm=TRUE)
+
+    colnames(jcat) <- c("year","catch")
+    colnames(dcat) <- c("year","catch")
+    years <- jcat$year
+
+    if(from < min(years) || to > max(years)){
+      cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+      return(NULL)
+    }
+    if(length(years) != length(dcat$year)){
+      # This code doesn't take into account the situation where there were discards in a year but no catches
+      cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+      return(NULL)
+    }
+    jcat <- jcat[jcat$year %in% from:to,]
+    years <- years[years %in% from:to]
+    jcat$catch <- jcat$catch / scalefactor
+
+    dcat <- dcat[dcat$year %in% from:to,]
+    dcat$catch <- dcat$catch / scalefactor
+
+    # Bind the two amounts by year into table
+    totcatch <- cbind(years,jcat[,2],dcat[,2])
+
+    pattern <- paste0("% 9.",digits,"f")                             # Pattern for pretty output
+    pretty <- function(d){d <- round(d,digits);sprintf(pattern, d)}  # For pretty output
+
+    # Add the area descriptor to the output table
+    # If 3 and 4 are together, label 3CD, if only one of them label 3C or 3D
+    # If 5 - 9 are together, label 5ABCDE with 5=A, 6=B, 7=C, 8=D, and 9=E
+    header <- NULL
+    if(3 %in% currareagrp ||
+       4 %in% currareagrp){
+      header <- paste0(header, "3")
+    }
+    if(3 %in% currareagrp){
+      header <- paste0(header, "C")
+    }
+    if(4 %in% currareagrp){
+      header <- paste0(header, "D")
+    }
+
+    if(5 %in% currareagrp ||
+       6 %in% currareagrp ||
+       7 %in% currareagrp ||
+       8 %in% currareagrp ||
+       9 %in% currareagrp){
+      header <- paste0(header, "5")
+    }
+    if(5 %in% currareagrp){
+      header <- paste0(header, "A")
+    }
+    if(6 %in% currareagrp){
+      header <- paste0(header, "B")
+    }
+    if(7 %in% currareagrp){
+      header <- paste0(header, "C")
+    }
+    if(8 %in% currareagrp){
+      header <- paste0(header, "D")
+    }
+    if(9 %in% currareagrp){
+      header <- paste0(header, "E")
+    }
+
+    if(retxtable){
+      header <- c(paste0("\\textbf{",header,"}"), "", "")
+      header <- c(header,"","")
+      out <- rbind(out, header, cbind(years, pretty(totcatch[,2]), pretty(totcatch[,3])))
+    }else{
+      header <- c(header,"","")
+      out <- rbind(out, header, totcatch)
+    }
+
+    # Bind the area output onto output table
+  }
+
+  if(retxtable){
+    colnames(out) <- c("\\textbf{Year/Area}","\\textbf{Landings}","\\textbf{Discards}")
+    return(print(xtable(out, caption=xcaption, label=xlabel, align=getAlign(ncol(totcatch))), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
+  }
+
+  colnames(out) <- c("Year/Area","Landings","Discards")
+  if(savetable){
+    write.table(out, filename, quote=FALSE, sep=",", col.names=FALSE, row.names=FALSE)
+    cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
+  }else{
+    print(out)
   }
 }
 
@@ -149,18 +288,16 @@ catchTable <- function(catchdat  = catch,      # Catch data frame. By default, i
                        savetable = FALSE,
                        filename  = "default",
                        digits    = 3,          # Number of digits to round the index to
-                       byarea    = FALSE,      # make the table by area groups
-                       areas     = NULL,       # if byarea is true, this must be a vector of area codes
                        retxtable = FALSE,      # Return an xtable object, if TRUE, savetable will be ignored
-                       xcaption  = "default", # Caption to use in an xtable
-                       xlabel    = "default", # Reference label to use in an xtable
+                       xcaption  = "default",  # Caption to use in an xtable
+                       xlabel    = "default",  # Reference label to use in an xtable
                        from      = 1996,       # Include catch starting at this year
                        to        = 2014,       # Include catch ending at this year
-                       scalefactor = 1000, # The catch will be divided by this
+                       scalefactor = 1000,     # The catch will be divided by this
                        verbose   = FALSE){
   # Make the catch table, including discards. Uses getAreaCodes (from iscam-gui-figures-catch.r)
-  # areas will look like this:
-  # areas <- c(3,4) i.e. 3C and 3D together
+  # areas will be a list of vectors of areas to group together, e.g.:
+  # areas <- list(c(3,4),c(5,6,7,8,9) i.e. 3C and 3D together, and 5ABCDE together
 
   currFuncName <- getCurrFunc()
   oldPar <- par(no.readonly=TRUE)
@@ -199,7 +336,6 @@ catchTable <- function(catchdat  = catch,      # Catch data frame. By default, i
 
   # Bind the two amounts by year into table
   totcatch <- cbind(years,jcat[,2],dcat[,2])
-  browser()
   colnames(totcatch) <- c("Year","Landings","Discards")
 
   pattern <- paste0("% 9.",digits,"f")                             # Pattern for pretty output
