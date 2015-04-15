@@ -31,8 +31,11 @@ plotCatch <- function(scenario   = 1,         # Scenario number
                       figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                       showtitle  = TRUE,         # Show the main title on the plot
                       units      = .UNITS,
-                      silent     = .SILENT){
-
+                      silent     = .SILENT,
+                      indletter  = NULL,         # A letter to plot on the panel. If NULL, no letter will be printed.
+                      add        = FALSE,        # If TRUE, plot will be added to current device
+                      ylim       = NULL
+                      ){
   # Assumes that 'op' list exists and has been populated correctly.
   # plotNum must be one of:
   # 1  Total catch (Landings + Discards)
@@ -102,26 +105,30 @@ plotCatch <- function(scenario   = 1,         # Scenario number
       setEPS(horizontal=FALSE, onefile=FALSE, paper="special",width=width,height=height)
       postscript(filename)
     }
-  }else{
+  }else if(!add){
     windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum == 1){
-    plotCatches(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity)
+    plotCatches(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity, add=add)
   }
   if(plotNum == 2){
-    plotCatchesSplit(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity)
+    plotCatchesSplit(leg = leg, col = color, showtitle = showtitle, from=from, to=to, opacity=opacity, add=add)
   }
   if(plotNum == 3){
-    plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg, showtitle = showtitle, opacity=opacity)
+    plotCatchFit(inputs, out, colors=colors, lty=linetypes, names=names, scenarioName=scenarioName, leg = leg, showtitle = showtitle, opacity=opacity, add=add)
   }
   if(plotNum == 4){
-    plotCatchesArea(leg = leg, col = color, showtitle = showtitle, from=from, to=to, areas=areas, opacity=opacity)
+    plotCatchesArea(leg = leg, col = color, showtitle = showtitle, from=from, to=to, areas=areas, opacity=opacity, add=add, ylim=ylim)
   }
 
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
     dev.off()
+  }
+
+  if(!is.null(indletter)){
+    .gletter(indletter)
   }
   return(TRUE)
 }
@@ -145,15 +152,6 @@ plotCatches_OLD <- function(inp,
 	print(p)
 }
 
-plotSPR <-  function(inp,
-                     scenarioName,
-                     verbose = FALSE,
-                     leg = "topright",
-                        showtitle = TRUE,
-                     col = 1){
-
-}
-
 plotCatchFit<-function(inp       = NULL,
                        out       = NULL,
                        colors    = NULL,
@@ -163,7 +161,9 @@ plotCatchFit<-function(inp       = NULL,
                        verbose   = FALSE,
                        leg       = "topright",
                        showtitle = TRUE,
-                       opacity   = 90){
+                       opacity   = 90,
+                       add       = FALSE         # If TRUE, plot will be added to current device
+                       ){
   # Catch fits plot, out contains a list of models to plot,
   # it must be at least length 1.
   # Assumes only one catch gear
@@ -193,8 +193,12 @@ plotCatchFit<-function(inp       = NULL,
     return(NULL)
   }
 
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(add){
+    par(add=TRUE)
+  }else{
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   catchData <- as.data.frame(inp[[1]]$catch)
   years <- catchData$year
@@ -234,12 +238,12 @@ plotCatchFit<-function(inp       = NULL,
 }
 
 plotExpVsObsAnnualMeanWt<-function(inp,
-                                out,
-                                scenarioName,
-                                verbose = FALSE,
-                                leg = "topright",
-                                showtitle = TRUE,
-                                col = 1){
+                                   out,
+                                   scenarioName,
+                                   verbose = FALSE,
+                                   leg = "topright",
+                                   showtitle = TRUE,
+                                   col = 1){
   nmeanwtObs <- inp$data$nmeanwtobs
   if( nmeanwtObs > 0){
 		  meanwtData <- inp$data$meanwtdata
@@ -272,18 +276,23 @@ plotExpVsObsAnnualMeanWt<-function(inp,
   }
 }
 
-plotCatches <- function(leg = "topright",
-                        showtitle = TRUE,
-                        col = 1,
-                        from = 1996,         # Year to plot from
-                        to   = 2014,         # Year to plot to
+plotCatches <- function(leg         = "topright",
+                        showtitle   = TRUE,
+                        col         = 1,     # color to plot
+                        from        = 1996,  # Year to plot from
+                        to          = 2014,  # Year to plot to
                         scalefactor = 1000,  # Divide the catch and discard by this factor
-                        opacity = 90         # The transparency of the bars
+                        opacity     = 90,    # The transparency of the bars
+                        add         = FALSE  # If TRUE, par will not be restored on exit
                         ){
   # Catch plot for iscam model, plots by gear
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(add){
+    par(add=TRUE)
+  }else{
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   # Aggregate the data by year, with catch summed
   jcat <- catch[,-c(2:4,6:7)]
@@ -339,19 +348,37 @@ plotCatches <- function(leg = "topright",
 
 }
 
-plotCatchesSplit <- function(leg = "topright",
-                             showtitle = TRUE,
-                             col = 1,
-                             from = 1996,             # Year to plot from
-                             to   = 2014,             # Year to plot to
-                             scalefactor = 1000,      # Divide the catch and discard by this factor
-                             spaceBetweenBars = 0.5,  # space between each year's set of bars
-                             opacity = 90             # The transparency of the bars
+testpc <- function(){
+  oldPar <- par(no.readonly=TRUE)
+  layout(matrix(c(1,1,2,3), 2, 2, byrow=TRUE))
+  #plotCatchesSplit(opacity=opacity,add=TRUE, leg="topleft")
+  #plotCatchesArea(areas=c("3C","3D"),opacity=opacity,add=TRUE, leg=NULL)
+  #plotCatchesArea(areas=c("5A","5B","5C","5D","5E"),opacity=opacity,add=TRUE, leg=NULL)
+  plotCatch(1, 2, opacity=opacity,add=TRUE,indletter=1)
+  plotCatch(1, 4, areas=c("3C","3D"), opacity=opacity,add=TRUE, leg=NULL,indletter=2,ylim=c(0,10000))
+  plotCatch(1, 4, areas=c("5A","5B","5C","5D","5E"), opacity=opacity,add=TRUE,leg=NULL,indletter=3,ylim=c(0,10000))
+  par(oldPar)
+
+}
+
+plotCatchesSplit <- function(leg              = "topright",
+                             showtitle        = TRUE,
+                             col              = 1,
+                             from             = 1996,       # Year to plot from
+                             to               = 2014,       # Year to plot to
+                             scalefactor      = 1000,       # Divide the catch and discard by this factor
+                             spaceBetweenBars = 0.5,        # space between each year's set of bars
+                             opacity          = 90,         # The transparency of the bars
+                             add              = FALSE       # If TRUE, par will not be restored on exit
                              ){
   # Catch plot for iscam model, plots by gear for landings and discards, split side-by-side bars
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(add){
+    par(add=TRUE)
+  }else{
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   # Aggregate the landings data by year, with catch and discards summed for total catch
   jcat <- catch[,-c(2:4,6:7)]
@@ -440,23 +467,26 @@ getAreaCodes <- function(areas = c("3C","3D","5A","5B","5C","5D","5E")){
   return(as.numeric(ret))
 }
 
-plotCatchesArea <- function(leg = "topright",
-                            showtitle = TRUE,
-                            col = 1,
-                            from = 1996,             # Year to plot from
-                            to   = 2014,             # Year to plot to,
-                            areas = c("3C","3D","5A","5B","5C","5D","5E"), # Areas to plot
+plotCatchesArea <- function(leg              = "topright",
+                            showtitle        = TRUE,
+                            col              = 1,
+                            from             = 1996,           # Year to plot from
+                            to               = 2014,           # Year to plot to,
+                            areas            = c("3C","3D","5A","5B","5C","5D","5E"), # Areas to plot
                             spaceBetweenBars = 1.5,
-                            scaleFactor = 1000, # The catch will be divided by this
-                            opacity = 90 # The transparency of the bars
+                            scaleFactor      = 1000,           # The catch will be divided by this
+                            opacity          = 90,             # The transparency of the bars
+                            add              = FALSE,          # If TRUE, par will not be restored on exit
+                            ylim             = NULL
                             ){
   # Generates side-by-side barplot by area for the input catch and discard data
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
-  #par(mar=c(4,4,1,1))
-
+  if(add){
+    par(add=TRUE)
+  }else{
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   # Filter for areas
   areaCodes <- getAreaCodes(areas)
@@ -497,13 +527,16 @@ plotCatchesArea <- function(leg = "topright",
   col1        <- .getShade(1, opacity)
   col2        <- .getShade(2, opacity)
 
+  if(is.null(ylim)){
+    ylim=c(0,1.1*max(allcatch))
+  }
   b <- barplot(t(allcatch),
                beside=TRUE,
                col=c(col1,col2),
                border=c("black","black"),
                space=c(0,spaceBetweenBars),
                axes=FALSE,
-               ylim=c(0,1.1*max(allcatch)),
+               ylim=ylim,
                las=2)
 
   cex <- 0.7

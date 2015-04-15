@@ -762,7 +762,7 @@ refPointsTable <- function(outMPD    = NULL,
     write.table(quants, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote table to file: ",filename)
   }else{
-    print(quants[[1]])
+    print(quants)
   }
 }
 

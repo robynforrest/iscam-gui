@@ -173,7 +173,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--                      Notebook Tab: ComparisonFigs              --#
 #--------------------------------------------------------------------#
    grid 1 2
-     grid 15 5 byrow=T sticky=N relief=raised
+     grid 14 5 byrow=T sticky=N relief=raised
           #1
           label text="Comparison Groups"     font="bold 10" sticky=W
           null
@@ -241,24 +241,18 @@ grid 3 1 padx=10 pady=5 sticky=W
           null
           null
           #12
-          radio name=viewPlotType value=sSensDensity        text="Densities"                         function=.subView mode=character sticky=W
-          null
-          null
-          null
-          null
-          #13
           radio name=viewPlotType value=sSensRefPoints       text="Reference Points"                  function=.subView mode=character sticky=W
           check name=sensumsy     checked=F                  text="Umsy"                              function=.subView
           null
           null
           null
-          #14
+          #13
           radio name=viewPlotType value=sSensCatchFit       text="Catch Fit"                         function=.subView mode=character sticky=W
           null
           null
           null
           null
-          #15
+          #14
           radio name=viewPlotType value=sSensSelex          text="Selectivity"                        function=.subView mode=character sticky=W
           null
           null

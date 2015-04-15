@@ -366,6 +366,11 @@ iscam <- function(reloadScenarios      = FALSE,
   # For returning XTables for latex
   retxtable <- val$returnXTable
 
+  # For catch tables
+  startYearCatch <- val$entryCatchStart
+  endYearCatch <- val$entryCatchEnd
+  catchAreas <- .parseAreas(val$entryCatchAreas)
+
   switch(act,
          # Change the scenario number using three different methods
          "prevScenario" = {
