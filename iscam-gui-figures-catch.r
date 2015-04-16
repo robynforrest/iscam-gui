@@ -193,9 +193,7 @@ plotCatchFit<-function(inp       = NULL,
     return(NULL)
   }
 
-  if(add){
-    par(add=TRUE)
-  }else{
+  if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
@@ -287,9 +285,7 @@ plotCatches <- function(leg         = "topright",
                         ){
   # Catch plot for iscam model, plots by gear
   currFuncName <- getCurrFunc()
-  if(add){
-    par(add=TRUE)
-  }else{
+  if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
@@ -373,9 +369,7 @@ plotCatchesSplit <- function(leg              = "topright",
                              ){
   # Catch plot for iscam model, plots by gear for landings and discards, split side-by-side bars
   currFuncName <- getCurrFunc()
-  if(add){
-    par(add=TRUE)
-  }else{
+  if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
@@ -481,9 +475,7 @@ plotCatchesArea <- function(leg              = "topright",
                             ){
   # Generates side-by-side barplot by area for the input catch and discard data
   currFuncName <- getCurrFunc()
-  if(add){
-    par(add=TRUE)
-  }else{
+  if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }

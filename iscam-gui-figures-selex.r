@@ -32,6 +32,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                       colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
                       linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
                       names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                      add        = FALSE,        # If TRUE, plot will be added to current device
                       indletter  = NULL          # A letter to plot on the panel. If NULL, no letter will be printed.
                       ){
 
@@ -111,13 +112,13 @@ plotSelex <- function(scenario   = 1,            # Scenario number
     if(figtype == .EPS_TYPE){
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
-  }else{
+  }else if(!add){
     windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum==1){
     plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
-                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle)
+                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
   }
   if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
 
@@ -132,7 +133,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   return(TRUE)
 }
 
-plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg, showtitle = TRUE){
+plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg, showtitle = TRUE, add=FALSE){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
   # Both sexes will be plotted with linetype of the females = linetype for males + 1 The colors will be the same.
   # Notes:
@@ -145,8 +146,11 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   #   but incrementing line tyles (lty) and labelled on the legend with the range of years the block covers.
 
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
   ## if(selType != 1 && selType != 6 && selType != 11){
   ##   cat0(.PROJECT_NAME,"->",currFuncName,"The selectivity plotting function can only plot logistic selectivity for age or length (types 1,6,11 only).")
   ##   return(NULL)

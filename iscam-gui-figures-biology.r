@@ -27,6 +27,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                         showtitle  = TRUE,         # Showe the main title on the plot
                         units      = .UNITS,
+                        add        = FALSE,        # If TRUE, plot will be added to current device
                         scenario   = NULL){
 
   # plotNum must be one of:
@@ -84,7 +85,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
     if(figtype == .EPS_TYPE){
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
-  }else{
+  }else if(!add){
     windows(width=widthScreen,height=heightScreen)
   }
 
@@ -98,19 +99,19 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==8)  cat("No Plot Yet -- Coming Soon!!\n")
   if(plotNum==9)  cat("No Plot Yet -- Coming Soon!!\n")
   # Composition at beginning of time series, no selectivity applied
-  if(plotNum==10) plotN1(compFitSex, scenario, leg, showtitle = showtitle)
+  if(plotNum==10) plotN1(compFitSex, scenario, leg, showtitle = showtitle, add=add)
 
   # Composition plots
-  if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg, showtitle=showtitle)
-  if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg, showtitle=showtitle)
-  if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg, showtitle=showtitle)
+  if(plotNum==11) plotComps(1, compFitSex, scenario, index, leg, showtitle=showtitle, add=add)
+  if(plotNum==12) plotComps(2, compFitSex, scenario, index, leg, showtitle=showtitle, add=add)
+  if(plotNum==13) plotComps(3, compFitSex, scenario, index, leg, showtitle=showtitle, add=add)
 
   # Special can be deleted after ARF assessment
-  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg, showtitle=showtitle)
+  if(plotNum==99) plotCompSpecial(scenario, compFitSex, leg, showtitle=showtitle, add=add)
   # Biological plots
-  if(plotNum==14) plotLW(leg, showtitle=showtitle)
-  if(plotNum==15) plotGrowth(leg, showtitle=showtitle)
-  if(plotNum==16) plotMA(leg, showtitle=showtitle)
+  if(plotNum==14) plotLW(leg, showtitle=showtitle, add=add)
+  if(plotNum==15) plotGrowth(leg, showtitle=showtitle, add=add)
+  if(plotNum==16) plotMA(leg, showtitle=showtitle, add=add)
 
   if(savefig){
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n")
@@ -119,13 +120,15 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   return(TRUE)
 }
 
-plotLW <- function(leg, showtitle = TRUE){
+plotLW <- function(leg, showtitle = TRUE, add=TRUE){
   # Plot the length/weight data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is round weight in grams.
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   if(!exists("bio", envir = .GlobalEnv)){
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - object 'bio' does not exist. Run the length/weight model from the Biotool tab.")
@@ -189,13 +192,15 @@ plotLW <- function(leg, showtitle = TRUE){
   }
 }
 
-plotMA <- function(leg  = NULL, showtitle = TRUE){
+plotMA <- function(leg  = NULL, showtitle = TRUE, add=TRUE){
   # Plot the maturity/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is maturity level.
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   if(!exists("bio", envir = .GlobalEnv)){
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - object 'bio' does not exist. Run the maturity/age model from the Biotool tab.")
@@ -255,13 +260,15 @@ plotMA <- function(leg  = NULL, showtitle = TRUE){
   }
 }
 
-plotGrowth <- function(leg, showtitle = TRUE){
+plotGrowth <- function(leg, showtitle = TRUE, add=TRUE){
   # Plot the length/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is age.
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   if(!exists("bio", envir = .GlobalEnv)){
     cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - object 'bio' does not exist. Run the length/weight model from the Biotool tab.")
@@ -319,7 +326,7 @@ plotGrowth <- function(leg, showtitle = TRUE){
   }
 }
 
-plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
+plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, add=TRUE){
   # Plot the age or length compositions for the given index (gear).
   # If the model is two-sex, a two-paneled plot will be drawn.
   # plotnum:
@@ -329,9 +336,10 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
   # sex 0=Combined, 1=M, 2=F
 
   currFuncName <- getCurrFunc()
-
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   nsex <- op[[scenario]]$inputs$data$nsex
   nAgears <- op[[scenario]]$input$data$nagears
@@ -432,13 +440,13 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
           sexstr <- "Single sex"
         }
         if(plotnum == 1){
-          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle)
+          plotCompositions(prop, numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle, add=add)
         }
         if(plotnum == 2){
-          plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab, showtitle = showtitle)
+          plotCompositionsFit(t(prop), fitdat, yrs, sage:nage, sex, sexstr, titleText, leg, ylab, showtitle = showtitle, add=add)
         }
         if(plotnum == 3){
-          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle)
+          plotCompositionsResids(t(residdat), numages, yrs, sage:nage, sexstr, titleText, leg, ylab, showtitle = showtitle, add=add)
         }
       }
     }else{
@@ -451,11 +459,14 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE){
 
 plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                              las = 1, leglabels = c("Positive","Zero"),
-                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, showtitle = TRUE){
+                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, showtitle = TRUE, add=TRUE){
   # Plot the age or length compositions given in prop
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
   titletext <- ""
   if(showtitle){
     titletext <- paste0(gearTitle," - ",title)
@@ -471,9 +482,11 @@ plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  y
 
 plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText, showtitle = TRUE){
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText, showtitle = TRUE, add=TRUE){
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   titletext <- ""
   if(showtitle){
@@ -490,13 +503,15 @@ plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, l
 
 plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                 las = 1, leglabels = c("Positive","Zero"),
-                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE, showtitle = TRUE){
+                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE, showtitle = TRUE, add=TRUE){
   # Plot the age or length composition fits, no more than 36 or this function will need to be modified.
   # sex, 1=M/Both, 2=F
 
   currFuncName <- getCurrFunc()
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   nyrs <- nrow(prop)
   nside <- getRowsCols(nyrs)
@@ -527,11 +542,12 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   }
 }
 
-plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE){
+plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE, add=TRUE){
   # Plot the age or length compositions given in prop
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
   compData <- as.data.frame(op[[scenario]]$outputs$mpd$d3_A)
   gears <- c(2,3)
   sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
@@ -570,11 +586,12 @@ plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE){
   text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
 }
 
-plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE){
+plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE, add=TRUE){
   # Plot the age structure at the beginning of the time series without any application of selectivity.
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
   # Get initial age comp data
   gears <- c(2,3)
   sage <- op[[scenario]]$output$mpd$n_A_sage[gears]

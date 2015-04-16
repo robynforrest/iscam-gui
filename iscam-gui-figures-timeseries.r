@@ -43,6 +43,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
                    showB0Ref  = TRUE,         # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
                    showBMSYRef= FALSE,        # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
+                   add        = FALSE,        # If TRUE, plot will be added to current device
                    opacity    = 90            # Opaqueness (opposite of transparency) with which to draw envelopes
                    ){
 
@@ -158,13 +159,13 @@ plotTS <- function(scenario   = 1,         # Scenario number
     if(figtype == .EPS_TYPE){
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
-  }else{
+  }else if(!add){
     windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum == 1){
     if(plotMCMC){
-      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, showBMSYRef = showBMSYRef, opacity=opacity)
+      plotBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showB0Ref = showB0Ref, showBMSYRef = showBMSYRef, opacity=opacity, add=add)
     }else{
       if(showBMSYRef){
         cat0(.PROJECT_NAME,"->",currFuncName,"BMSY reference line not available in MPD mode.")
@@ -174,59 +175,51 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 3){
     if(plotMCMC){
-      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity)
+      plotDepletionMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity, add=add)
     }else{
-      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity)
+      plotDepletionMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity, add=add)
     }
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
     }else{
-      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
     }
   }
   if(plotNum == 7){
     if(plotMCMC){
-      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented.")
-    }else{
-      plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle, indfixaxis=indfixaxis)
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented. Plotting MPD.")
     }
-  }
-  if(plotNum == 8){
-    if(plotMCMC){
-      #plotSPRMCMC(out, colors, names, inputs, ci, index = index, verbose = !silent, leg = leg)
-    }else{
-      #plotSPRMPD(out, colors, names, inputs, index = index, verbose = !silent, leg = leg)
-    }
+    plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle, indfixaxis=indfixaxis, add=add)
   }
   if(plotNum == 9){
     if(plotMCMC){
-      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity)
+      plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity, add=add)
     }else{
-      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity)
+      plotFMPD(out, colors, names, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity, add=add)
     }
   }
   if(plotNum == 10){
     if(plotMCMC){
-      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle, showumsy=showumsy)
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle, showumsy=showumsy, add=add)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
   }
   if(plotNum == 11){
     if(plotMCMC){
-      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotRecruitmentDevsMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
     }else{
-      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)
+      plotRecruitmentDevsMPD(out, parout, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
     }
   }
   if(plotNum == 12){
     # Vulnerable biomass
     if(plotMCMC){
-      plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity)
+      plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity, add=add)
     }else{
-      plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity)
+      plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity, add=add)
     }
   }
 
@@ -249,6 +242,7 @@ plotBiomassMPD <- function(out       = NULL,
                            showtitle = TRUE,
                            showB0Ref = TRUE,
                            leg       = "topright",
+                           add       = FALSE,
                            opacity   = 90){
   # Biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -276,8 +270,11 @@ plotBiomassMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
    if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
     # When sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
@@ -326,6 +323,7 @@ plotBiomassMCMC <- function(out         = NULL,
                             showB0Ref   = TRUE,   # Show the 0.2 and 0.4 B0 lines on the plot
                             showBMSYRef = FALSE,  # # Show the 0.4 and 0.8 BMSY lines on the plot
                             leg         = "topright",
+                            add         = FALSE,
                             opacity     = 90){
   # Biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -355,8 +353,10 @@ plotBiomassMCMC <- function(out         = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -423,6 +423,7 @@ plotDepletionMPD <- function(out       = NULL,
                              verbose   = FALSE,
                              showtitle = TRUE,
                              leg       = "topright",
+                             add       = FALSE,
                              opacity   = 90){
   # Depletion plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -449,8 +450,10 @@ plotDepletionMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   yUpper <- max(depl)
@@ -483,6 +486,7 @@ plotDepletionMCMC <- function(out       = NULL,
                               verbose   = FALSE,
                               showtitle = TRUE,
                               leg       = "topright",
+                              add       = FALSE,
                               opacity   = 90){
   # Depletion plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -511,8 +515,10 @@ plotDepletionMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -556,6 +562,7 @@ plotVBiomassMPD <- function(out       = NULL,
                             showtitle = TRUE,
                             leg = "topright",
                             showSbio  = FALSE,
+                            add       = FALSE,
                             opacity   = 90){
   # Vulnerable biomass plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -584,8 +591,11 @@ plotVBiomassMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
   # For vbt from the report file, 1st column is gear number, 2nd column is group, 3rd is year, and 4th is vbt
   # This code will assume only one group, and will ignore the 2nd column
   # Also, only one gear is assumed, which is gear==1 in the first column
@@ -656,6 +666,7 @@ plotVBiomassMCMC <- function(out       = NULL,
                              showtitle = TRUE,
                              leg = "topright",
                              showSbio  = FALSE,
+                             add       = FALSE,
                              opacity   = 90){
   # Vulnerable biomass plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -685,8 +696,10 @@ plotVBiomassMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -761,6 +774,7 @@ plotRecruitmentMPD <- function(out       = NULL,
                                lty       = NULL,
                                verbose   = FALSE,
                                showtitle = TRUE,
+                               add       = FALSE,
                                leg = "topright"){
   # Recruitment plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -787,9 +801,10 @@ plotRecruitmentMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
-
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   sage   <- out[[1]]$mpd$sage
   nyear  <- length(out[[1]]$mpd$yr)
@@ -841,6 +856,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 offset    = 0.1,
                                 verbose   = FALSE,
                                 showtitle = TRUE,
+                                add       = FALSE,
                                 leg = "topright"){
   # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -872,8 +888,10 @@ plotRecruitmentMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -940,6 +958,7 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
                                     offset    = 0.1,
                                     verbose   = FALSE,
                                     showtitle = TRUE,
+                                    add       = FALSE,
                                     leg = "topright"){
   # Recruitment deviations plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -969,8 +988,10 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -1021,6 +1042,7 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
                                    lty       = NULL,
                                    verbose   = FALSE,
                                    showtitle = TRUE,
+                                   add       = FALSE,
                                    leg = "topright"){
   # Recruitment deviations plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -1051,9 +1073,10 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
     return(NULL)
   }
-
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   ryr    <- out[[1]]$mpd$yr
   rt     <- parout[[1]]$log_rec_devs
@@ -1097,17 +1120,18 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
   }
 }
 
-plotIndexMPD <- function(scenario  = NULL,
-                         out       = NULL,
-                         inputs    = NULL,
-                         index     = NULL,
-                         colors    = NULL,
-                         names     = NULL,
-                         lty       = NULL,
-                         verbose   = FALSE,
-                         showtitle = TRUE,
-                         leg = "topright",
-                         indfixaxis = FALSE){         # A letter to plot on the panel. If NULL, no letter will be printed.
+plotIndexMPD <- function(scenario   = NULL,
+                         out        = NULL,
+                         inputs     = NULL,
+                         index      = NULL,
+                         colors     = NULL,
+                         names      = NULL,
+                         lty        = NULL,
+                         verbose    = FALSE,
+                         showtitle  = TRUE,
+                         leg        = "topright",
+                         add        = FALSE,
+                         indfixaxis = FALSE){
   # Index fits plot for an MPD
   # scenario is the sccenario number. Only used if 'out' is of length 1.
   # out is a list of the mpd outputs to show on the plot
@@ -1153,8 +1177,10 @@ plotIndexMPD <- function(scenario  = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   ## For future: No assumption of first model having all indices
   # Get the names of all models' input indices so that the plot will work
@@ -1251,13 +1277,13 @@ plotIndexMPD <- function(scenario  = NULL,
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, xlim = c(xmin, xmax),
             ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year",
-            ylab="x 1000 metric tonnes") #, axes=FALSE)
+            ylab="x 1000 metric tonnes")
     #axis(1, at = seq(xmin,xmax))
     #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
   }else{
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)),
-            xlab="Year", ylab="x 1000 metric tonnes") #, axes=FALSE)
+            xlab="Year", ylab="x 1000 metric tonnes")
     #axis(1, at = yrs)
     #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
   }
@@ -1279,6 +1305,7 @@ plotFMPD <- function(out       = NULL,
                      showtitle = TRUE,
                      leg       = "topright",
                      plotU     = FALSE,
+                     add       = FALSE,
                      opacity   = 90){
   # Fishing mortality plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -1303,9 +1330,10 @@ plotFMPD <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
-
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
   nsex   <- out[[1]]$mpd$nsex
   yrs    <- out[[1]]$mpd$yr
   nyear  <- length(yrs)
@@ -1428,6 +1456,7 @@ plotFMCMC <- function(out       = NULL,
                       showtitle = TRUE,
                       leg       = "topright",
                       plotU     = FALSE,
+                      add       = FALSE,
                       opacity   = 90){
   # Fishing mortality plot for mcmc models
   # col is a list of the colors to use in the plot
@@ -1453,8 +1482,10 @@ plotFMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
     return(NULL)
   }
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
@@ -1516,7 +1547,8 @@ plotReferencePointsMCMC <- function(out       = NULL,
                                     pointSize = 0.2,
                                     verbose   = FALSE,
                                     showtitle = TRUE,
-                                    leg = "topright",
+                                    leg       = "topright",
+                                    add       = FALSE,
                                     showumsy  = FALSE){
   # Reference points plot for an MCMC model
   # col is a list of the colors to use in the plot
@@ -1545,9 +1577,10 @@ plotReferencePointsMCMC <- function(out       = NULL,
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
     return(NULL)
   }
-
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
