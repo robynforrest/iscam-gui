@@ -21,7 +21,7 @@
 # Fix all mcmc diagnostic plotting and other misc plotting.
 # Remove all references to assignGlobals()
 
-removeAllExcept <- function(vars  = c("op","sens","bio")){
+removeAllExcept <- function(vars  = c("op","sens","bio","catch")){
   # Removes everyobject in the workspace except for what is in the vars list.
   # Upon finishing, the workspace will contain whatever is in the vars list,
   #  plus the objects 'removeAllExcept' (this function) and 'modelLoaded'.

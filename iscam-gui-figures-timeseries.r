@@ -290,7 +290,7 @@ plotBiomassMPD <- function(out       = NULL,
      yUpper <- max(yUpper, out[[model]]$mpd$sbt, out[[model]]$mpd$sbo)
    }
   }
-  par(mar=c(3,6,3,3))
+  #par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
     title <- "Spawning Biomass"
@@ -376,7 +376,7 @@ plotBiomassMCMC <- function(out         = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
-  par(mar=c(3,6,3,3))
+  #par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
     title <- "Spawning Biomass"
@@ -608,7 +608,7 @@ plotVBiomassMPD <- function(out       = NULL,
       yUpper <- max(yUpper, vbt[,4])
     }
   }
-  par(mar=c(3,6,3,3))
+  #par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
     if(showSbio){
@@ -710,7 +710,7 @@ plotVBiomassMCMC <- function(out       = NULL,
   }
   syrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
   vyrs <- syrs[1:length(syrs)]
-  par(mar=c(3,6,3,3))
+  #par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
     if(showSbio){
@@ -1484,7 +1484,7 @@ plotFMCMC <- function(out       = NULL,
   ynames <- names(out[[1]]$mcmc$ft[[1]][[1]])
   pattern <- ".*_([0-9]+)"
   yrs <- as.numeric(sub(pattern,"\\1",ynames))
-  par(mar=c(3,6,3,3))
+  #par(mar=c(3,6,3,3))
   title <- ""
   if(showtitle){
     title <- "Fishing Mortality"
