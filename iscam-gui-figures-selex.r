@@ -37,11 +37,12 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                       ){
 
   # plotNum must be one of:
-  # 1  Logistic selectivity - age or length based will be detected automatically
+  # 1  Logistic selectivity one gear  - age or length based will be detected automatically
+  # 2  Logistic selectivity all gears - age or length based will be detected automatically
 
   currFuncName <- getCurrFunc()
 
-  if(plotNum != 1){
+  if(plotNum != 1 && plotNum != 2){
     return(FALSE)
   }
   scenarioName <- op[[scenario]]$names$scenario
@@ -120,7 +121,10 @@ plotSelex <- function(scenario   = 1,            # Scenario number
     plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
                     controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
   }
-  if(plotNum>=2)  cat("No Plot Yet -- Coming Soon!!\n")
+  if(plotNum==2){
+    plotLogisticSelAllGears(scenario, out, inputs=inputs, controlinputs=controlinputs, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
+  }
+  if(plotNum>=3)  cat("No Plot Yet -- Coming Soon!!\n")
 
   if(!is.null(indletter)){
     .gletter(indletter)
@@ -131,6 +135,50 @@ plotSelex <- function(scenario   = 1,            # Scenario number
     dev.off()
   }
   return(TRUE)
+}
+
+plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbose, leg, showtitle = TRUE, add=FALSE){
+  # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
+  # Single sex only, no time blocks
+  # Parses the control inputs to see which gears have age comps and therefore selectivity estimates
+  # Assumes 'out' is list of length 1, this is not a sensitivity plot but a single-scenario plot with multiple gears.
+  currFuncName <- getCurrFunc()
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+  # Get gear names
+  gearnames <- inputs[[1]]$gearNames
+  # Get phase information for the gears, negatives are fixed, positives are estimated
+  estphase <- controlinputs[[1]]$sel[6,]
+  # Selectivity parameter values from the model. Even if fixed, they appear in the output.
+  selex <- out[[1]]$mpd$sel
+  # Change the names of the fixed selectivities in the legend
+  gearnames[estphase<0] <- paste0(gearnames[estphase<0]," (Fixed)")
+  age <- out[[1]]$mpd$age
+
+  # Get selectivity outputs
+  logselData   <- out[[1]]$mpd$log_sel
+  # Make matrix for plotting
+  mat <- NULL
+  for(gearnum in 1:nrow(selex)){
+    # For each gear, extract the log sel and years
+    logseldata   <- logselData[which(logselData[,1] == gearnum),]
+    #nb <- controlinputs[[1]]$sel["nselblocks",][gearnum]
+    yrs <- logseldata[,3]
+    selData <- exp(logseldata[,4:ncol(logseldata)])
+    selData <- selData[nrow(selData),] # end-year selectivity for the only block
+    mat <- cbind(mat, selData)
+  }
+  titletext <- ""
+  if(showtitle){
+    titletext <- "Selectivities for all gears"
+  }
+  matplot(age, mat, type = "l", lwd = 2, col = seq(1,nrow(mat)), lty=1, las = 1,
+          main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="Selectivity", xlab="Age")
+  if(!is.null(leg)){
+    legend(leg, legend=gearnames, col=seq(1,nrow(mat)), lty=1, lwd=2)
+  }
 }
 
 plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlinputs, index, verbose, leg, showtitle = TRUE, add=FALSE){
@@ -257,7 +305,7 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
   colors[sapply(colors, is.na)] <- NULL
   names[sapply(names, is.na)] <- NULL
   matplot(age, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors), las = 1,
-          main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="", xlab="Age")
+          main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="Selectivity", xlab="Age")
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
   }

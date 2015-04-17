@@ -277,6 +277,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSelexLengthBasedByFleet"               = {plotSelex(1,savefig,"SelexLengthBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            #"sSelexAgeBasedByFleet"                  = {plotSelex(2,savefig,"SelexAgeBasedByFleet",plotMCMC,ci,sensGroup=sgr,index=ind)},
            "sSelexLogisticByFleet"                  = {plotSelex(s,1,savefig,paste0("Selex-",currIndexName),plotMCMC,ci,sensGroup=sgr,ps=ps,leg=leg,index=ind,figtype=figtype,showtitle=showtitle)},
+           "sSelexLogisticByFleetAllGears"          = {plotSelex(s,2,savefig,"Selex-All-Gears",plotMCMC,ci,sensGroup=sgr,ps=ps,leg=leg,index=ind,figtype=figtype,showtitle=showtitle)},
            # From iscam-gui-figures-catch.r
            "sCatchLandings"                         = {plotCatch(s,1,savefig,"Landings",plotMCMC,ci,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            #"sCatchLandingsStacked"                  = {plotCatch(s,2,savefig,"CatchLandingsStacked",plotMCMC,ci,sensGroup=sgr,index=ind)},
