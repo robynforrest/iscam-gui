@@ -702,11 +702,14 @@ refPointsTable <- function(outMPD    = NULL,
     mcmcnames <- names(mcmcData)
     # Change then name 'ssb' to B followed by the final year.
     yrs <- names(outMCMC[[1]]$mcmc$sbt[[1]])
-    mcmcnames[mcmcnames=="ssb"] = paste0("B",yrs[length(yrs)])
+    startyrbio <- yrs[1]
+    endyrbio <- yrs[length(yrs)]
+    endyrF <- yrs[length(yrs)-1]
+    mcmcnames[mcmcnames=="ssb"] = endyrbio
 
-    # Add 0.2B0, 0.4B0, 0.4BMSY, and 0.8BMSY
-    mcmcData <- cbind(mcmcData, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
-    mcmcnames <- c(mcmcnames, "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
+    # Add reletive spawning biomass, 0.2B0, 0.4B0, 0.4BMSY, and 0.8BMSY
+    mcmcData <- cbind(mcmcData, mcmcData$ssb/mcmcData$bo, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
+    mcmcnames <- c(mcmcnames, paste0(endyrbio,"/",startyrbio), "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
 
     # Add the initial year biomass (first column of sbt)
     sbt <- outMCMC[[model]]$mcmc$sbt[[1]]
@@ -747,16 +750,15 @@ refPointsTable <- function(outMPD    = NULL,
   if(retxtable){
     # Put the latex-pretty names in another column of the table. It doesn't like it when they are actual rownames
     quants <- as.data.frame(quants)
-    newcol <- paste0("\\textbf{",c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}","B\\subscr{2015}",
-                "0.2B\\subscr{0}","0.4B\\subscr{0}","0.4B\\subscr{MSY}","0.8B\\subscr{MSY}","B\\subscr{1996}","F\\subscr{2014}"),"}")
+    newcol <- paste0("\\textbf{",c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",endyrbio,"}"),
+                                   paste0("B\\subscr{",endyrbio,"}/B\\subscr{",startyrbio,"}"),"0.2B\\subscr{0}","0.4B\\subscr{0}",
+                                   "0.4B\\subscr{MSY}","0.8B\\subscr{MSY}",paste0("B\\subscr{",startyrbio,"}"),
+                                   paste0("F\\subscr{",endyrF,"}")),"}")
     colnames <- names(quants)
-    # Must preceed any '%' signs with a backslash
     quants <- cbind(newcol, quants)
     names(quants) <- paste0("\\textbf{",c("Reference Point", gsub("%","\\\\%",colnames)),"}")
     return(print(xtable(quants, caption=xcaption, label=xlabel, align=getAlign(ncol(quants))), caption.placement = "top", include.rownames=FALSE,
                  sanitize.text.function=function(x){x}))
-    # Try to align decimal points in table:
-    # return(print(xtable.decimal(quants, caption=xcaption, label=xlabel, digits=digits), caption.placement = "top", include.rownames=TRUE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
     write.table(quants, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=TRUE)
@@ -898,8 +900,9 @@ paramEstTable <- function(outMPD    = NULL,
     # Modify headers so that they are in nice latex format
     pnames <- rownames(alltable)
     # HACK! The next set of names only pertains to the ARF assessment, the q's and sel's are modified to line up with each other.
-    newcol <- paste0("$\\mathbf{",c("R_0","Steepness (h)","M","\\overline{R}","R_{init}","q_2","q_3","q_4","q_5",
-                            "sel_1","selsd_1","sel_2","selsd_2","sel_4","selsd_4","sel_5","selsd_5"),"}$")
+    newcol <- paste0("$\\mathbf{",c("R_0","Steepness (h)","M","\\overline{R}","\\overline{R}_{init}","q_2","q_3","q_4","q_5",
+                                    "\\hat{a}_1","\\hat{\\gamma}_1","\\hat{a}_2","\\hat{\\gamma}_2","\\hat{a}_4",
+                                    "\\hat{\\gamma}_4","\\hat{a}_5","\\hat{\\gamma}_5"),"}$")
     colnames <- colnames(alltable)
     alltable <- cbind(newcol, alltable)
     # Must preceed any '%' signs with a backslash, and add the name 'Parameters'

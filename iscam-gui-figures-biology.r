@@ -28,6 +28,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         showtitle  = TRUE,         # Showe the main title on the plot
                         units      = .UNITS,
                         add        = FALSE,        # If TRUE, plot will be added to current device
+                        indletter  = NULL,         # The letter to add to the top left corner (if NULL nothing is added)
                         scenario   = NULL){
 
   # plotNum must be one of:
@@ -112,6 +113,10 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==14) plotLW(leg, showtitle=showtitle, add=add)
   if(plotNum==15) plotGrowth(leg, showtitle=showtitle, add=add)
   if(plotNum==16) plotMA(leg, showtitle=showtitle, add=add)
+
+  if(!is.null(indletter)){
+    .gletter(indletter)
+  }
 
   if(savefig){
     cat0(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n")

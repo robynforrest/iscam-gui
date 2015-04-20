@@ -456,17 +456,15 @@ plotDepletionMPD <- function(out       = NULL,
   }
 
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
-  yUpper <- max(depl)
   for(model in 1:length(out)){
     depl <- out[[model]]$mpd$sbt / out[[model]]$mpd$sbo
-    yUpper <- max(yUpper, depl)
   }
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   title <- ""
   if(showtitle){
     title <- "Relative Spawning Biomass"
   }
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,1.1),ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
@@ -541,7 +539,7 @@ plotDepletionMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Relative Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, max(1.1,yUpper), first=TRUE, opacity=opacity, ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
@@ -737,8 +735,10 @@ plotVBiomassMCMC <- function(out       = NULL,
       # Make the spawning biomass the same linetype as the vulnerable, but up one color
       drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
       drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
-      vbioname <- paste0("VBio - ",names[[1]])
-      sbioname <- paste0("Sbio - ",names[[1]])
+      vbioname <- "Vulnerable B"
+      sbioname <- "Spawning B"
+#      vbioname <- paste0("VBio - ",names[[1]])
+#      sbioname <- paste0("Sbio - ",names[[1]])
       names[[1]] <- vbioname
       names[[2]] <- sbioname
       colors[[2]] <- colors[[1]] + 1

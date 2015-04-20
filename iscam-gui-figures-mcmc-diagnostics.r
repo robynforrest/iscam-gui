@@ -24,6 +24,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                             showEntirePrior = TRUE,
                             units           = .UNITS,
                             silent          = .SILENT,
+                            latexnames      = FALSE,  # If TRUE, latex-pretty parameter names will be inserted
                             priorsonly      = FALSE){ # Plot priors only in the priors vs posts function
 
   # Plot a convergence plot for an MCMC model run
@@ -81,22 +82,22 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   mcmcData <- stripStaticParams(scenario, mcmcData)
 
   if(plotNum == 1){
-    plotTraces(mcmcData, burnthin=burnthin, showtitle = showtitle)
+    plotTraces(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(plotNum == 2){
-    plotAutocor(mcmcData, burnthin=burnthin, showtitle = showtitle)
+    plotAutocor(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(plotNum == 3){
-    plotDensity(mcmcData, burnthin=burnthin, showtitle = showtitle)
+    plotDensity(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(plotNum == 4){
-    plotPairs(mcmcData, burnthin=burnthin, showtitle = showtitle)
+    plotPairs(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(plotNum == 5){
-    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin, showtitle = showtitle, priorsonly = priorsonly)
+    plotPriorsPosts(mcmcData, mpdData, inputs = inputs, burnthin=burnthin, showtitle = showtitle, priorsonly = priorsonly, latexnames=latexnames)
   }
   if(plotNum == 6){
-    plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle)
+    plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -176,7 +177,7 @@ stripStaticParams <- function(scenario, dat){
   return(dat)
 }
 
-plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200, showtitle = TRUE){
+plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200, showtitle = TRUE, latexnames=latexnames){
   # Traceplots for an mcmc matrix, mcmcData
   # axis.lab.freq is the frequency of x-axis labelling
 
@@ -203,11 +204,11 @@ plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200,
   for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     mcmcTrace <- as.matrix(mcmcData[,param])
-#    if(param==5){
-#      plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",ylim=c(0,1), axes=F)
-#    }else{
-      plot(mcmcTrace, main=colnames(mcmcData)[param], type="l",ylab="",xlab="",axes=F)
-#    }
+    name <- colnames(mcmcData)[param]
+    if(latexnames){
+      name <- getLatexName(name)
+    }
+    plot(mcmcTrace, main=name, type="l",ylab="",xlab="",axes=F)
     box()
     at <- labels <- seq(0,nrow(mcmcData), axis.lab.freq)
     axis(1, at=at, labels=labels)
@@ -215,9 +216,53 @@ plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200,
   }
 }
 
+getLatexName <- function(n){
+  # Return a pretty version of the parameter name found in variable 'n'
+  if(n == "ro") currname <- expression("R"[0])
+  if(n == "h") currname <- expression("h")
+  if(n == "m1") currname <- expression("M")
+  if(n == "rbar") currname <- expression(bar("R"))
+  if(n == "rinit") currname <- expression(bar("R")[init])
+  if(n == "bo") currname <- expression("B"[0])
+  if(n == "bmsy") currname <- expression("B"[MSY])
+  if(n == "msy") currname <- expression("MSY")
+  if(n == "fmsy") currname <- expression("F"[MSY])
+  if(n == "umsy") currname <- expression("U"[MSY])
+  # HACK! Add 1 to the q variable names that they match up with the sel parameters with estimated selectivity
+  # ARF assessment only, this needs to be fixed in iSCAM so that these kind of hacks don't have to be hard coded!
+  if(n == "q1") currname <- expression("q"[2])
+  if(n == "q2") currname <- expression("q"[3])
+  if(n == "q3") currname <- expression("q"[4])
+  if(n == "q4") currname <- expression("q"[5])
+  if(n == "ssb") currname <- expression("SSB")
+  if(n == "sel1") currname <- expression(hat(a)[1])
+  if(n == "selsd1") currname <- expression(hat(gamma)[1])
+  if(n == "sel2") currname <- expression(hat(a)[2])
+  if(n == "selsd2") currname <- expression(hat(gamma)[2])
+  if(n == "sel3") currname <- expression(hat(a)[3])
+  if(n == "selsd3") currname <- expression(hat(gamma)[3])
+  if(n == "sel4") currname <- expression(hat(a)[4])
+  if(n == "selsd4") currname <- expression(hat(gamma)[4])
+  if(n == "sel5") currname <- expression(hat(a)[5])
+  if(n == "selsd5") currname <- expression(hat(gamma)[5])
+
+  if(n == "log_ro") currname <- expression("ln(R"[0]*")")
+  if(n == "h") currname <- expression("h")
+  if(n == "log_m") currname <- expression("ln(M)")
+  if(n == "log_rbar") currname <- expression("ln("*bar("R")*")")
+  if(n == "log_rinit") currname <- expression("ln("*bar("R")[init]*")")
+  if(n == "log_q1") currname <- expression("ln(q"[1]*")")
+  if(n == "log_q2") currname <- expression("ln(q"[2]*")")
+  if(n == "log_q3") currname <- expression("ln(q"[3]*")")
+  if(n == "log_q4") currname <- expression("ln(q"[4]*")")
+
+  return(currname)
+}
+
 plotAutocor <- function(mcmcData = NULL,
                         burnthin = list(0,1),
                         lag = c(0, 1, 5, 10, 15, 20, 30, 40, 50),
+                        latexnames = FALSE,
                         showtitle = TRUE){
   # Plot autocorrelations for all mcmc parameters
   oldPar <- par(no.readonly=TRUE)
@@ -241,11 +286,15 @@ plotAutocor <- function(mcmcData = NULL,
   for(param in 1:np){
     par(mar=.MCMC_MARGINS)
     mcmcAutocor <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
-    autocorr.plot(mcmcAutocor, lag.max = 100, main = colnames(mcmcData)[param], auto.layout = FALSE)
+    name <- colnames(mcmcData)[param]
+    if(latexnames){
+      name <- getLatexName(name)
+    }
+    autocorr.plot(mcmcAutocor, lag.max = 100, main = name, auto.layout = FALSE)
   }
 }
 
-plotDensity <- function(mcmcData = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE){
+plotDensity <- function(mcmcData = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE, latexnames=FALSE){
   # Plot densities for the mcmc parameters in the matrix mcmcData
 	oldPar	<- par(no.readonly=T)
   on.exit(par(oldPar))
@@ -269,7 +318,11 @@ plotDensity <- function(mcmcData = NULL, burnthin = list(0,1), color = 1, opacit
     par(mar=.MCMC_MARGINS)
     dat <- window(mcmc(as.ts(mcmcData[,param])), start = burnin, thin = thinning)
     dens <- density(dat)
-    plot(dens, main = colnames(mcmcData)[param], ylab="")
+    name <- colnames(mcmcData)[param]
+    if(latexnames){
+      name <- getLatexName(name)
+    }
+    plot(dens, main = name, ylab="")
     xx <- c(dens$x,rev(dens$x))
     yy <- c(rep(min(dens$y), length(dens$y)), rev(dens$y))
     shade <- .getShade(color, opacity)
@@ -277,7 +330,7 @@ plotDensity <- function(mcmcData = NULL, burnthin = list(0,1), color = 1, opacit
   }
 }
 
-plotPairs <- function(mcmcData = NULL, burnthin = list(0,1), showtitle = TRUE){
+plotPairs <- function(mcmcData = NULL, burnthin = list(0,1), showtitle = TRUE, latexnames=FALSE){
   # Pairs plots for an mcmc matrix, mcmcData
 
   oldPar <- par(no.readonly=TRUE)
@@ -311,10 +364,19 @@ plotPairs <- function(mcmcData = NULL, burnthin = list(0,1), showtitle = TRUE){
 
   numParams <- ncol(mcmcData)
   mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
-  pairs(mcmcData, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth)
+  names <- colnames(mcmcData)
+  if(latexnames){
+    newnames <- NULL
+    for(col in 1:ncol(mcmcData)){
+      newnames <- c(newnames, getLatexName(names[col]))
+    }
+    #colnames(mcmcData) <- newcoln
+    names <- newnames
+  }
+  pairs(mcmcData, labels=names, cex.labels=1.0, pch=".", upper.panel = panel.smooth, diag.panel = panel.hist, lower.panel = panel.smooth, gap=0.0)
 }
 
-plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE, priorsonly=FALSE){
+plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,1), color = 1, opacity = 30, showtitle = TRUE, priorsonly=FALSE, latexnames=FALSE){
   # Produce a grid of the parameters' posteriors with their priors overlaid.
   # mpdData is used to get the MLE estimates for each parameter
 	oldPar	<- par(no.readonly=T)
@@ -436,6 +498,9 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
       }
       xx <- list(p = dat, p1 = specs[3], p2 = specs[4], fn = priorfn, nm = priorNames[priorInd], mle=mle)
       par(mar=.MCMC_MARGINS)
+      if(latexnames){
+        xx$nm <- getLatexName(xx$nm)
+      }
       if(priorsonly){
         func <- function(x){xx$fn(x,xx$p1,xx$p2)}
         if(specs[2] == 0){
@@ -513,7 +578,7 @@ convertLogParams <- function(paramSpecs = NULL){
   return(paramSpecs)
 }
 
-plotVariancePartitions <- function(mcmcData, burnthin = list(0,1), showtitle = TRUE){
+plotVariancePartitions <- function(mcmcData, burnthin = list(0,1), showtitle = TRUE, latexnames=FALSE){
   # Produce a grid of pairs plots for the variance parameters' posteriors
   # Assumes that there are an equal number of each rho and vartheta
   #  parameters, i.e. each group must have both rho and vartheta and

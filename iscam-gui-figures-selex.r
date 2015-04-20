@@ -289,7 +289,6 @@ plotLogisticSel	<-	function(scenario, out, colors, names, lty, inputs, controlin
         }
         selData <- exp(logselData[,4:ncol(logselData)])
         selData <- selData[nrow(selData),] # end-year selectivity for the only block
-        #selData <- as.matrix(selData)
         mat <- cbind(mat, selData)
       }
       gearTitle <- agegearnames[gearnum]
