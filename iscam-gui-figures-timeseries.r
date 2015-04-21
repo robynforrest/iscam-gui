@@ -275,6 +275,9 @@ plotBiomassMPD <- function(out       = NULL,
     on.exit(par(oldPar))
   }
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   yUpper <- max(out[[1]]$mpd$sbt, out[[1]]$mpd$sbo)
    if(out[[1]]$mpd$sbo > 2*max(out[[1]]$mpd$sbt)){
     # When sbo is very large, the trends in sbt are masked - don't plot sbt if more than twice the max value of sbt
@@ -360,6 +363,9 @@ plotBiomassMCMC <- function(out         = NULL,
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
 
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
@@ -455,6 +461,9 @@ plotDepletionMPD <- function(out       = NULL,
     on.exit(par(oldPar))
   }
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   for(model in 1:length(out)){
     depl <- out[[model]]$mpd$sbt / out[[model]]$mpd$sbo
@@ -520,6 +529,9 @@ plotDepletionMCMC <- function(out       = NULL,
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
 
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
@@ -597,6 +609,9 @@ plotVBiomassMPD <- function(out       = NULL,
   # For vbt from the report file, 1st column is gear number, 2nd column is group, 3rd is year, and 4th is vbt
   # This code will assume only one group, and will ignore the 2nd column
   # Also, only one gear is assumed, which is gear==1 in the first column
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
 
   sbt <- out[[1]]$mpd$sbt
   vbt <- out[[1]]$mpd$vbt
@@ -702,6 +717,9 @@ plotVBiomassMCMC <- function(out       = NULL,
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   squants <- vector("list", length(out))
   vquants <- vector("list", length(out))
@@ -806,6 +824,9 @@ plotRecruitmentMPD <- function(out       = NULL,
     on.exit(par(oldPar))
   }
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   sage   <- out[[1]]$mpd$sage
   nyear  <- length(out[[1]]$mpd$yr)
   ryr    <- out[[1]]$mpd$yr[(1+sage):nyear]
@@ -895,6 +916,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
 
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
 
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
@@ -996,6 +1020,9 @@ plotRecruitmentDevsMCMC <- function(out       = NULL,
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   # Calculate quantiles for the posterior data if an MCMC is to be plotted
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -1077,6 +1104,9 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
 
   ryr    <- out[[1]]$mpd$yr
   rt     <- parout[[1]]$log_rec_devs
@@ -1334,6 +1364,10 @@ plotFMPD <- function(out       = NULL,
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   nsex   <- out[[1]]$mpd$nsex
   yrs    <- out[[1]]$mpd$yr
   nyear  <- length(yrs)
@@ -1490,6 +1524,9 @@ plotFMCMC <- function(out       = NULL,
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
 
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
   # Calculate quantiles for the posterior data
   quants <- vector("list", length(out))
   for(model in 1:length(out)){
@@ -1521,9 +1558,9 @@ plotFMCMC <- function(out       = NULL,
     title <- "Fishing Mortality"
   }
   if(plotU){
-    ylabel <- "U\n"
+    ylabel <- "U"
   }else{
-    ylabel <- "F\n"
+    ylabel <- "F"
   }
   drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab=ylabel, xlab="Year", main=title, las=1)
   if(length(out) > 1){

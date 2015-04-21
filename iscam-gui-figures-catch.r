@@ -133,24 +133,24 @@ plotCatch <- function(scenario   = 1,         # Scenario number
   return(TRUE)
 }
 
-plotCatches_OLD <- function(inp,
-                        scenarioName,
-                        verbose = FALSE,
-                        leg = "topright",
-                        showtitle = TRUE,
-                        col = 1){
-  # Catch plot for iscam model, plots by gear
-  oldPar <- par(no.readonly=TRUE)
-  on.exit(par(oldPar))
+## plotCatches_OLD <- function(inp,
+##                         scenarioName,
+##                         verbose = FALSE,
+##                         leg = "topright",
+##                         showtitle = TRUE,
+##                         col = 1){
+##   # Catch plot for iscam model, plots by gear
+##   oldPar <- par(no.readonly=TRUE)
+##   on.exit(par(oldPar))
 
-  catch <- as.data.frame(inp$catch)
-  p <- ggplot(catch,aes(x=factor(year),value,fill=factor(gear)))
-	p <- p + geom_bar(width=0.75,position="dodge",stat="identity")
-  p <- p + labs(x="Year",y="Catch (1000 mt)",fill="Gear")
-  p <- p + .PLOT_THEME
-  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0))
-	print(p)
-}
+##   catch <- as.data.frame(inp$catch)
+##   p <- ggplot(catch,aes(x=factor(year),value,fill=factor(gear)))
+## 	p <- p + geom_bar(width=0.75,position="dodge",stat="identity")
+##   p <- p + labs(x="Year",y="Catch (1000 mt)",fill="Gear")
+##   p <- p + .PLOT_THEME
+##   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0))
+## 	print(p)
+## }
 
 plotCatchFit<-function(inp       = NULL,
                        out       = NULL,

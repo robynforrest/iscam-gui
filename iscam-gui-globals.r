@@ -48,7 +48,7 @@ if(.OS == "Darwin"){
 .TABLES_SOURCE                   <- paste0(.PROJECT_NAME,"-tables.r")
 
 # Plotting theme (ggplot). Only used in observed catch plot at this point.
-.PLOT_THEME                      <- theme_bw(11)
+#.PLOT_THEME                      <- theme_bw(11)
 
 # GUI definition files (see PBSModelling package)
 .MAIN_GUI_DEF_FILE               <- paste0(.PROJECT_NAME,"-gui-specs.txt")

@@ -29,6 +29,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         units      = .UNITS,
                         add        = FALSE,        # If TRUE, plot will be added to current device
                         indletter  = NULL,         # The letter to add to the top left corner (if NULL nothing is added)
+                        plotsubfleet = TRUE,       # plotLengthComparison only, tells function to plot subfleet or the rest
+                        lengthcompsex = 1,         # plotLengthComparison only, tells function whichs sex to plot
                         scenario   = NULL){
 
   # plotNum must be one of:
@@ -48,6 +50,7 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   # 14 LW relationship with fit a parameter estimates
   # 15 VONB relationship with fit a parameter estimates
   # 16 MA relationship with fit a parameter estimates
+  # 17 Length plot to compare freezer trawlers with shoreside
   # 99 Age comps for two gears. Hacked function for ARF assessment, can delete after
 
 #  if(plotNum < 1 || plotNum > 16){
@@ -113,6 +116,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   if(plotNum==14) plotLW(leg, showtitle=showtitle, add=add)
   if(plotNum==15) plotGrowth(leg, showtitle=showtitle, add=add)
   if(plotNum==16) plotMA(leg, showtitle=showtitle, add=add)
+  # This next plot is kind of a hack for ARF, done last minute to finish document in time
+  if(plotNum==17) plotLengthComparison(leg, showtitle=showtitle, add=add, plotsubfleet=plotsubfleet, sex=lengthcompsex)
 
   if(!is.null(indletter)){
     .gletter(indletter)
@@ -123,6 +128,63 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
     dev.off()
   }
   return(TRUE)
+}
+
+plotLengthComparison <- function(leg, startyr = 2005, subfleetVRN = c(103548,  # Viking Enterprise FOS
+                                                                      109710,  # Northern Alliance FOS
+                                                                      103808,  # Osprey #1         FOS
+                                                                      120250,  # Raw Spirit        FOS
+                                                                         568,  # Viking Enterprise GFBIO
+                                                                         592,  # Northern Alliance GFBIO
+                                                                         569,  # Osprey #1 FOS     GFBIO
+                                                                         595), # Raw Spirit FOS    GFBIO
+                                 plotsubfleet = TRUE, sex = 1, showtitle = TRUE, add=TRUE){
+  # Plot the length data for freezer trawlers vs. shoreside fleet
+  # subfleetVRN vessels will be one fleet, all the rest will be the other fleet
+  # plotsubfleet, if TRUE wil plot subfleet. If FALSE, will plot non-subfleet (all other vessels)
+  # sex will be filtered, 1=Male, 2=Female
+  currFuncName <- getCurrFunc()
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  if(!exists("trawlbio", envir = .GlobalEnv)){
+    cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - object 'trawlbio' does not exist. Load the data with e.g. trawlbio=read.csv('trawl_obs_len_wt_age.csv').")
+    return(NULL)
+  }
+
+  # Filter data for start year of model to present
+  tb <- trawlbio
+  d <- tb[tb$Year >= startyr,]
+  # Filter for sex
+  d <- d[d$SPECIMEN_SEX_CODE == sex,]
+  # Remove any records where Vessel_ID is NA
+  d <- d[!(is.na(d$VESSEL_ID)),]
+  # Remove any records where length is NA
+  d <- d[!(is.na(d$Length_cm)),]
+  # Filter data for requested fleet
+  if(plotsubfleet){
+    d <- d[d$VESSEL_ID %in% subfleetVRN,]
+  }else{
+    d <- d[!(d$VESSEL_ID %in% subfleetVRN),]
+  }
+
+  years <- sort(unique(d$Year))
+  boxdat <- NULL
+  for(yr in 1:length(years)){
+    datft <- d[d$Year == years[yr],]
+    boxdat <- cbind.na(boxdat, datft$Length_cm) # Bind the data without replication
+  }
+  boxdat <- boxdat[,-1]
+  b <- boxplot(boxdat, axes=FALSE, ylim=c(20,100))
+  axis(1, at=seq(1,length(years)), labels=years)
+  axis(2, at=c(seq(20,90,by=10),95), labels=c(seq(20,90,by=10),"N"), las=1)
+  browser()
+  text(1:length(years), rep(95,length(years)), labels=b$n, cex=0.7)
+  box()
+  #mtext("Year",1,line=2)
+  mtext("Length (cm)",2,line=2)
 }
 
 plotLW <- function(leg, showtitle = TRUE, add=TRUE){

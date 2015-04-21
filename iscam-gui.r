@@ -15,13 +15,7 @@
 #
 #**********************************************************************************
 
-# TODO:
-# Implement the order changes by sorting the op list, etc
-# Add the ability to copy any one of the scenarios, at which time the gui will have to reload (how?)
-# Fix all mcmc diagnostic plotting and other misc plotting.
-# Remove all references to assignGlobals()
-
-removeAllExcept <- function(vars  = c("op","sens","bio","catch")){
+removeAllExcept <- function(vars  = c("op","sens","bio","catch","trawlbio")){
   # Removes everyobject in the workspace except for what is in the vars list.
   # Upon finishing, the workspace will contain whatever is in the vars list,
   #  plus the objects 'removeAllExcept' (this function) and 'modelLoaded'.
@@ -41,10 +35,11 @@ removeAllExcept()
 require(PBSmodelling)
 require(tcltk)
 require(coda)
-require(ggplot2) # Only used for Observed landings plot.
+#require(ggplot2) # Only used for Observed landings plot.
 require(reshape2)
 require(Hmisc)
 require(xtable) # For tables which can be inserted into latex docs with knitr
+#require(qpcR) # For cbind.na which binds columns without replicating to fit length
 
 options(stringsAsFactors = FALSE)
 options(warn = -1)
