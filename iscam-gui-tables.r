@@ -399,7 +399,7 @@ indicesTable <- function(inputs    = NULL,
   rownames(tabledf) <- NULL
   colnames(tabledf) <- c("Survey/Year","Index","CV")
   if(retxtable){
-    colnames(tabledf) <- c("\\textbf{Survey/Year}","\\textbf{Index}","\\textbf{CV}")
+    colnames(tabledf) <- c("\\textbf{Survey/Year}","\\textbf{Index}","\\textbf{1/CV}")
     return(print(xtable(tabledf, caption=xcaption, label=xlabel, align=getAlign(ncol(tabledf))), caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}))
   }
   if(savetable){
@@ -524,31 +524,32 @@ decisionTable <- function(outMCMC   = NULL,
     ##                   "\\specialcell{$P(U_{2015}>$\\\\$U_{MSY})$}")
     # Make TAC==11 and TAC==15 boldface (Last year's catch and this year's TAC)
     # Add a star for last year's catch value (item 1)
-    tprob <- probs[probs[,1]==11,]
-    tname <- tprob[1]
-    tdata <- tprob[-1]
-    tname <- paste0("\\textbf{",tname,"*}")
-    tdata <- paste0("\\textbf{",tdata,"}")
-    probs[probs[,1]==11,] <- c(tname,tdata)
+    #tprob <- probs[probs[,1]==11,]
+    #tname <- tprob[1]
+    #tdata <- tprob[-1]
+    #tname <- paste0("\\textbf{",tname,"*}")
+    #tdata <- paste0("\\textbf{",tdata,"}")
+    #probs[probs[,1]==11,] <- c(tname,tdata)
     # Add two stars for current TAC value (item 2)
-    tprob <- probs[probs[,1]==15,]
-    tname <- tprob[1]
-    tdata <- tprob[-1]
-    tname <- paste0("\\textbf{",tname,"**}")
-    tdata <- paste0("\\textbf{",tdata,"}")
-    probs[probs[,1]==15,] <- c(tname,tdata)
+    #tprob <- probs[probs[,1]==15,]
+    #tname <- tprob[1]
+    #tdata <- tprob[-1]
+    #tname <- paste0("\\textbf{",tname,"**}")
+    #tdata <- paste0("\\textbf{",tdata,"}")
+    #probs[probs[,1]==15,] <- c(tname,tdata)
   }else{
     names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
   }
 
   if(retxtable){
-    footnote <- list()
-    footnote$pos <- list()
-    footnote$pos[[1]] <- c(nrow(probs))
-    footnote$command <- c(paste0("\\hline \\multicolumn{5}{l}{\\textbf{* Approximate 2014 catch; ** 2014 TAC}.}"))
+    #footnote <- list()
+    #footnote$pos <- list()
+    #footnote$pos[[1]] <- c(nrow(probs))
+    #footnote$command <- c(paste0("\\hline \\multicolumn{5}{l}{\\textbf{* Approximate 2014 catch; ** 2014 TAC}.}"))
     return(print(xtable(probs, caption=xcaption, label=xlabel, align=getAlign(ncol(probs))),
                  caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}, scalebox="0.75",
-                 add.to.row=footnote, hline.after=c(-1,0)))
+                 hline.after=c(-1,0)))
+#                 add.to.row=footnote, hline.after=c(-1,0)))
   }
   if(savetable){
     write.table(probs, filename, quote=FALSE, sep=",", col.names=TRUE, row.names=FALSE)
@@ -708,8 +709,9 @@ refPointsTable <- function(outMPD    = NULL,
     mcmcnames[mcmcnames=="ssb"] = endyrbio
 
     # Add reletive spawning biomass, 0.2B0, 0.4B0, 0.4BMSY, and 0.8BMSY
-    mcmcData <- cbind(mcmcData, mcmcData$ssb/mcmcData$bo, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
-    mcmcnames <- c(mcmcnames, paste0(endyrbio,"/",startyrbio), "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
+    mcmcData <- cbind(mcmcData, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
+    #mcmcData <- cbind(mcmcData, mcmcData$ssb/mcmcData$bo, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
+    #mcmcnames <- c(mcmcnames, paste0(endyrbio,"/",startyrbio), "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
 
     # Add the initial year biomass (first column of sbt)
     sbt <- outMCMC[[model]]$mcmc$sbt[[1]]
@@ -750,10 +752,14 @@ refPointsTable <- function(outMPD    = NULL,
   if(retxtable){
     # Put the latex-pretty names in another column of the table. It doesn't like it when they are actual rownames
     quants <- as.data.frame(quants)
-    newcol <- paste0("\\textbf{",c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",endyrbio,"}"),
-                                   paste0("B\\subscr{",endyrbio,"}/B\\subscr{",startyrbio,"}"),"0.2B\\subscr{0}","0.4B\\subscr{0}",
-                                   "0.4B\\subscr{MSY}","0.8B\\subscr{MSY}",paste0("B\\subscr{",startyrbio,"}"),
-                                   paste0("F\\subscr{",endyrF,"}")),"}")
+#    newcol <- paste0("\\textbf{",c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",endyrbio,"}"),
+#                                   paste0("B\\subscr{",endyrbio,"}/B\\subscr{",startyrbio,"}"),"0.2B\\subscr{0}","0.4B\\subscr{0}",
+#                                   "0.4B\\subscr{MSY}","0.8B\\subscr{MSY}",paste0("B\\subscr{",startyrbio,"}"),
+#                                   paste0("F\\subscr{",endyrF,"}")),"}")
+    newcol <- c("B\\subscr{0}","B\\subscr{MSY}","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",endyrbio,"}"),
+                "0.2B\\subscr{0}","0.4B\\subscr{0}",
+                "0.4B\\subscr{MSY}","0.8B\\subscr{MSY}",paste0("B\\subscr{",startyrbio,"}"),
+                paste0("F\\subscr{",endyrF,"}"))
     colnames <- names(quants)
     quants <- cbind(newcol, quants)
     names(quants) <- paste0("\\textbf{",c("Reference Point", gsub("%","\\\\%",colnames)),"}")
@@ -900,9 +906,12 @@ paramEstTable <- function(outMPD    = NULL,
     # Modify headers so that they are in nice latex format
     pnames <- rownames(alltable)
     # HACK! The next set of names only pertains to the ARF assessment, the q's and sel's are modified to line up with each other.
-    newcol <- paste0("$\\mathbf{",c("R_0","Steepness (h)","M","\\overline{R}","\\overline{R}_{init}","q_2","q_3","q_4","q_5",
-                                    "\\hat{a}_1","\\hat{\\gamma}_1","\\hat{a}_2","\\hat{\\gamma}_2","\\hat{a}_4",
-                                    "\\hat{\\gamma}_4","\\hat{a}_5","\\hat{\\gamma}_5"),"}$")
+#    newcol <- paste0("$\\mathbf{",c("R_0","Steepness (h)","M","\\overline{R}","\\overline{R}_{init}","q_2","q_3","q_4","q_5",
+#                                    "\\hat{a}_1","\\hat{\\gamma}_1","\\hat{a}_2","\\hat{\\gamma}_2","\\hat{a}_4",
+#                                    "\\hat{\\gamma}_4","\\hat{a}_5","\\hat{\\gamma}_5"),"}$")
+    newcol <- paste0("$",c("R_0","Steepness (h)","M","\\overline{R}","\\overline{R}_{init}","q_2","q_3","q_4","q_5",
+                           "\\hat{a}_1","\\hat{\\gamma}_1","\\hat{a}_2","\\hat{\\gamma}_2","\\hat{a}_4",
+                           "\\hat{\\gamma}_4","\\hat{a}_5","\\hat{\\gamma}_5"),"$")
     colnames <- colnames(alltable)
     alltable <- cbind(newcol, alltable)
     # Must preceed any '%' signs with a backslash, and add the name 'Parameters'

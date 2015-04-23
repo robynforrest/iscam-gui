@@ -35,6 +35,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   # 4  Pairs plots with histograms
   # 5  Priors vs. Posteriors plots
   # 6  Variance partitions
+  # 7  Cumulative posteriors plot
 
   currFuncName <- getCurrFunc()
   scenarioName <- op[[scenario]]$names$scenario
@@ -98,6 +99,10 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 6){
     plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
+  }
+  if(plotNum == 7){
+    plotCumulativePosterior(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
+    #plotCumulativePosterior_Rowan(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames, col.trace=c("green","red","blue"))
   }
   if(savefig){
     cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
@@ -177,6 +182,157 @@ stripStaticParams <- function(scenario, dat){
   return(dat)
 }
 
+plotCumulativePosterior_Rowan<- function(mcmcData = NULL, burnthin = list(0,1),
+                                    nchains=3, axes=FALSE, same.limits=FALSE, between=list(x=axes,y=axes),
+                                    div=1, span=1/4, log=FALSE, base=10, main=NULL, xlab=NULL, ylab=NULL,
+                                    cex.main=1.2, cex.lab=1, cex.strip=0.8, cex.axis=0.8, las=0,
+                                    tck=0.5, tick.number=5, lty.trace=1, lwd.trace=1, col.trace="grey",
+                                    lty.median=1, lwd.median=1, col.median="black", lty.quant=2, lwd.quant=1,
+                                    col.quant="black", plot=TRUE, probs=c(0.025, 0.5, 0.975),
+                                    showtitle = TRUE, latexnames=latexnames, ...){
+  # Cumulative values of posterior
+  # Break burned-in chain into 'nchains' segments, and create a three-panel cumulative plot of each of the segments
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
+  panel.trace <- function(x, y, ...) {
+		panel.xyplot(x, y, type="n")
+		chainlink=rep(1:nchains,f)
+		for (i in 1:nchains) {
+			z=is.element(chainlink,i)
+			panel.xyplot(x[z], y[z], type="l", lty=lty.trace, lwd=2, col=rep(col.trace,nchains)[i])
+		}
+		#panel.xyplot(x, y, type="l", lty=lty.trace, lwd=lwd.trace, col=col.trace)
+	}
+
+  mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
+  mcmc <- as.data.frame(mcmcData)
+
+  n <- nrow(mcmc)
+	f <- rep(round(n/nchains),nchains-1); f=c(f,n-sum(f))
+	p <- ncol(mcmc)
+	dat <- data.frame(Factor=ordered(rep(names(mcmc), each=n), names(mcmc)),
+                    Draw=rep(1:n, p),
+                    Chain=rep(rep(1:nchains,f),p),
+                    Value=as.vector(as.matrix(mcmc)))
+	mess <- c("require(grid, quietly=TRUE, warn.conflicts=FALSE)",
+            "require(lattice, quietly=TRUE, warn.conflicts=FALSE)")
+	eval(parse(text=mess))
+	if (trellis.par.get()$background$col == "#909090") {
+		for (d in dev.list()) dev.off()
+		trellis.device(color=FALSE)
+	}
+
+	relation <- if (same.limits) "same" else "free"
+  mymain <- list(label="cumu", cex=1)
+	myxlab <- list(label="X", cex=1)
+	myylab <- list(label="Y", cex=1)
+	myrot <- switch(as.character(las), `0`=0, `1`=0, `2`=0, `3`=90)     # AME changed '0'=90 to 0
+	myscales <- list(x=list(draw=FALSE, relation=relation, cex=1, tck=0.5, tick.number=5, rot=myrot),
+                   y=list(draw=FALSE, relation=relation, cex=1, tck=0.5, tick.number=5, rot=myrot))
+	mystrip <- list(cex=1)
+
+  dat$Index <- paste(dat$Factor,dat$Chain,sep="-")
+	vList <- split(dat$Value,dat$Index)
+	qList <- sapply(vList,function(x){xsort=sort(x)
+                                    xscal=xsort - min(xsort)
+                                    ycumu=cumsum(xscal)/sum(xscal)
+                                    out=cbind(x=xsort,y=ycumu)
+                                    return(out)},
+                  simplify=FALSE)
+	dat$CumFreq <- dat$ValueSort <- NA
+	for (i in names(qList)) {
+		z <- is.element(dat$Index,i)
+		dat$ValueSort[z] <- qList[[i]][,"x"]
+		dat$CumFreq[z]   <- qList[[i]][,"y"]
+	}
+  if(latexnames){
+    #unames <- unique(dat$Factor)
+#   for(name in 1:nrow(dat)){
+#     dat$Factor[name] <- getLatexName(dat$Factor[name])
+#   }
+  }
+	graph <- xyplot(CumFreq ~ ValueSort  | Factor, panel=panel.trace,
+                  data=dat, as.table=TRUE, between=between, main=mymain,
+                  xlab=myxlab, ylab=myylab, par.strip.text=mystrip,
+                  scales=myscales, ylim=c(0,1), ...)
+  print(graph)
+}
+
+plotCumulativePosterior <- function(mcmcData = NULL, burnthin = list(0,1), nsegs=3, color.seg=c("red","green","blue"), showtitle = TRUE, latexnames=latexnames){
+  # Cumulative values of posterior for mcmcData matrix
+  # Break burned-in chain into 'nchains' segments, and create a three-panel cumulative plot of each of the segments
+  # color.seg must be the length determined by nsegs
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
+  if(length(color.seg) != nsegs){
+    cat0(.PROJECT_NAME,"->",currFuncName,"'color.seg' vector is not of length 'nsegs'.\n")
+    return(NULL)
+  }
+  # np is number of parameters
+  np <- ncol(mcmcData)
+  nr <- nrow(mcmcData)
+  nside <- getRowsCols(np)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
+
+  mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
+  # Number of rows in each segment of the chain. If there are residual records
+  # due to the floor command, they will be truncated from the end of the overall chain
+  numperseg <- floor(nr/nsegs)
+  for(param in 1:np){
+    par(mar=.MCMC_MARGINS)
+    mcmcTrace <- as.matrix(mcmcData[,param])
+    name <- colnames(mcmcData)[param]
+    if(latexnames){
+      name <- getLatexName(name)
+    }
+    start <- 1
+    for(seg in 1:nsegs){
+      dat <- mcmcTrace[start:(start+numperseg-1)]
+      # Calculate cumulative object for this chain segment
+      #sdat <- sort(dat)
+      #scaldat <- sdat - min(sdat)
+      #cumdat <- cumsum(scaldat) / sum(scaldat)
+      cumdat <- cumsum(dat) / sum(dat)
+      if(start==1){
+        plot(1:length(cumdat), cumdat, main=name, type="l", ylab="", xlab="", col=color.seg[seg], axes=FALSE)
+      }else{
+        lines(1:length(cumdat), cumdat, col=color.seg[seg], axes=FALSE)
+      }
+      start <- start + numperseg
+     }
+    box()
+    #at <- labels <- seq(0,nrow(mcmcData), axis.lab.freq)
+    #axis(1, at=at, labels=labels)
+    #axis(2)
+  }
+}
+
 plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200, showtitle = TRUE, latexnames=latexnames){
   # Traceplots for an mcmc matrix, mcmcData
   # axis.lab.freq is the frequency of x-axis labelling
@@ -208,7 +364,7 @@ plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200,
     if(latexnames){
       name <- getLatexName(name)
     }
-    plot(mcmcTrace, main=name, type="l",ylab="",xlab="",axes=F)
+    plot(mcmcTrace, main=name, type="l", ylab="", xlab="", axes=FALSE)
     box()
     at <- labels <- seq(0,nrow(mcmcData), axis.lab.freq)
     axis(1, at=at, labels=labels)

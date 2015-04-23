@@ -1650,6 +1650,9 @@ plotReferencePointsMCMC <- function(out       = NULL,
     boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   }
   ymax <- max(msy)
+  if(length(out) == 3){
+    names <- c("Ref","Sc 12","Sc 13")
+  }
   boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   ymax <- max(bo)
   boxplot(bo, pch=pch, range = ci/100, names=names, border=colors, main="B0 (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
