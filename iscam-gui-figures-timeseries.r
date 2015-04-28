@@ -41,6 +41,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
                    linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
                    names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
+                   shortnames = NULL,         # Short names, mainly for use with the reference points plot, so that names will be visible
                    showB0Ref  = TRUE,         # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
                    showBMSYRef= FALSE,        # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
                    add        = FALSE,        # If TRUE, plot will be added to current device
@@ -202,7 +203,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 10){
     if(plotMCMC){
-      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle, showumsy=showumsy, add=add)
+      plotReferencePointsMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, showtitle = showtitle, shortnames=shortnames, showumsy=showumsy, add=add)
     }else{
       cat0(.PROJECT_NAME,"->",currFuncName,"Cannot make MPD plots for reference points, run MCMC first.")
     }
@@ -1585,6 +1586,7 @@ plotReferencePointsMCMC <- function(out       = NULL,
                                     verbose   = FALSE,
                                     showtitle = TRUE,
                                     leg       = "topright",
+                                    shortnames= NULL,
                                     add       = FALSE,
                                     showumsy  = FALSE){
   # Reference points plot for an MCMC model
@@ -1593,6 +1595,7 @@ plotReferencePointsMCMC <- function(out       = NULL,
   # ci is the confidence interval to use in percent, eg. 95
   # pch and pointsize are passed to the plot function. pointSize is in fact 'cex'
   # showumsy if TRUE will plot Umsy instead of Fmsy
+  # shortnames if not null will be used instead of full names
   currFuncName <- getCurrFunc()
   if(is.null(out)){
     cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
@@ -1650,8 +1653,8 @@ plotReferencePointsMCMC <- function(out       = NULL,
     boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   }
   ymax <- max(msy)
-  if(length(out) == 3){
-    names <- c("Ref","Sc 12","Sc 13")
+  if(!is.null(shortnames)){
+    names <- shortnames
   }
   boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   ymax <- max(bo)

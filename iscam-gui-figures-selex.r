@@ -33,16 +33,18 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                       linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
                       names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
                       add        = FALSE,        # If TRUE, plot will be added to current device
-                      indletter  = NULL          # A letter to plot on the panel. If NULL, no letter will be printed.
+                      indletter  = NULL,         # A letter to plot on the panel. If NULL, no letter will be printed.
+                      showmat    = FALSE         # Used in the plot with both selectivities and maturity ogives only (#3)
                       ){
 
   # plotNum must be one of:
   # 1  Logistic selectivity one gear  - age or length based will be detected automatically
   # 2  Logistic selectivity all gears - age or length based will be detected automatically
+  # 3  Logistic selectivity all gears with maturity - age only
 
   currFuncName <- getCurrFunc()
 
-  if(plotNum != 1 && plotNum != 2){
+  if(plotNum < 1 || plotNum > 3){
     return(FALSE)
   }
   scenarioName <- op[[scenario]]$names$scenario
@@ -122,9 +124,8 @@ plotSelex <- function(scenario   = 1,            # Scenario number
                     controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
   }
   if(plotNum==2){
-    plotLogisticSelAllGears(scenario, out, inputs=inputs, controlinputs=controlinputs, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
+    plotLogisticSelAllGears(scenario, out, inputs=inputs, controlinputs=controlinputs, verbose = !silent, leg = leg, showtitle = showtitle, add=add, showmat=showmat)
   }
-  if(plotNum>=3)  cat("No Plot Yet -- Coming Soon!!\n")
 
   if(!is.null(indletter)){
     .gletter(indletter)
@@ -137,11 +138,13 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   return(TRUE)
 }
 
-plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbose, leg, showtitle = TRUE, add=FALSE){
+plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbose, leg, showtitle = TRUE, add=FALSE, showmat=FALSE){
   # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
   # Single sex only, no time blocks
   # Parses the control inputs to see which gears have age comps and therefore selectivity estimates
   # Assumes 'out' is list of length 1, this is not a sensitivity plot but a single-scenario plot with multiple gears.
+  # If showmat is TRUE then maturity ogive will be included in plot
+
   currFuncName <- getCurrFunc()
   if(!add){
     oldPar <- par(no.readonly=TRUE)
@@ -170,14 +173,36 @@ plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbos
     selData <- selData[nrow(selData),] # end-year selectivity for the only block
     mat <- cbind(mat, selData)
   }
+
   titletext <- ""
   if(showtitle){
     titletext <- "Selectivities for all gears"
   }
-  matplot(age, mat, type = "l", lwd = 2, col = seq(1,nrow(mat)), lty=1, las = 1,
+  col <- seq(1,ncol(mat))
+  lty <- rep(1,ncol(mat))
+  lwd <- rep(2,ncol(mat))
+  matplot(age, mat, type = "l", lwd = lwd, col = col, lty = lty, las = 1,
           main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="Selectivity", xlab="Age")
+  if(showmat){
+    # Add maturity ogive to selectivity plot
+    # Plots female only - number 2 in next line signifies female
+    data <- bio$ma
+    sex <- 2
+    a50 <- data[[sex]][[2]][1,]
+    sigma_a50 <- data[[sex]][[2]][2,]
+    if(is.null(a50) || is.null(sigma_a50)){
+      cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - element 'ma' of object 'bio' does not exist. Run the maturity/age model from the Biotool tab.")
+      return(NULL)
+    }
+    gearnames <- c(gearnames, "Female maturity")
+    col <- c(col, ncol(mat)+1)
+    lty <- c(lty, 2)
+    lwd <- c(lwd, 3)
+    browser()
+    curve(1/(1+exp(-(x-a50)/sigma_a50)), col=ncol(mat)+1, lty=2, lwd=3, add=TRUE)
+  }
   if(!is.null(leg)){
-    legend(leg, legend=gearnames, col=seq(1,nrow(mat)), lty=1, lwd=2)
+    legend(leg, legend=gearnames, col=col, lty=lty, lwd=lwd)
   }
 }
 
