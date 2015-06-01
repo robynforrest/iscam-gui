@@ -180,10 +180,22 @@ plotLengthComparison <- function(leg, startyr = 2005, subfleetVRN = c(103548,  #
   b <- boxplot(boxdat, axes=FALSE, ylim=c(20,100))
   axis(1, at=seq(1,length(years)), labels=years)
   axis(2, at=c(seq(20,90,by=10),95), labels=c(seq(20,90,by=10),"N"), las=1)
-  browser()
   text(1:length(years), rep(95,length(years)), labels=b$n, cex=0.7)
   box()
-  #mtext("Year",1,line=2)
+  if(plotsubfleet){
+    titleText <- "Freezer trawlers - "
+  }else{
+    titleText <- "Shoreside trawlers - "
+  }
+  if(sex == 1){
+    titleText <- paste0(titleText, "Male")
+  }else{
+    titleText <- paste0(titleText, "Female")
+  }
+  if(showtitle){
+    title(titleText)
+  }
+  mtext("Year",1,line=2)
   mtext("Length (cm)",2,line=2)
 }
 
@@ -443,7 +455,9 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, 
       }
       compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
       startRowThisGear <- 1
-      if(index > 1){
+      # Using this line instead for the petrale assessment
+      if(nAgears > 1){
+      #if(index > 1){
         # If index = 1, then we want it to start at row 1
         for(ind in 1:(gearindex-1)){
           # Add all the gear's number of rows together to get the starting row for this gear
@@ -456,10 +470,14 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, 
           tmpagen <- op[[scenario]]$inputs$data$agearsN[[gearindex]]
         if(sex == 1){
           # Males are odd
-          numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
+          #numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
+          # Using this line instead for the petrale assessment
+          numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==1]
         }else{
           # Females get even
-          numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
+          #numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
+          # Using this line instead for the petrale assessment
+          numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==2]
         }
       }
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[gearindex]

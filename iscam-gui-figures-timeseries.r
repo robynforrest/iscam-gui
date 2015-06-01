@@ -29,6 +29,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                    showtitle  = TRUE,         # Show the main title on the plot
                    recrOffset = 0.1,          # Recruitment bar offset used if multiple==TRUE
+                   recrShowFinalYear = TRUE,  # Show the final year in recruitment plots
                    btarg      = 0.4,          # Biomass target line for depletion plots
                    blim       = 0.25,         # Biomass limit line for depletion plots
                    units      = .UNITS,       # Units to use in plotting
@@ -42,7 +43,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
                    linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
                    names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
                    shortnames = NULL,         # Short names, mainly for use with the reference points plot, so that names will be visible
-                   showB0Ref  = TRUE,         # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
+                   showB0Ref  = FALSE,        # Show the 0.2 and 0.4 B0 lines on the spawning biomass mcmc plot
                    showBMSYRef= FALSE,        # Show the 0.4 and 0.8 BMSY lines on the spawning biomass mcmc plot
                    add        = FALSE,        # If TRUE, plot will be added to current device
                    opacity    = 90            # Opaqueness (opposite of transparency) with which to draw envelopes
@@ -183,9 +184,9 @@ plotTS <- function(scenario   = 1,         # Scenario number
   }
   if(plotNum == 5){
     if(plotMCMC){
-      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
+      plotRecruitmentMCMC(out, colors, names, ci, burnthin = burnthin, offset=recrOffset, verbose = !silent, leg = leg, showtitle = showtitle, add=add, recrShowFinalYear=recrShowFinalYear)
     }else{
-      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
+      plotRecruitmentMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, add=add, recrShowFinalYear=recrShowFinalYear)
     }
   }
   if(plotNum == 7){
@@ -324,8 +325,8 @@ plotBiomassMCMC <- function(out         = NULL,
                             offset      = 0.1,
                             verbose     = FALSE,
                             showtitle   = TRUE,
-                            showB0Ref   = TRUE,   # Show the 0.2 and 0.4 B0 lines on the plot
-                            showBMSYRef = FALSE,  # # Show the 0.4 and 0.8 BMSY lines on the plot
+                            showB0Ref   = FALSE,  # Show the 0.2 and 0.4 B0 lines on the plot
+                            showBMSYRef = FALSE,  # Show the 0.4 and 0.8 BMSY lines on the plot
                             leg         = "topright",
                             add         = FALSE,
                             opacity     = 90){
@@ -402,20 +403,18 @@ plotBiomassMCMC <- function(out         = NULL,
     }
   }
   # Add 0.4BMSY, 0.8BMSY, 0.2B0, and 0.4B0 lines for the reference case [[1]] to plot
-  # B0
   if(showB0Ref){
-    abline(h=0.2*boquants[[1]][2], col="red", lty=1)  # sbo1 set above in loop through models
+    abline(h=0.2*boquants[[1]][2], col="red", lty=1, lwd=2)  # sbo1 set above in loop through models
     mtext("0.2B0",2,at=0.2*boquants[[1]][2],col="red",las=1)
-    abline(h=0.4*boquants[[1]][2], col="green", lty=1)
+    abline(h=0.4*boquants[[1]][2], col="green", lty=1, lwd=2)
     mtext("0.4B0",2,at=0.4*boquants[[1]][2],col="green",las=1)
   }
-  # BMSY
   if(showBMSYRef){
     bmsy <- window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin)
     bmsyquants <- getQuants(bmsy, ci)
-    abline(h=0.4*bmsyquants[2], col="red", lty=2)
+    abline(h=0.4*bmsyquants[2], col="red", lty=2, lwd=2)
     mtext("0.4BMSY",2,at=0.4*bmsyquants[2],col="red",las=1)
-    abline(h=0.8*bmsyquants[2], col="green", lty=2)
+    abline(h=0.8*bmsyquants[2], col="green", lty=2, lwd=2)
     mtext("0.8BMSY",2,at=0.8*bmsyquants[2],col="green",las=1)
   }
   if(!is.null(leg)){
@@ -478,7 +477,7 @@ plotDepletionMPD <- function(out       = NULL,
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
-      lines(out[[line]]$mpd$yrs, depl, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
+      lines(out[[line]]$mpd$yrs, depl, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,1))
     }
   }
   if(!is.null(leg)){
@@ -762,7 +761,6 @@ plotVBiomassMCMC <- function(out       = NULL,
       names[[2]] <- sbioname
       colors[[2]] <- colors[[1]] + 1
     }else{
-      browser()
       drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
     }
   }
@@ -794,6 +792,7 @@ plotRecruitmentMPD <- function(out       = NULL,
                                verbose   = FALSE,
                                showtitle = TRUE,
                                add       = FALSE,
+                               recrShowFinalYear = TRUE,
                                leg = "topright"){
   # Recruitment plot for an MPD
   # out is a list of the mpd outputs to show on the plot
@@ -832,10 +831,16 @@ plotRecruitmentMPD <- function(out       = NULL,
   nyear  <- length(out[[1]]$mpd$yr)
   ryr    <- out[[1]]$mpd$yr[(1+sage):nyear]
   rt     <- out[[1]]$mpd$rt
-
+  if(!recrShowFinalYear){
+    ryr <- ryr[-length(ryr)]
+    rt <- rt[-length(rt)]
+  }
   yUpper <- max(rt)
   for(model in 1:length(out)){
     tmprt  <- out[[model]]$mpd$rt
+    if(!recrShowFinalYear){
+      tmprt <- tmprt[-length(tmprt)]
+    }
     yUpper <- max(yUpper, tmprt)
   }
   xlim <- c(min(ryr), max(ryr))
@@ -844,6 +849,10 @@ plotRecruitmentMPD <- function(out       = NULL,
       tmpsage  <- out[[model]]$mpd$sage
       tmpnyear <- length(out[[model]]$mpd$yr)
       tmpryr   <- out[[model]]$mpd$ryr[(1+tmpsage):nyear]
+      if(!recrShowFinalYear){
+        tmpryr <- tmpryr[-length(tmpryr)]
+        tmprt <- tmprt[-length(tmprt)]
+      }
       minx     <- min(min(tmpryr), min(xlim))
       maxx     <- max(max(tmpryr), max(xlim))
       xlim     <- c(minx, maxx)
@@ -853,7 +862,6 @@ plotRecruitmentMPD <- function(out       = NULL,
   if(showtitle){
     title <- "Recruitment"
   }
-
   plot(ryr, rt, type = "o", col=colors[[1]], pch=19, lty=lty[[1]], lwd=2, ylim=c(0,yUpper), xlim=xlim,
        ylab="Recruitment (millions)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
@@ -862,6 +870,10 @@ plotRecruitmentMPD <- function(out       = NULL,
       nyear <- length(out[[line]]$mpd$yr)
       ryr   <- out[[line]]$mpd$yr[(1+sage):nyear]
       rt    <- out[[line]]$mpd$rt
+      if(!recrShowFinalYear){
+        ryr <- ryr[-length(ryr)]
+        rt <- rt[-length(rt)]
+      }
       lines(ryr, rt, type="o",col=colors[[line]], pch=19, lty=lty[[line]], lwd=2, ylim=c(0,yUpper), las=1)
     }
   }
@@ -879,6 +891,7 @@ plotRecruitmentMCMC <- function(out       = NULL,
                                 verbose   = FALSE,
                                 showtitle = TRUE,
                                 add       = FALSE,
+                                recrShowFinalYear = TRUE,
                                 leg = "topright"){
   # Recruitment plot for an MCMC
   # out is a list of the mcmc outputs to show on the plot
@@ -926,6 +939,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
   for(model in 1:length(out)){
    #quants[[model]] <- getQuants(out[[model]]$mcmc$rt[[1]], ci)
    rt <- window(mcmc(out[[model]]$mcmc$rt[[1]]), start=burn, thin=thin)
+   if(!recrShowFinalYear){
+     rt <- rt[,-ncol(rt)]
+   }
    quants[[model]] <- getQuants(rt, ci)
   }
   yUpper <- max(quants[[1]])
@@ -934,12 +950,18 @@ plotRecruitmentMCMC <- function(out       = NULL,
   }
 
   yrs <- as.numeric(names(out[[1]]$mcmc$rt[[1]]))
+  if(!recrShowFinalYear){
+    yrs <- yrs[-length(yrs)]
+  }
 
   #RF - need to get xlim in case time series lengths differ
   Xlim <- c(min(yrs), max(yrs))
   if(length(out)>1){
     for(model in 1:length(out)){
-      tmpryr     <- as.numeric(names(out[[model]]$mcmc$rt[[1]]))
+      tmpryr <- as.numeric(names(out[[model]]$mcmc$rt[[1]]))
+      if(!recrShowFinalYear){
+        tmpryr <- tmpryr[-length(tmpryr)]
+      }
       minx <- min(min(tmpryr), min(Xlim))
       maxx <- max(max(tmpryr), max(Xlim))
       Xlim <- c(minx, maxx)
@@ -949,7 +971,6 @@ plotRecruitmentMCMC <- function(out       = NULL,
   if(showtitle){
     title <- "Recruitment"
   }
-
   plot(yrs, quants[[1]][2,], type="p", pch=20, col=colors[[1]], ylim=c(0,yUpper), xlim=Xlim, xlab="Year", ylab="Recruitment (millions)", main=title, las=1)
   arrows(yrs, quants[[1]][1,],
          yrs, quants[[1]][3,], col=colors[[1]], code=3, angle=90, length=0.01)
@@ -957,6 +978,9 @@ plotRecruitmentMCMC <- function(out       = NULL,
     incOffset <- offset
     for(line in 2:length(out)){
       yrs <- as.numeric(names(out[[line]]$mcmc$rt[[1]]))
+      if(!recrShowFinalYear){
+        yrs <- yrs[-length(yrs)]
+      }
       # Plot the uncertainty
       points(yrs+incOffset, quants[[line]][2,], pch=20, col=colors[[line]])
       arrows(yrs+incOffset, quants[[line]][1,],
@@ -1305,22 +1329,34 @@ plotIndexMPD <- function(scenario   = NULL,
       xmin <- min(xmin, indices[[ind]][,1])
       xmax <- max(xmax, indices[[ind]][,1])
     }
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
-            las = 1, main = title, xlim = c(xmin, xmax),
-            ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)), xlab="Year",
-            ylab="x 1000 metric tonnes")
-    #axis(1, at = seq(xmin,xmax))
-    #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
+            las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
+            ylab="", axes=FALSE)
   }else{
+    xmin <- min(yrs)
+    xmax <- max(yrs)
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
-            las = 1, main = title, ylim = c(0,max(mat, inputindices$it + cv * inputindices$it)),
-            xlab="Year", ylab="x 1000 metric tonnes")
+            las = 1, main = title, ylim = ylim,
+            xlab="", ylab="", axes=FALSE)
     #axis(1, at = yrs)
     #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
   }
   points(yrs, inputindices$it, pch = 3)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
+
+  axis(1, at     = seq(min(xlim),max(xlim)),
+          labels = seq(min(xlim),max(xlim)))
+  axis(2)
+  box()
+  mtext("Year", 1, line=2)
+  mtext("x 1,000 tonnes", 2, line=2)
 
   if(!is.null(leg)){
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
@@ -1643,6 +1679,9 @@ plotReferencePointsMCMC <- function(out       = NULL,
 
   colors <- c(do.call("cbind",colors)) # Convert colors list to vector
   names  <- c(do.call("cbind",names))
+  if(!is.null(shortnames)){
+    names <- shortnames
+  }
 
   par(mfrow=c(2,2), mai=c(0.3,0.5,0.4,0.2), oma=c(1.,1.2,0.2,0.1))
   if(showumsy){
@@ -1653,12 +1692,101 @@ plotReferencePointsMCMC <- function(out       = NULL,
     boxplot(fmsy, pch=pch, range = ci/100, names=names, border=colors, main="FMSY", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   }
   ymax <- max(msy)
-  if(!is.null(shortnames)){
-    names <- shortnames
-  }
   boxplot(msy, pch=pch, range = ci/100, names=names, border=colors, main="MSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   ymax <- max(bo)
   boxplot(bo, pch=pch, range = ci/100, names=names, border=colors, main="B0 (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
   ymax <- max(bmsy)
   boxplot(bmsy, pch=pch, range = ci/100, names=names, border=colors, main="BMSY (1000mt)", las=1, cex.axis=1.2, cex=1.2, ylim=c(0,ymax))
+}
+
+plotIndexData <- function(scenario   = NULL,
+                          index      = NULL,
+                          showtitle  = TRUE,
+                          indfixaxis = FALSE){
+  # Index data plot
+  # scenario is the scenario number.
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # Notes:
+  # - Models may have different gears than others, but we want the index plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
+  # indfixaxis, if TRUE then all index plots will be scaled to the overall year span of all indices
+
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Get index names included in the model
+  inputs <- op[[1]]$inputs$data
+  indices <- inputs$indices
+  gearindices <- NULL
+  for(ind in 1:length(indices)){
+    indexmat <- as.data.frame(indices[[ind]])
+    gearindices <- c(gearindices, unique(indexmat$gear))
+  }
+  if(!is.element(index,gearindices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }
+  currindexname <- inputs$gearNames[index]
+  mat <- NULL
+  # For each model, match the data with the gear name 'currgearname'
+  # If it does not match, it will be skipped
+  indexname <- inputs$gearNames[index]
+  gearnum <- match(currindexname, inputs$gearNames)
+  if(is.na(gearnum)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }else{
+    indices <- inputs$indices
+    gearindreal <- NA
+    for(ind in 1:length(indices)){
+      indexmat <- as.data.frame(indices[[ind]])
+      gearindex <- unique(indexmat$gear)
+      if(gearindex == gearnum){
+        gearindreal <- ind
+      }
+    }
+    if(!is.na(gearindreal)){
+      inputindices <- as.data.frame(indices[[gearindreal]])
+      yrs          <- inputindices$iyr
+      cv           <- 1 / inputindices$wt
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+      return(NULL)
+    }
+  }
+  title <- ""
+  if(showtitle){
+    title <- paste0("Index fit - ",currindexname)
+  }
+  # If user requests a fixed scale x-axis, go through all indices to get year range
+  ymin <- 0
+  ymax <- NULL
+  if(indfixaxis){
+    xmin <- NULL
+    xmax <- NULL
+    for(ind in 1:length(indices)){
+      xmin <- min(xmin, indices[[ind]][,1])
+      xmax <- max(xmax, indices[[ind]][,1])
+    }
+    ymax <- max(inputindices$it + cv * inputindices$it)
+  }else{
+    xmin <- min(yrs)
+    xmax <- max(yrs)
+    ymax <- max(inputindices$it + cv * inputindices$it)
+  }
+  xlim <- c(xmin, xmax)
+  ylim <- c(ymin, ymax)
+  plot(yrs, inputindices$it, type="p", pch = 3, ylim=ylim, xlim=xlim, ylab="", xlab="", axes=FALSE)
+  arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
+         code = 3, angle = 90, length = 0.01, lwd=2, col = "black")
+  axis(1, at     = seq(min(xlim),max(xlim)),
+          labels = seq(min(xlim),max(xlim)))
+  axis(2)
+  box()
+  mtext("Year", 1, line=2)
+  mtext("x 1,000 tonnes", 2, line=2)
 }

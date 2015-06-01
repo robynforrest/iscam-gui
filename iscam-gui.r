@@ -178,6 +178,10 @@ iscam <- function(reloadScenarios      = FALSE,
   showumsy <- val$umsy
   sensshowumsy <- val$sensumsy
 
+  # recrShowFinalYear for recruitment plots only
+  recrShowFinalYear <- val$recrShowFinalYear
+  recrsensShowFinalYear <- val$recrsensShowFinalYear
+
   plotMCMC  <- val$plotMCMC
   ci        <- val$entryConfidence  # Confidence interval
   pType     <- val$viewPlotType
@@ -204,6 +208,8 @@ iscam <- function(reloadScenarios      = FALSE,
   startYearCatch <- val$entryCatchStart
   endYearCatch <- val$entryCatchEnd
   catchAreas <- .parseAreas(val$entryCatchAreas)
+
+  nchains <- val$nchains # Used for Gelman diagnostic (MCMC)
 
   if(val$figureType == "sEPS"){
     figtype <- .EPS_TYPE
@@ -238,7 +244,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSVSBiomassAllAreas"                   = {plotTS(s,12,savefig,"VB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, showSbio=TRUE, opacity=opacity)},
            "sTSSpawningDepletionAllAreas"           = {plotTS(s,3,savefig,"Depl",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
            "sTSSpawningDepletionByArea"             = {plotTS(s,4,savefig,"DeplByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
-           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
+           "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity,recrShowFinalYear=recrShowFinalYear)},
            "sTSRecruitmentDevsAllAreas"             = {plotTS(s,11,savefig,"RecrDevs",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
            "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecrByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
            # Only MPD for Index
@@ -287,13 +293,13 @@ iscam <- function(reloadScenarios      = FALSE,
            "sParameterPairs"                        = {plotConvergence(s,4,savefig,"Pairs",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,latexnames=TRUE)},
            "sPriorsVsPosts"                         = {plotConvergence(s,5,savefig,"PriorsPosts",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,exFactor=1.5,showEntirePrior=T, priorsonly=priorsonly,latexnames=TRUE)},
            "sVariancePartitions"                    = {plotConvergence(s,6,savefig,"VariancePartitions",ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,latexnames=TRUE)},
+           "sMCMCGelman"                            = {plotConvergence(s,7,savefig,"Gelman",nchains=nchains,ps=ps,burnthin=burnthin,figtype=figtype,showtitle=showtitle,latexnames=TRUE)},
            #"sMCMCGeweke"                            = {fig.mcmc.geweke(scenario=val$entryScenario)},
-           #"sMCMCGelman"                            = {fig.mcmc.gelman(scenario=val$entryScenario)},
            # From iscam-gui-figures-timeseries.r
            "sSensSB"                                = {plotTS(s,1,savefig,"SB",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
            "sSensVB"                                = {plotTS(s,12,savefig,"VB",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
            "sSensBRatio"                            = {plotTS(s,3,savefig,"Depl",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity)},
-           "sSensRecruit"                           = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity, recrOffset=val$entryRecrOffset)},
+           "sSensRecruit"                           = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, opacity=opacity, recrOffset=val$entryRecrOffset,recrShowFinalYear=recrsensShowFinalYear)},
            # No sensitivity plot for MCMC Indices
            "sSensIndex"                             = {plotTS(s,7,savefig,paste0("Index-",currIndexName),FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle, indfixaxis=sensindfixaxis, opacity=opacity)},
            #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},

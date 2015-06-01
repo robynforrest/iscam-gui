@@ -198,7 +198,6 @@ plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbos
     col <- c(col, ncol(mat)+1)
     lty <- c(lty, 2)
     lwd <- c(lwd, 3)
-    browser()
     curve(1/(1+exp(-(x-a50)/sigma_a50)), col=ncol(mat)+1, lty=2, lwd=3, add=TRUE)
   }
   if(!is.null(leg)){

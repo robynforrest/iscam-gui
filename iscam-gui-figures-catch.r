@@ -553,3 +553,235 @@ plotCatchesArea <- function(leg              = "topright",
   }
 }
 
+# Plot catch, exploitation rate and median spawning biomass on one plot
+plotce <- function(leg              = "topleft",
+                   showtitle        = TRUE,
+                   col              = 1,
+                   from             = 1996,       # Year to plot from
+                   to               = 2014,       # Year to plot to
+                   scalefactor      = 1000,       # Divide the catch and discard by this factor
+                   spaceBetweenBars = 0.5,        # space between each year's set of bars
+                   opacity          = 90,         # The transparency of the bars
+                   add              = FALSE,      # If TRUE, par will not be restored on exit
+                   burnthin         = c(1000,1),
+                   ci               = 95
+                   ){
+  # Catch plot for iscam model, plots by gear for landings and discards, split side-by-side bars
+  currFuncName <- getCurrFunc()
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  # Aggregate the landings data by year, with catch and discards summed for total catch
+  jcat <- catch[,-c(2:4,6:7)]
+  jcat <- aggregate(catch$CatchKG, list(catch$Year), sum, na.rm=TRUE)
+
+  # Aggregate the data by year, with discards summed
+  dcat <- catch[,-c(2:5,7)]
+  dcat <- aggregate(catch$DiscardedKG, list(catch$Year), sum, na.rm=TRUE)
+
+  colnames(jcat) <- c("year","catch")
+  colnames(dcat) <- c("year","catch")
+  years <- jcat$year
+  if(from < min(years) || to > max(years)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(years),", max = ",max(years),".")
+    return(NULL)
+  }
+  if(length(years) != length(dcat$year)){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  jcat <- jcat[jcat$year %in% from:to,]
+  years <- years[years %in% from:to]
+  jcat$catch <- jcat$catch / scalefactor
+
+  dcat <- dcat[dcat$year %in% from:to,]
+  dcat$catch <- dcat$catch / scalefactor
+
+  # Make a matrix out of the two data series, and plot side-by-side
+  allCatch <- as.matrix(cbind(jcat[,2],dcat[,2]))
+
+  col1        <- .getShade(1, opacity)
+  col2        <- .getShade(2, opacity)
+
+  #par(mar=c(5.1,4.1,4.1,2.1)) # This is the default
+  par(mar=c(5.1,4.1,4.1,4.1))
+
+  b <- barplot(t(allCatch),
+               #inset=c(-0.25,0),
+               axes=FALSE,
+               col=c(col1,col2),
+               border=c("black","black"),
+               ylim=c(0,1.1*max(apply(allCatch, 1, sum))),
+               las=2)
+
+  axis(1,
+       at = b,
+       labels = years)
+  axis(2,
+       at = seq(0,20000,5000),
+       labels = seq(0,2,0.5))
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+  # Add exploitation rate line
+  ut <- op[[1]]$outputs$mcmc$ut[[1]][[1]]
+  utw <- window(mcmc(ut), start=burn, thin=thin)
+  quants <- getQuants(utw, ci)
+  umed <- quants[2,]
+  par(new=TRUE)
+  plot(b, umed, type="l", lwd=3, lty=2, col="blue", axes=FALSE, ylim=c(0,1), ylab="", xlab="")
+  # Add reletive spawning biomass line
+  sbt <- window(mcmc(op[[1]]$outputs$mcmc$sbt[[1]]), start=burn, thin=thin)
+  bo <- as.vector(window(mcmc(op[[1]]$outputs$mcmc$params$bo), start=burn, thin=thin))
+  depl <- sbt / bo
+  quants <- getQuants(depl, ci)
+  depmed <- quants[2,]
+  depmed <- depmed[-length(depmed)]
+  par(new=TRUE)
+  plot(b, depmed, type="b", pch=19, lwd=2, lty=2, col="black", ylim=c(0,1), axes=FALSE, ylab="", xlab="")
+
+  cex <- 0.7
+  axis(4,
+       at = seq(0,1,0.2),
+       labels = seq(0,1,0.2))
+  box()
+  xlabel <- "Year"
+  ylabel <- "Catch (x 1000 t)"
+  ylabel2 <- "Proportion"
+
+  mtext(side=1,line=2,xlabel)
+  mtext(side=2,line=2,ylabel)
+  mtext(side=4,line=2,ylabel2)
+
+  if(!is.null(leg)){
+    legendList       <- c("Landings","Discards","Exploitation rate","Female Spawning Biomass")
+    legendShadeCols  <- c(c(col1,col2),c("blue","black"))
+    legendBorderCols <- c(c("black","black"),0,0)
+    legend(leg,legendList,col=legendShadeCols, pch=c(15,15,NA,19), pt.cex=1, lty=c(0,0,2,2), lwd=c(0,0,2,2), bty="n", merge=TRUE)
+    #legend(leg,legendList,col=legendBorderCols,fill=legendShadeCols,bty="n", merge=TRUE)
+  }
+}
+
+plotFT <- function(leg         = "topright",
+                   showtitle   = TRUE,
+                   col         = 1,     # color to plot
+                   from        = 1996,  # Year to plot from
+                   to          = 2014,  # Year to plot to
+                   scalefactor = 1000,  # Divide the catch and discard by this factor
+                   opacity     = 90,    # The transparency of the bars
+                   vessel = c(310913,   # Viking Enterprise
+                              312275,   # Northern Alliance
+                              310988,   # Osprey #1
+                              312405)){ # Raw Spirit
+  # Plot the catch of shoreside and freezer trawler fleets on one plot and generate a table of
+  # the landings, discards, and total catch for each.
+  currFuncName <- getCurrFunc()
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  # Split into two groups of data, one for SS and one for FT
+
+  ft <- catch[catch$Vessel_ID %in% vessel,]
+  ss <- catch[!(catch$Vessel_ID %in% vessel),]
+
+  # Aggregate the data by year, with catch summed
+  #jcat <- catch[,-c(2:4,6:7)]
+  jcatFT <- aggregate(ft$CatchKG, list(ft$Year), sum, na.rm=TRUE)
+  jcatSS <- aggregate(ss$CatchKG, list(ss$Year), sum, na.rm=TRUE)
+
+  # Aggregate the data by year, with discards summed
+  #dcat <- catch[,-c(2:5,7)]
+  dcatFT <- aggregate(ft$DiscardedKG, list(ft$Year), sum, na.rm=TRUE)
+  dcatSS <- aggregate(ss$DiscardedKG, list(ss$Year), sum, na.rm=TRUE)
+
+  colnames(jcatFT) <- c("year","catch")
+  colnames(jcatSS) <- c("year","catch")
+  colnames(dcatFT) <- c("year","catch")
+  colnames(dcatSS) <- c("year","catch")
+
+  yearsSS <- jcatSS$year
+  yearsFT <- jcatFT$year
+  # Only compare to SS because FT is only a few years likely not in the full timeseries
+  if(from < min(yearsSS) || to > max(yearsSS)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The year range entered does not match the data. min = ",min(yearsSS),", max = ",max(yearsSS),".")
+    return(NULL)
+  }
+  if(length(yearsSS) != length(dcatSS$year) ||
+     length(yearsFT) != length(dcatFT$year)){
+    # This code doesn't take into account the situation where there were discards in a year but no catches
+    cat0(.PROJECT_NAME,"->",currFuncName,"The catch and discards are mismatched. This probably means there were discards for one or more years when there was no catch.")
+    return(NULL)
+  }
+
+  jcatFT <- jcatFT[jcatFT$year %in% from:to,]
+  yearsFT <- yearsFT[yearsFT %in% from:to]
+  jcatFT$catch <- jcatFT$catch / scalefactor
+
+  jcatSS <- jcatSS[jcatSS$year %in% from:to,]
+  yearsSS <- yearsSS[yearsSS %in% from:to]
+  jcatSS$catch <- jcatSS$catch / scalefactor
+
+  dcatFT <- dcatFT[dcatFT$year %in% from:to,]
+  dcatFT$catch <- dcatFT$catch / scalefactor
+
+  dcatSS <- dcatSS[dcatSS$year %in% from:to,]
+  dcatSS$catch <- dcatSS$catch / scalefactor
+
+  # Sum the two amount by year
+  totcatchFT <- cbind(yearsFT,jcatFT[,2]+dcatFT[,2])
+  totcatchSS <- cbind(yearsSS,jcatSS[,2]+dcatSS[,2])
+
+  # Fill FT vectors with NAs to make same size as SS vectors
+  ftcatch <- fillna(jcatFT[,2], length(jcatSS[,2]))
+  ftdisc <- fillna(dcatFT[,2], length(dcatSS[,2]))
+  # Make a matrix out of the two data series, and plot side-by-side
+  allCatch <- as.matrix(cbind(jcatSS[,2],dcatSS[,2],ftcatch,ftdisc))
+  col1        <- .getShade(1, opacity)
+  col2        <- .getShade(2, opacity)
+  col3        <- .getShade(3, opacity)
+  col4        <- .getShade(4, opacity)
+
+  b <- barplot(t(allCatch),
+               inset=c(-0.25,0),
+               axes=FALSE,
+               col=c(col1,col2,col3,col4),
+               border=c("black","black","black","black"),
+               ylim=c(0,1.1*max(apply(allCatch, 1, sum))),
+               las=2)
+  cex <- 0.7
+  axis(2)
+  axis(1,
+       at     = b,
+       labels = yearsSS,
+       tick = TRUE)
+  box()
+  xlabel <- "Year"
+  ylabel <- "Catch (t)"
+
+  mtext(side=1,line=2,xlabel)
+  mtext(side=2,line=2,ylabel)
+  if(!is.null(leg)){
+    legendList       <- c("Shoreside Landings","Shoreside Discards","Freezer Trawler Landings","Freezer Trawler Discards")
+    legendShadeCols  <- c(col1,col2,col3,col4)
+    legendBorderCols <- c("black","black","black","black")
+    legend(leg,legendList,col=legendBorderCols,fill=legendShadeCols,bty="n", merge=TRUE)
+  }
+}
+
+fillna <- function(vec, num){
+  # Prepend 0s to vector vec if it is less than size num
+  # If it is n or larger, nothing will change
+  # returns the new vector of size num
+  if(length(vec) >= num){
+    return(vec)
+  }
+  len <- num - length(vec)
+  for(i in 1:len){
+    vec <- c(0, vec)
+  }
+  return(vec)
+}

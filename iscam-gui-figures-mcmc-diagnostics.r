@@ -10,6 +10,7 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
                             plotNum    = 1,         # Plot code number
                             savefig    = .SAVEFIG,  # TRUE/FALSE for plot output
                             fileText   = "Default", # Name of the file if png==TRUE
+                            nchains    = 2,         # Number of chains to use in the gelman diagnostics
                             # PlotSpecs: Width, height, and resolution of screen and file
                             ps         = list(pngres = .RESOLUTION,
                                               pngw   = .WIDTH,
@@ -35,7 +36,8 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
   # 4  Pairs plots with histograms
   # 5  Priors vs. Posteriors plots
   # 6  Variance partitions
-  # 7  Cumulative posteriors plot
+  # 7  Gelman Rubin Statistic plot, to show convergence of mcmc.
+  #    mcmc chain will be broken into nchains individual chains by the routine.
 
   currFuncName <- getCurrFunc()
   scenarioName <- op[[scenario]]$names$scenario
@@ -101,7 +103,8 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
     plotVariancePartitions(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
   }
   if(plotNum == 7){
-    plotCumulativePosterior(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
+    plotGelman(mcmcData, nchains=nchains, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
+    #plotCumulativePosterior(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames)
     #plotCumulativePosterior_Rowan(mcmcData, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames, col.trace=c("green","red","blue"))
   }
   if(savefig){
@@ -407,11 +410,15 @@ getLatexName <- function(n){
   if(n == "log_m") currname <- expression("ln(M)")
   if(n == "log_rbar") currname <- expression("ln("*bar("R")*")")
   if(n == "log_rinit") currname <- expression("ln("*bar("R")[init]*")")
-  if(n == "log_q1") currname <- expression("ln(q"[1]*")")
-  if(n == "log_q2") currname <- expression("ln(q"[2]*")")
-  if(n == "log_q3") currname <- expression("ln(q"[3]*")")
-  if(n == "log_q4") currname <- expression("ln(q"[4]*")")
+  # HACK! Add 1 to the q variable names that they match up with the sel parameters with estimated selectivity
+  # ARF assessment only, this needs to be fixed in iSCAM so that these kind of hacks don't have to be hard coded!
+  if(n == "log_q1") currname <- expression("ln(q"[2]*")")
+  if(n == "log_q2") currname <- expression("ln(q"[3]*")")
+  if(n == "log_q3") currname <- expression("ln(q"[4]*")")
+  if(n == "log_q4") currname <- expression("ln(q"[5]*")")
 
+  if(n == "vartheta") currname <- expression(vartheta)
+  if(n == "rho") currname <- expression(rho)
   return(currname)
 }
 
@@ -586,6 +593,9 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
   }
   priorNames <- rownames(priorSpecs)
   postNames <- names(mcmcData)
+
+  # Add the selectivity parameters to the prior specs table here
+  # inputs$control$sel
 
   if(length(grep("^m[12]$",postNames)) == 2){
     # Remove the single 'm' and add the two m's, log_m1 and log_m2 to the prior paramSpecs table
@@ -800,4 +810,137 @@ plotVariancePartitions <- function(mcmcData, burnthin = list(0,1), showtitle = T
   }
   pairs(d, pch=".", upper.panel=NULL, gap=0)
 
+}
+
+splitchain <- function(mc, nchains){
+  # Split the given mcmc data (mc) into nchain mcmc objects and return an mcmc.list of them
+  chainlist <- list()
+  nrowseach <- floor(nrow(mc)/nchains)
+  lower <- 1
+  upper <- nrowseach
+  for(chain in 1:nchains){
+    chainlist[[chain]] <- mcmc(mc[lower:upper,])
+    lower <- upper + 1
+    upper <- lower + nrowseach - 1
+  }
+  return(chainlist)
+}
+
+plotGelman <- function(mcmcData, nchains = 2, burnthin=burnthin, showtitle = showtitle, latexnames=latexnames){
+  # Plot the gelman-rubin convergence for these mcmcData
+
+  oldPar <- par(no.readonly=TRUE)
+  on.exit(par(oldPar))
+
+  burnin       <- burnthin[[1]]
+  thinning     <- burnthin[[2]]
+  currFuncName <- getCurrFunc()
+  if(is.null(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"mcmcData must be supplied.\n")
+    return(NULL)
+  }
+  if(burnin > nrow(mcmcData)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"Burnin value exceeds mcmc chain length.\n")
+    return(NULL)
+  }
+  # np is number of parameters
+  np <- ncol(mcmcData)
+  nside <- getRowsCols(np)
+  par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
+  mcmcData <- window(as.matrix(mcmcData), start=burnin, thin=thinning)
+  for(param in 1:np){
+    par(mar=.MCMC_MARGINS)
+    mc <- as.matrix(mcmcData[,param])
+    # Break chain into 'nchains' number of chains
+    mc <- splitchain(mc, nchains)
+    gelman.plot(mc, auto.layout=FALSE, xlab="", ylab="")
+    name <- colnames(mcmcData)[param]
+    regname <- name
+    if(latexnames){
+      name <- getLatexName(name)
+    }
+    title(name)
+    #cat0("gelman.diag for parameter: ", regname)
+    #print(gelman.diag(mc))
+  }
+  # Add legend in its own panel
+  #plot(0,xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='')
+  #box()
+  #legend(1,1,legend=c("Median","97.5%"),col=c("black","red"),lty=c(1,4), cex=0.6)
+  mtext("Sample number in chain", side=1, line=1, outer=TRUE)
+  mtext("Shrink factor", side=2, outer=TRUE)
+}
+
+gelman.plot <- function (x, bin.width = 10, max.bins = 50, confidence = 0.95, 
+    transform = FALSE, autoburnin = TRUE, auto.layout = TRUE, 
+    ask, col = 1:2, lty = 1:2, xlab = "last iteration in chain", 
+    ylab = "shrink factor", type = "l", ...) 
+{
+    if (missing(ask)) {
+        ask <- if (is.R()) {
+            dev.interactive()
+        }
+        else {
+            interactive()
+        }
+    }
+    x <- as.mcmc.list(x)
+    oldpar <- NULL
+    on.exit(par(oldpar))
+    if (auto.layout) 
+        oldpar <- par(mfrow = set.mfrow(Nchains = nchain(x), 
+            Nparms = nvar(x)))
+    y <- gelman.preplot(x, bin.width = bin.width, max.bins = max.bins, 
+        confidence = confidence, transform = transform, autoburnin = autoburnin)
+    all.na <- apply(is.na(y$shrink[, , 1, drop = FALSE]), 2, 
+        all)
+    if (!any(all.na)) 
+        for (j in 1:nvar(x)) {
+            matplot(y$last.iter, y$shrink[, j, ], col = col, 
+                lty = lty, xlab = xlab, ylab = ylab, type = type, 
+                ...)
+            abline(h = 1)
+            ymax <- max(c(1, y$shrink[, j, ]), na.rm = TRUE)
+            #leg <- dimnames(y$shrink)[[3]]
+            xmax <- max(y$last.iter)
+            #legend(xmax, ymax, legend = leg, lty = lty, bty = "n", 
+            #    col = col, xjust = 1, yjust = 1)
+            #title(main = varnames(x)[j])
+            if (j == 1) 
+                oldpar <- c(oldpar, par(ask = ask))
+        }
+    return(invisible(y))
+}
+
+gelman.preplot <-
+  function (x, bin.width = bin.width, max.bins = max.bins,
+            confidence = confidence, transform = transform,
+            autoburnin = autoburnin) 
+{
+  x <- as.mcmc.list(x)
+  if (niter(x) <= 50) 
+    stop("Less than 50 iterations in chain")
+  nbin <- min(floor((niter(x) - 50)/thin(x)), max.bins)
+  binw <- floor((niter(x) - 50)/nbin)
+  last.iter <- c(seq(from = start(x) + 50 * thin(x), by = binw * 
+                     thin(x), length = nbin), end(x))
+  shrink <- array(dim = c(nbin + 1, nvar(x), 2))
+  dimnames(shrink) <- list(last.iter, varnames(x),
+                           c("median", paste(50 * (confidence + 1), "%",
+                                             sep = ""))
+                           )
+  for (i in 1:(nbin + 1)) {
+    shrink[i, , ] <- gelman.diag(window(x, end = last.iter[i]), 
+                                 confidence = confidence,
+                                 transform = transform,
+                                 autoburnin = autoburnin)$psrf
+  }
+  all.na <- apply(is.na(shrink[, , 1, drop = FALSE]), 2, all)
+  if (any(all.na)) {
+    cat("\n******* Error: *******\n")
+    cat("Cannot compute Gelman & Rubin's diagnostic for any chain \n")
+    cat("segments for variables", varnames(x)[all.na], "\n")
+    cat("This indicates convergence failure\n")
+  }
+  return(list(shrink = shrink, last.iter = last.iter))
 }

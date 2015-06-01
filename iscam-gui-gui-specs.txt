@@ -113,7 +113,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sTSVSBiomassAllAreas                text="S & V biomass"               function=.subView sticky=W mode=character
                null
                radio name=viewPlotType value=sTSRecruitmentAllAreas              text="Recruitment"                 function=.subView sticky=W mode=character
-               null
+               check name=recrShowFinalYear  checked=T                           text="Show final year"             function=.subView
                radio name=viewPlotType value=sTSRecruitmentDevsAllAreas          text="Recruitment deviations"      function=.subView sticky=W mode=character
                null
                radio name=viewPlotType value=sTSIndex                            text="Index fits"                   function=.subView sticky=W mode=character
@@ -201,7 +201,7 @@ grid 3 1 padx=10 pady=5 sticky=W
           radio name=viewPlotType value=sSensRecruit        text="Recruitment"                       function=.subView mode=character sticky=W
           label text="Bar offset" sticky=W
           entry name=entryRecrOffset function=.subView action="changeRecrOffset" width=5  padx=10 entryfont="10" value=0.1 sticky=W
-          null
+          check name=recrsensShowFinalYear  checked=T                           text="Show final year"             function=.subView
           null
           #8
           radio name=viewPlotType value=sSensF              text="Fishing mortality (F)"                 function=.subView mode=character sticky=W
@@ -256,7 +256,7 @@ grid 3 1 padx=10 pady=5 sticky=W
 #--------------------------------------------------------------------#
 #--                      Notebook Tab:  DiagnosticsFigs            --#
 #--------------------------------------------------------------------#
-          grid 7 3 byrow=T sticky=N relief=raised
+          grid 8 3 byrow=T sticky=N relief=raised
                #1
                label text="MCMC Diagnostics" font="bold 10" sticky=NW
                null
@@ -264,7 +264,7 @@ grid 3 1 padx=10 pady=5 sticky=W
                #2
                radio name=viewPlotType value=sMCMCTrace          text="Traceplots"                       function=.subView mode=character sticky=W
                label text="Burn" font="bold 10" width=5 sticky=E
-               entry name=burn function=.subView action="changeBurnThin" width=5 value=0   entryfont="10"
+               entry name=burn function=.subView action="changeBurnThin" width=5 value=1000   entryfont="10"
                #3
                radio name=viewPlotType value=sMCMCAutocor        text="Autocorrelation"                  function=.subView mode=character sticky=W
                label text="Thin" font="bold 10" width=5 sticky=E
@@ -285,14 +285,14 @@ grid 3 1 padx=10 pady=5 sticky=W
                radio name=viewPlotType value=sVariancePartitions text="Variance partitions"              function=.subView mode=character sticky=W
                null
                null
-               #5
+               #8
+               radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
+               label text="Nchains" font="bold 10" width=5 sticky=E
+               entry name=nchains function=.subView action="changeNchains" width=5 value=3   entryfont="10"
+               #9
                #radio name=viewPlotType value=sMCMCGeweke         text="Geweke Diagnostic"                     function=.subView mode=character sticky=W
                #label text="Nbin" font="bold 10" width=5 sticky=E
                #entry name=nbin  function=.subView action="changeBurnThin" width=5 value=20   entryfont="10"
-               #6
-               #radio name=viewPlotType value=sMCMCGelman         text="Gelman Diagnostic"                     function=.subView mode=character sticky=W
-               #null
-               #null
 
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Tables                      --#

@@ -880,8 +880,8 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
 
   # Now we have a nice bunch of string elements which are the inputs for iscam.
   # Here we parse them into a list structure
-  # This is dependent on the current format of the DAT file and needs to
-  # be updated whenever the DAT file changes format
+  # This is dependent on the current format of the CTL file and needs to
+  # be updated whenever the CTL file changes format
   tmp <- list()
   ind <- 0
   tmp$npar <- as.numeric(dat[ind <- ind + 1])
@@ -1111,7 +1111,10 @@ readMCMC <- function(dired = NULL, verbose = TRUE){
   tmp$rdev   <- extractGroupMatrices(rdev, prefix = "rdev")
   vbt        <- read.csv(mcmcvbtfn)
   tmp$vbt    <- extractAreaSexMatrices(vbt, prefix = "vbt")
-  tmp$proj   <- read.csv(mcmcprojfn)
+  tmp$proj <- NULL
+  if(file.exists(mcmcprojfn)){
+    tmp$proj   <- read.csv(mcmcprojfn)
+  }
   return(tmp)
 }
 

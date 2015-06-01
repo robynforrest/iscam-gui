@@ -163,6 +163,31 @@ drawEnvelope <- function(yrs, quants, color, yLower = 0, yUpper, first, opacity 
 
   if(first){
     plot(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
+    shade <- .getShade(color, opacity)
+    polyYears <- c(yrs, rev(yrs))
+    polyCI    <- c(lower, rev(upper))
+    polygon(polyYears, polyCI, col = shade)
+  }else{
+    lines(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
+    # Upper and lower part of CI
+    lines(yrs, lower, col=color, lty=5, lwd=1)
+    lines(yrs, upper, col=color, lty=5, lwd=1)
+  }
+}
+
+drawEnvelopeShaded <- function(yrs, quants, color, yLower = 0, yUpper, first, opacity = 90, ...){
+  # Draw a time series envelope on a device on which plot.new has already been called
+  # Assumptions: quants is a 3-row matrix,
+  #  where the middle row is the median and the other two are the lower and upper
+  #  values for some confidence interval.
+  # yUpper is the upper limit for the y-axis
+  # first is a boolean, if TRUE, plot will be called. If FALSE, lines will be called.
+  lower  <- quants[1,]
+  median <- quants[2,]
+  upper  <- quants[3,]
+
+  if(first){
+    plot(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
   }else{
     lines(yrs, median, type="l", col=color, lty=1, lwd=2, ylim=c(yLower, yUpper), ...)
   }
