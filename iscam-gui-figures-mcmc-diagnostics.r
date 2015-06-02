@@ -155,10 +155,10 @@ stripStaticParams <- function(scenario, dat){
   # remove the log_ stuff from the input parameter names
   snames <- gsub("log_","",snames)
   # There will be either one "m" or "m1" and "m2" in pnames.
-  # If "m" is in snames, remove the "m1", and "m2" from pnames
+  # If "m" is in snames, remove the "m1", and "m2" from pnames as well if they exist
   if("m" %in% snames){
     ms <- c("m1","m2")
-    pnames <- pnames[!(pnames %in% ms)]
+    snames <- c(snames, "m1", "m2")
   }
   # The following also removes "m" in a combined sex model
   dat <- dat[,!(pnames %in% snames)]
@@ -375,51 +375,110 @@ plotTraces <- function(mcmcData = NULL, burnthin = list(0,1), axis.lab.freq=200,
   }
 }
 
-getLatexName <- function(n){
-  # Return a pretty version of the parameter name found in variable 'n'
-  if(n == "ro") currname <- expression("R"[0])
-  if(n == "h") currname <- expression("h")
-  if(n == "m1") currname <- expression("M")
-  if(n == "rbar") currname <- expression(bar("R"))
-  if(n == "rinit") currname <- expression(bar("R")[init])
-  if(n == "bo") currname <- expression("B"[0])
-  if(n == "bmsy") currname <- expression("B"[MSY])
-  if(n == "msy") currname <- expression("MSY")
-  if(n == "fmsy") currname <- expression("F"[MSY])
-  if(n == "umsy") currname <- expression("U"[MSY])
-  # HACK! Add 1 to the q variable names that they match up with the sel parameters with estimated selectivity
-  # ARF assessment only, this needs to be fixed in iSCAM so that these kind of hacks don't have to be hard coded!
-  if(n == "q1") currname <- expression("q"[2])
-  if(n == "q2") currname <- expression("q"[3])
-  if(n == "q3") currname <- expression("q"[4])
-  if(n == "q4") currname <- expression("q"[5])
-  if(n == "ssb") currname <- expression("SSB")
-  if(n == "sel1") currname <- expression(hat(a)[1])
-  if(n == "selsd1") currname <- expression(hat(gamma)[1])
-  if(n == "sel2") currname <- expression(hat(a)[2])
-  if(n == "selsd2") currname <- expression(hat(gamma)[2])
-  if(n == "sel3") currname <- expression(hat(a)[3])
-  if(n == "selsd3") currname <- expression(hat(gamma)[3])
-  if(n == "sel4") currname <- expression(hat(a)[4])
-  if(n == "selsd4") currname <- expression(hat(gamma)[4])
-  if(n == "sel5") currname <- expression(hat(a)[5])
-  if(n == "selsd5") currname <- expression(hat(gamma)[5])
+getLatexName <- function(name, addToQ = 0){
+  # Return a pretty version of the parameter name found in variable 'name'
+  # addToQ is an integer to the parameter name for the q's. This is necessary
+  # because iscam sets the q parameter names to 1, 2, 3... regardless of the
+  # gear number. i.e. if gear 1 is a trawl fishery and gear 2 is a survey,
+  # iscam will call q1 the survey gear. We must add 1 to it to get q2 to
+  # accurately portray the survey gear number
+  if(name == "ro") return(expression("R"[0]))
+  if(name == "rbar") return(expression(bar("R")))
+  if(name == "rinit") return(expression(bar("R")[init]))
+  if(name == "bo") return(expression("B"[0]))
+  if(name == "vartheta") return(expression(vartheta))
+  if(name == "rho") return(expression(rho))
+  if(name == "bmsy") return(expression("B"[MSY]))
+  if(name == "msy") return(expression("MSY"))
+  if(name == "fmsy") return(expression("F"[MSY]))
+  if(name == "umsy") return(expression("U"[MSY]))
+  if(name == "ssb") return(expression("SSB"))
+  if(name == "sel1") return(expression(hat(a)[1]))
+  if(name == "selsd1") return(expression(hat(gamma)[1]))
+  if(name == "sel2") return(expression(hat(a)[2]))
+  if(name == "selsd2") return(expression(hat(gamma)[2]))
+  if(name == "sel3") return(expression(hat(a)[3]))
+  if(name == "selsd3") return(expression(hat(gamma)[3]))
+  if(name == "sel4") return(expression(hat(a)[4]))
+  if(name == "selsd4") return(expression(hat(gamma)[4]))
+  if(name == "sel5") return(expression(hat(a)[5]))
+  if(name == "selsd5") return(expression(hat(gamma)[5]))
 
-  if(n == "log_ro") currname <- expression("ln(R"[0]*")")
-  if(n == "h") currname <- expression("h")
-  if(n == "log_m") currname <- expression("ln(M)")
-  if(n == "log_rbar") currname <- expression("ln("*bar("R")*")")
-  if(n == "log_rinit") currname <- expression("ln("*bar("R")[init]*")")
-  # HACK! Add 1 to the q variable names that they match up with the sel parameters with estimated selectivity
-  # ARF assessment only, this needs to be fixed in iSCAM so that these kind of hacks don't have to be hard coded!
-  if(n == "log_q1") currname <- expression("ln(q"[2]*")")
-  if(n == "log_q2") currname <- expression("ln(q"[3]*")")
-  if(n == "log_q3") currname <- expression("ln(q"[4]*")")
-  if(n == "log_q4") currname <- expression("ln(q"[5]*")")
+  if(name == "log_ro") return(expression("ln(R"[0]*")"))
+  if(name == "h") return(expression("h"))
+  if(name == "m1") return(expression("M"[1]))
+  if(name == "m2") return(expression("M"[2]))
+  if(name == "log_m") return(expression("ln(M)"))
+  if(name == "log_rbar") return(expression("ln("*bar("R")*")"))
+  if(name == "log_rinit") return(expression("ln("*bar("R")[init]*")"))
 
-  if(n == "vartheta") currname <- expression(vartheta)
-  if(n == "rho") currname <- expression(rho)
-  return(currname)
+  if(name == "q1"){
+    digit <- 1 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q2"){
+    digit <- 2 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q3"){
+    digit <- 3 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q4"){
+    digit <- 4 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q5"){
+    digit <- 5 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q6"){
+    digit <- 6 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q7"){
+    digit <- 7 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+  if(name == "q8"){
+    digit <- 8 + addToQ
+    return(substitute("q"[digit], list(digit=digit)))
+  }
+
+  if(name == "log_q1"){
+    digit <- 1 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q2"){
+    digit <- 2 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q3"){
+    digit <- 3 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q4"){
+    digit <- 4 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q5"){
+    digit <- 5 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q6"){
+    digit <- 6 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q7"){
+    digit <- 7 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+  if(name == "log_q8"){
+    digit <- 8 + addToQ
+    return(substitute("ln(q"[digit]*")", list(digit=digit)))
+  }
+
+  return(NULL)
 }
 
 plotAutocor <- function(mcmcData = NULL,
