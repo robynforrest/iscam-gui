@@ -686,7 +686,6 @@ plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE, add=TRUE){
     sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
     nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
   }
-  browser()
   nages <- length(sage:nage)
   ages <- sage:nage
   nsex <- op[[scenario]]$inputs$data$nsex

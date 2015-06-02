@@ -444,6 +444,10 @@ decisionTable <- function(outMCMC   = NULL,
   on.exit(par(oldPar))
 
   projdat <- outMCMC[[1]]$mcmc$proj
+  if(is.null(projdat)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must run the model in projection mode first.")
+    return(NULL)
+  }
   projfields <- names(projdat)
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
