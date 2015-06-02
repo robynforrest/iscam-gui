@@ -152,7 +152,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
                                   "*.eva",
                                   "*.hes",
                                   "*.par",
-                                  "*.re*",
+                                  "*\\.re*",
                                   "*.std",
                                   "*.psv",
                                   "variance",

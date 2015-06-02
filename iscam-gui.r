@@ -849,6 +849,7 @@ iscam <- function(reloadScenarios      = FALSE,
     for(ind in 1:length(.OUTPUT_FILES)){
       # Remove any output files from the copy source so as not to mess up the retro directory
       pattern <- .OUTPUT_FILES[ind]
+
       # Replace * wildcard with an alphnumeric wildcard
       pattern <- sub("\\*","[[:alnum:]]+",pattern)
       gr <- grep(pattern, files)
