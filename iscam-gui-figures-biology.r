@@ -679,8 +679,14 @@ plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE, add=TRUE){
   }
   # Get initial age comp data
   gears <- c(2,3)
-  sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
-  nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
+  if(length(op[[scenario]]$output$mpd$n_A_sage) == 1){
+    sage <- op[[scenario]]$output$mpd$n_A_sage
+    nage <- op[[scenario]]$output$mpd$n_A_nage
+  }else{
+    sage <- op[[scenario]]$output$mpd$n_A_sage[gears]
+    nage <- op[[scenario]]$output$mpd$n_A_nage[gears]
+  }
+  browser()
   nages <- length(sage:nage)
   ages <- sage:nage
   nsex <- op[[scenario]]$inputs$data$nsex
