@@ -76,6 +76,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   #10 Reference Points
   #11 Recruitment deviations
   #12 Vulnerable biomass all areas (+Spawning biomass all areas)
+  #13 Relative spawning biomass with USR (0.8MSY) and LRP (0.4MSY) with uncertainties and 0.2B0 and 0.4B0 lines
 
   currFuncName <- getCurrFunc()
 
@@ -137,7 +138,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 12){
+  if(plotNum < 1 || plotNum > 13){
     cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 12. You passed ",plotNum)
     return(FALSE)
   }
@@ -222,6 +223,15 @@ plotTS <- function(scenario   = 1,         # Scenario number
       plotVBiomassMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity, add=add)
     }else{
       plotVBiomassMPD(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle, showSbio = showSbio, opacity=opacity, add=add)
+    }
+  }
+
+  if(plotNum == 13){
+    # Relative spawning biomass with USR (0.8MSY) and LRP (0.4MSY) with uncertainties and 0.2B0 and 0.4B0 lines (for the SAR)
+    if(plotMCMC){
+      plotSAR(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg = leg, showtitle = showtitle, opacity=opacity, add=add)
+    }else{
+      cat0(.PROJECT_NAME,"->",currFuncName,"No Relative biomass/USR/LRP plot available for MPD runs. Check the plot MCMC box.")
     }
   }
 
@@ -562,7 +572,105 @@ plotDepletionMCMC <- function(out       = NULL,
   }
 }
 
+plotSAR <- function(out       = NULL,
+                    colors    = NULL,
+                    names     = NULL,
+                    ci        = NULL,
+                    burnthin  = list(0,1),
+                    verbose   = FALSE,
+                    showtitle = TRUE,
+                    leg       = "topright",
+                    add       = FALSE,
+                    opacity   = 90){
+  # Relative spawning biomass with USR (0.8MSY) and LRP (0.4MSY) with uncertainties and 0.2B0 and 0.4B0 lines (for the SAR)
+  # out is a list of the mcmc outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
 
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,3.1))
+
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  quants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    bo <- as.vector(window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin))
+    depl <- sbt / bo
+    quants[[model]] <- getQuants(depl, ci)
+  }
+  yUpper <- max(quants[[1]])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]])
+  }
+
+  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  title <- ""
+  if(showtitle){
+    title <- "Relative Spawning Biomass/USR/LRP"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, max(1.1,yUpper), first=TRUE, opacity=opacity,
+               #ylab=expression("Relative Spawning Biomass (" ~ frac(B[t],B[0]) ~ ")"),
+               ylab=expression("Relative Spawning Biomass (" ~ B[t] ~ "/" ~ B[0] ~ ")"),
+               xlab="Year", main=title, las=1)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
+    }
+  }
+
+  # Envelope done, now plot USR and LRP with credible intervals
+  bmsy <- out[[1]]$mcmc$params$bmsy / out[[1]]$mcmc$params$bo
+  bmsy4 <- 0.4 * bmsy
+  bmsy8 <- 0.8 * bmsy
+  bmsy4quants <- getQuants(bmsy4, ci)
+  bmsy8quants <- getQuants(bmsy8, ci)
+  bmsy4shade <- .getShade("red", opacity)
+  bmsy8shade <- .getShade("orange", opacity)
+  # Plot median line and credible interval for 0.4Bmsy
+  polygon(c(yrs,rev(yrs)), c(rep(bmsy4quants[1], length(yrs)), rep(bmsy4quants[3], length(yrs))), col=bmsy4shade, border="red")
+  lines(c(yrs[1], yrs[length(yrs)]), c(bmsy4quants[2], bmsy4quants[2]), col="red", lty=2, lwd=2)
+
+  # Plot median line and credible interval for 0.8Bmsy
+  polygon(c(yrs,rev(yrs)), c(rep(bmsy8quants[1], length(yrs)), rep(bmsy8quants[3], length(yrs))), col=bmsy8shade, border="orange")
+  lines(c(yrs[1], yrs[length(yrs)]), c(bmsy8quants[2], bmsy8quants[2]), col="orange", lty=2, lwd=2)
+
+  legend(leg, legend=c(expression("USR: 0.8B"[msy]), expression("LRP: 0.4B"[msy])), fill=c(bmsy8shade, bmsy4shade), border=c("orange","red"))
+
+  # Add 0.2B0 and 0.4B0 static lines
+  abline(h=0.2, col="black", lty=2, lwd=2)
+  abline(h=0.4, col="black", lty=2, lwd=2)
+  # Add labels for the static lines on the right of the plot
+  mtext(expression(" 0.2B"[0]), side=4, at=0.2, las=1)
+  mtext(expression(" 0.4B"[0]), side=4, at=0.4, las=1)
+}
 
 plotVBiomassMPD <- function(out       = NULL,
                             colors    = NULL,

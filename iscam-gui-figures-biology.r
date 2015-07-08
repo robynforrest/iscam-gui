@@ -456,8 +456,8 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, 
       compData <- compData[which(compData[,2]==index) ,]   # Get only the composition data for the current index
       startRowThisGear <- 1
       # Using this line instead for the petrale assessment
-      if(nAgears > 1){
-      #if(index > 1){
+      #if(nAgears > 1){
+      if(index > 1){
         # If index = 1, then we want it to start at row 1
         for(ind in 1:(gearindex-1)){
           # Add all the gear's number of rows together to get the starting row for this gear
@@ -470,14 +470,14 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, 
           tmpagen <- op[[scenario]]$inputs$data$agearsN[[gearindex]]
         if(sex == 1){
           # Males are odd
-          #numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
+          numages <- tmpagen[seq_along(tmpagen) %% 2 > 0]
           # Using this line instead for the petrale assessment
-          numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==1]
+          #numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==1]
         }else{
           # Females get even
-          #numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
+          numages <- tmpagen[seq_along(tmpagen) %% 2 == 0]
           # Using this line instead for the petrale assessment
-          numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==2]
+          #numages <- tmpagen[as.data.frame(op[[scenario]]$outputs$mpd$d3_A)[5]==2]
         }
       }
       nrowsThisGear <- op[[scenario]]$inputs$data$nagearsvec[gearindex]

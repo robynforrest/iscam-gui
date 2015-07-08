@@ -634,7 +634,7 @@ plotce <- function(leg              = "topleft",
   umed <- quants[2,]
   par(new=TRUE)
   plot(b, umed, type="l", lwd=3, lty=2, col="blue", axes=FALSE, ylim=c(0,1), ylab="", xlab="")
-  # Add reletive spawning biomass line
+  # Add relative spawning biomass line
   sbt <- window(mcmc(op[[1]]$outputs$mcmc$sbt[[1]]), start=burn, thin=thin)
   bo <- as.vector(window(mcmc(op[[1]]$outputs$mcmc$params$bo), start=burn, thin=thin))
   depl <- sbt / bo
@@ -650,7 +650,7 @@ plotce <- function(leg              = "topleft",
        labels = seq(0,1,0.2))
   box()
   xlabel <- "Year"
-  ylabel <- "Catch (x 1000 t)"
+  ylabel <- "Catch (x 10,000 t)"
   ylabel2 <- "Proportion"
 
   mtext(side=1,line=2,xlabel)
@@ -658,7 +658,7 @@ plotce <- function(leg              = "topleft",
   mtext(side=4,line=2,ylabel2)
 
   if(!is.null(leg)){
-    legendList       <- c("Landings","Discards","Exploitation rate","Female Spawning Biomass")
+    legendList       <- c("Landings","At-sea releases","Exploitation rate","Relative Female Spawning Biomass")
     legendShadeCols  <- c(c(col1,col2),c("blue","black"))
     legendBorderCols <- c(c("black","black"),0,0)
     legend(leg,legendList,col=legendShadeCols, pch=c(15,15,NA,19), pt.cex=1, lty=c(0,0,2,2), lwd=c(0,0,2,2), bty="n", merge=TRUE)
