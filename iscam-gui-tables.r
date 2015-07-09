@@ -691,10 +691,14 @@ refPointsTable <- function(outMPD    = NULL,
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
 
-  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  # Calculate quantiles for the posterior data
   quants <- vector("list", length(outMCMC))
   for(model in 1:length(outMCMC)){
     mcmcData <- outMCMC[[model]]$mcmc$params
+    # Need to get final year from sbt object, not mcmcdata. If you use ssb from mcmcData it will be the final year-1.
+    sbt <- outMCMC[[model]]$mcmc$sbt[[1]]
+    ssb <- sbt[,ncol(sbt)]
+
     # If you are trying to show more than one group or area's parameters,
     # comment the next line below out.
     mcmcData <- stripAreasGroups(mcmcData)
@@ -703,19 +707,22 @@ refPointsTable <- function(outMPD    = NULL,
 
     # Remove some of them... We want only ref points and nothing else
     mcmcnames <- names(mcmcData)
-    mcmcData <- mcmcData[ ,which(mcmcnames %in% c("fmsy","bmsy","umsy","ssb","bo"))]
+    mcmcData <- mcmcData[ ,which(mcmcnames %in% c("fmsy","bmsy","umsy","bo"))]
+    mcmcData <- cbind(mcmcData, ssb)
+
     mcmcnames <- names(mcmcData)
     # Change then name 'ssb' to B followed by the final year.
     yrs <- names(outMCMC[[1]]$mcmc$sbt[[1]])
     startyrbio <- yrs[1]
     endyrbio <- yrs[length(yrs)]
     endyrF <- yrs[length(yrs)-1]
-    mcmcnames[mcmcnames=="ssb"] = endyrbio
+    mcmcnames[mcmcnames=="ssb"] = paste0("B",endyrbio)
 
     # Add reletive spawning biomass, 0.2B0, 0.4B0, 0.4BMSY, and 0.8BMSY
     mcmcData <- cbind(mcmcData, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
     #mcmcData <- cbind(mcmcData, mcmcData$ssb/mcmcData$bo, 0.2*mcmcData$bo, 0.4*mcmcData$bo, 0.4*mcmcData$bmsy, 0.8*mcmcData$bmsy)
-    #mcmcnames <- c(mcmcnames, paste0(endyrbio,"/",startyrbio), "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
+    #mcmcnames <- c(mcmcnames, paste0("B",endyrbio,"/B",startyrbio), "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
+    mcmcnames <- c(mcmcnames, "0.2B0", "0.4B0", "0.4BMSY", "0.8BMSY")
 
     # Add the initial year biomass (first column of sbt)
     sbt <- outMCMC[[model]]$mcmc$sbt[[1]]
