@@ -302,41 +302,23 @@ grid 3 1 padx=10 pady=5 sticky=W
 
      grid 1 1 sticky=N pady=10
           grid 12 1 relief=sunken padx=20
+               button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
+               button name=refPointsTable      function=.subView action="refPointsTable"       width=25 text="Reference points" fg="chocolate4"
+               button name=biomassTable      function=.subView action="biomassTable"       width=25 text="Spawning biomass" fg="chocolate4"
+               button name=depletionTable      function=.subView action="depletionTable"       width=25 text="Relative spawning biomass" fg="chocolate4"
+               button name=recruitmentTable      function=.subView action="recruitmentTable"       width=25 text="Recruitment" fg="chocolate4"
+               button name=fTable      function=.subView action="fTable"       width=25 text="Fishing mortality (F)" fg="chocolate4"
+               button name=uTable      function=.subView action="uTable"       width=25 text="Exploitation rate (U)" fg="chocolate4"
+               button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decisions" fg="chocolate4"
+               button name=indicesTable      function=.subView action="indicesTable"       width=25 text="Indices" fg="chocolate4"
+               button name=catchTable         function=.subView action="catchTable"     width=25 text="Landings/discards"  fg="chocolate4"
                grid 1 2
-                    button name=paramEstTable      function=.subView action="paramEstTable"        width=25 text="Leading parameter estimates" fg="chocolate4"
-                    check  name=writeParamEstTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=refPointsTable      function=.subView action="refPointsTable"       width=25 text="Reference points" fg="chocolate4"
-                    check  name=writeRefPointsTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=biomassTable      function=.subView action="biomassTable"       width=25 text="Spawning biomass" fg="chocolate4"
-                    check  name=writeBiomassTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=depletionTable      function=.subView action="depletionTable"       width=25 text="Relative spawning biomass" fg="chocolate4"
-                    check  name=writeDepletionTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=recruitmentTable      function=.subView action="recruitmentTable"       width=25 text="Recruitment" fg="chocolate4"
-                    check  name=writeRecruitmentTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=fTable      function=.subView action="fTable"       width=25 text="Fishing mortality (F)" fg="chocolate4"
-                    check  name=writeFTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=uTable      function=.subView action="uTable"       width=25 text="Fishing mortality (U)" fg="chocolate4"
-                    check  name=writeUTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=decisionTable      function=.subView action="decisionTable"       width=25 text="Decisions" fg="chocolate4"
-                    check  name=writeDecisionTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=indicesTable      function=.subView action="indicesTable"       width=25 text="Indices" fg="chocolate4"
-                    check  name=writeIndicesTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    button name=catchTable         function=.subView action="catchTable"     width=25 text="Landings/discards"  fg="chocolate4"
-                    check  name=writeCatchTable checked=T         text="Write to file"          function=.subView
-               grid 1 2
-                    label text="Number of decimal places" font="bold 12" sticky=E
-                    entry name=numTableDigits  function=.subView value=3   entryfont="12" sticky=W width=10
-               grid 1 1
-                    check  name=returnXTable checked=F         text="Return XTable (latex format)"          function=.subView
+                 label text="Number of decimal places" font="bold 12" sticky=E
+                 entry name=numTableDigits  function=.subView value=3   entryfont="12" sticky=W width=10
+               grid 2 1
+                    check  name=returnXTable checked=F  text="use XTable (latex format)" function=.subView
+                    check  name=writeTable checked=F    text="Write to file"                function=.subView
+
 #--------------------------------------------------------------------#
 #--                      Notebook Tab: Retrospectives              --#
 #--------------------------------------------------------------------#
