@@ -42,6 +42,7 @@ if(.OS == "Darwin"){
 .FIGURES_SELEX_SOURCE            <- paste0(.PROJECT_NAME,"-figures-selex.r")
 .FIGURES_TIMESERIES_SOURCE       <- paste0(.PROJECT_NAME,"-figures-timeseries.r")
 .FIGURES_CATCH_SOURCE            <- paste0(.PROJECT_NAME,"-figures-catch.r")
+.FIGURES_SAR_SOURCE              <- paste0(.PROJECT_NAME,"-figures-sar.r")
 .FIGURES_MCMC_SOURCE             <- paste0(.PROJECT_NAME,"-figures-mcmc-diagnostics.r")
 .FIGURES_MLE_SOURCE              <- paste0(.PROJECT_NAME,"-figures-mle-diagnostics.r")
 .FIGURES_RETROSPECTIVES_SOURCE   <- paste0(.PROJECT_NAME,"-figures-retrospectives.r")
