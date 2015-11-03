@@ -12,7 +12,7 @@
 .MAIN_FUNCTION_CALL              <- "iscam"
 
 # Editor
-.EDITOR                          <- file.path("C:","Progra~1","emacs-22.1","bin","runemacs.exe")
+.EDITOR                          <- file.path("C:","emacs","bin","runemacs.exe")
 if(.OS == "Linux"){
   .EDITOR <- file.path("","usr","bin","emacs")
 }
@@ -70,7 +70,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
   .VONB_EXE_FILE_NAME            <- paste0(.VONB_EXE_BASE_NAME,".exe")
   .MA_EXE_FILE_NAME              <- paste0(.MA_EXE_BASE_NAME,".exe")
 }
-.EXE_FILE_NAME_FULL_PATH         <- file.path("..","iSCAM","src","admb-code",.EXE_FILE_NAME)
+.EXE_FILE_NAME_FULL_PATH         <- file.path("..","iSCAM","build","dist","bin",.EXE_FILE_NAME)
 
 .LAST_COMMAND_RUN_FILE_NAME      <- "lastCommandRun.rdata"  # Contains a list of the command line switches used in a run.
 .STARTER_FILE_NAME               <- paste0(.EXE_BASE_NAME,".dat")
