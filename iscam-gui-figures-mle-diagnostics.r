@@ -92,7 +92,7 @@ plotDiagnostics <- function(scenario   = 1,         # Scenario number
       postscript(filename)
     }
   }else{
-    windows(width=widthScreen,height=heightScreen)
+    ##windows(width=widthScreen,height=heightScreen)
   }
   if(plotNum == 1){
     plotObjFunVal(out, colors, names, lty = linetypes, verbose = !silent, leg = leg, showtitle = showtitle)

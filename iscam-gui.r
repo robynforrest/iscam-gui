@@ -88,7 +88,7 @@ iscam <- function(reloadScenarios      = FALSE,
 
   graphics.off()  # Destroy graphics window if it exists
 
-  if(!showgui){
+    if(!showgui){
     .loadData(reloadScenarios = TRUE)
   }else if(reloadScenarios){
     .loadData(reloadScenarios = reloadScenarios)
@@ -235,9 +235,9 @@ iscam <- function(reloadScenarios      = FALSE,
     leg <- NULL
   }
 
-  if(.checkEntries()){
+    if(.checkEntries()){
 
-   switch(pType,
+      switch(pType,
            # From iscam-gui-figures-timeseries.r
            "sTSSpawningBiomassAllAreas"             = {plotTS(s,1,savefig,"SB",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,showB0Ref=val$showB0Ref,showBMSYRef=val$showBMSYRef,opacity=opacity)},
            "sTSSpawningBiomassByArea"               = {plotTS(s,2,savefig,"SBByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},

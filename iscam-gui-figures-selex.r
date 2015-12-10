@@ -116,7 +116,7 @@ plotSelex <- function(scenario   = 1,            # Scenario number
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
   }else if(!add){
-    windows(width=widthScreen,height=heightScreen)
+    ## windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum==1){

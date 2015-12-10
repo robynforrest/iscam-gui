@@ -73,7 +73,10 @@ plotConvergence <- function(scenario   = 1,         # Scenario number
       postscript(filename)
     }
   }else{
-    windows(width=widthScreen,height=heightScreen)
+    ##if(dev.cur() != 1){
+    ##  dev.off()
+    ## }
+    ##windows(width=widthScreen,height=heightScreen)
   }
 
   mcmcData <- mcmcOut$params
@@ -760,7 +763,7 @@ plot.marg <- function(xx, breaks = "sturges", exFactor = 1.0, ...){
   ss <- hist(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
   #ss <- barplot(xx$p, prob=TRUE, breaks = breaks, main = xx$nm, xlab="", cex.axis = 1.2, xlim = xlim, ylab = "", ...)
   func <- function(x){xx$fn(x,xx$p1,xx$p2)}
-  curve(func, xlim[1], xlim[2], xlab="", ylab="", col="green", lwd=2, add=TRUE, axes=FALSE)
+  curve(func, xlim[1], xlim[2], xlab="", ylab="", col="green", lwd=2, add=TRUE) ##, axis=FALSE)
   abline(v = xx$mle, lwd=2, lty=2, col=2)
 }
 

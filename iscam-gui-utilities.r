@@ -226,7 +226,7 @@ getValidModelsList <- function(models, retros = FALSE, type = "mpd"){
       hasType[[model]] <- !is.null(unlist(op[[models[model]]]$outputs[type]))
     }
   }
-  if(hasType == 0){
+  if(hasType[1] == 0){
     cat0(.PROJECT_NAME,"->",currFuncName,"There are no models which have been run in '",type,"' mode. No plot to draw.")
     return(NULL)
   }

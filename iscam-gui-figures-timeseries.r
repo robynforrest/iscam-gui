@@ -163,7 +163,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
   }else if(!add){
-    windows(width=widthScreen,height=heightScreen)
+    ##windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum == 1){
@@ -611,7 +611,6 @@ plotSAR <- function(out       = NULL,
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
-
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
 

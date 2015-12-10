@@ -27,7 +27,8 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
                         figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
                         showtitle  = TRUE,         # Showe the main title on the plot
                         units      = .UNITS,
-                        add        = FALSE,        # If TRUE, plot will be added to current device
+                        add        = FALSE,        ## If TRUE, plot will be added to current device,
+                                                   ## if FALSE, a new window will be created to hold this plot.
                         indletter  = NULL,         # The letter to add to the top left corner (if NULL nothing is added)
                         plotsubfleet = TRUE,       # plotLengthComparison only, tells function to plot subfleet or the rest
                         lengthcompsex = 1,         # plotLengthComparison only, tells function whichs sex to plot
@@ -82,15 +83,20 @@ plotBiology <- function(plotNum    = 1,         # Plot code number
   heightScreen <- ps$h
 
   if(savefig){
-    graphics.off()
     if(figtype == .PNG_TYPE){
       png(filename,res=res,width=width,height=height,units=units)
     }
     if(figtype == .EPS_TYPE){
       postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
     }
-  }else if(!add){
-    windows(width=widthScreen,height=heightScreen)
+  }else{
+    ## if add, do nothing because we want to write to current device
+##    if(!add){
+##      if(dev.cur() != 1){
+##        dev.off()
+##      }
+##      windows(width=widthScreen,height=heightScreen)
+##    }
   }
 
   if(plotNum==1)  cat("No Plot Yet -- Coming Soon!!\n")
@@ -138,7 +144,7 @@ plotLengthComparison <- function(leg, startyr = 2005, subfleetVRN = c(103548,  #
                                                                          592,  # Northern Alliance GFBIO
                                                                          569,  # Osprey #1 FOS     GFBIO
                                                                          595), # Raw Spirit FOS    GFBIO
-                                 plotsubfleet = TRUE, sex = 1, showtitle = TRUE, add=TRUE){
+                                 plotsubfleet = TRUE, sex = 1, showtitle = TRUE, add=FALSE){
   # Plot the length data for freezer trawlers vs. shoreside fleet
   # subfleetVRN vessels will be one fleet, all the rest will be the other fleet
   # plotsubfleet, if TRUE wil plot subfleet. If FALSE, will plot non-subfleet (all other vessels)
@@ -199,7 +205,7 @@ plotLengthComparison <- function(leg, startyr = 2005, subfleetVRN = c(103548,  #
   mtext("Length (cm)",2,line=2)
 }
 
-plotLW <- function(leg, showtitle = TRUE, add=TRUE){
+plotLW <- function(leg, showtitle = TRUE, add=FALSE){
   # Plot the length/weight data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is round weight in grams.
@@ -245,7 +251,7 @@ plotLW <- function(leg, showtitle = TRUE, add=TRUE){
       }
       a <- data[[sex]][[2]][1,]
       b <- data[[sex]][[2]][2,]
-      curve(a*x^b, col=col, lwd=3, add=T)
+      curve(a*x^b, col=col, lwd=3, add=TRUE)
       legCols <- c(legCols, col)
       if(sex == 1){
         legNames <- c(legNames, as.expression(substitute(paste("Male  ", alpha, "=", a, " ", beta,"=", b, "\n"))))
@@ -262,7 +268,7 @@ plotLW <- function(leg, showtitle = TRUE, add=TRUE){
     plot(l, w, col=col, xlab="Length (cm)", ylab="Weight (g)")
     a <- data[[1]][[2]][1,]
     b <- data[[1]][[2]][2,]
-    curve(a*x^b, col=col, lwd=3, add=T)
+    curve(a*x^b, col=col, lwd=3, add=TRUE)
     legCols <- c(legCols, col)
     legNames <- c(legNames, as.expression(substitute(paste("Combined sexes  ", alpha, "=", a, " ", beta,"=", b, "\n"))))
   }
@@ -271,7 +277,7 @@ plotLW <- function(leg, showtitle = TRUE, add=TRUE){
   }
 }
 
-plotMA <- function(leg  = NULL, showtitle = TRUE, add=TRUE){
+plotMA <- function(leg  = NULL, showtitle = TRUE, add=FALSE){
   # Plot the maturity/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is maturity level.
@@ -339,7 +345,7 @@ plotMA <- function(leg  = NULL, showtitle = TRUE, add=TRUE){
   }
 }
 
-plotGrowth <- function(leg, showtitle = TRUE, add=TRUE){
+plotGrowth <- function(leg, showtitle = TRUE, add=FALSE){
   # Plot the length/age data and fit from the bio global object
   # If split sex, plot both with individual fits.
   # First column of 'data' assumed to be length in mm, second is age.
@@ -378,7 +384,7 @@ plotGrowth <- function(leg, showtitle = TRUE, add=TRUE){
       linf <- data[[sex]][[2]][1,]
       k    <- data[[sex]][[2]][2,]
       tt0  <- data[[sex]][[2]][3,]
-      curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
+      curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=TRUE)
       legCols <- c(legCols, col)
       if(sex == 1){
         legNames <- c(legNames, as.expression(substitute(paste("Male  L"[infinity], " = ", linf, " ", kappa, " = ", k, " tt"[0], " = ", tt0, "\n"))))
@@ -396,7 +402,7 @@ plotGrowth <- function(leg, showtitle = TRUE, add=TRUE){
     linf <- data[[1]][[2]][1,]
     k    <- data[[1]][[2]][2,]
     tt0  <- data[[1]][[2]][3,]
-    curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=T)
+    curve(linf*(1-exp(-k*x)), col=col, lwd=3, add=TRUE)
     legCols <- c(legCols, col)
     legNames <- c(legNames, as.expression(substitute(paste("Combined sexes  L"[infinity], " = ", linf, " ", kappa, " = ", k, " tt"[0], " = ", tt0, "\n"))))
    }
@@ -405,7 +411,7 @@ plotGrowth <- function(leg, showtitle = TRUE, add=TRUE){
   }
 }
 
-plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, add=TRUE){
+plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, add=FALSE){
   # Plot the age or length compositions for the given index (gear).
   # If the model is two-sex, a two-paneled plot will be drawn.
   # plotnum:
@@ -544,7 +550,7 @@ plotComps <- function(plotnum = 1, sex, scenario, index, leg, showtitle = TRUE, 
 
 plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                              las = 1, leglabels = c("Positive","Zero"),
-                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, showtitle = TRUE, add=TRUE){
+                             col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, showtitle = TRUE, add=FALSE){
   # Plot the age or length compositions given in prop
   currFuncName <- getCurrFunc()
   if(!add){
@@ -567,7 +573,7 @@ plotCompositions <- function(prop, numages, yrs, ages, title, gearTitle, leg,  y
 
 plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                   las = 1, leglabels = c("Positive","Negative"),
-                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText, showtitle = TRUE, add=TRUE){
+                                  col = c("black","red"), pch = 1, bty = "n", cex = 0.75, titleText, showtitle = TRUE, add=FALSE){
   if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
@@ -588,7 +594,7 @@ plotCompositionsResids <- function(prop, numages, yrs, ages, title, gearTitle, l
 
 plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg,  ylab, size = 0.1, powr = 0.5,
                                 las = 1, leglabels = c("Positive","Zero"),
-                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE, showtitle = TRUE, add=TRUE){
+                                col = c("black","blue"), pch = 1, bty = "n", cex = 1.25, titleText, scaleYaxis=TRUE, showtitle = TRUE, add=FALSE){
   # Plot the age or length composition fits, no more than 36 or this function will need to be modified.
   # sex, 1=M/Both, 2=F
 
@@ -627,7 +633,7 @@ plotCompositionsFit <- function(prop, fit, yrs, ages, sex, title, gearTitle, leg
   }
 }
 
-plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE, add=TRUE){
+plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE, add=FALSE){
   # Plot the age or length compositions given in prop
   if(!add){
     oldPar <- par(no.readonly=TRUE)
@@ -671,7 +677,7 @@ plotCompSpecial <- function(scenario, sex, leg, showtitle = TRUE, add=TRUE){
   text(years,rep(0,10),labels=c("WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS","WCVI","HS"))
 }
 
-plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE, add=TRUE){
+plotN1 <- function(compFitSex, scenario, leg, showtitle = TRUE, add=FALSE){
   # Plot the age structure at the beginning of the time series without any application of selectivity.
   if(!add){
     oldPar <- par(no.readonly=TRUE)

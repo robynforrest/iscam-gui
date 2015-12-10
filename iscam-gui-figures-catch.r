@@ -106,7 +106,7 @@ plotCatch <- function(scenario   = 1,         # Scenario number
       postscript(filename)
     }
   }else if(!add){
-    windows(width=widthScreen,height=heightScreen)
+    ##windows(width=widthScreen,height=heightScreen)
   }
 
   if(plotNum == 1){
@@ -409,7 +409,7 @@ plotCatchesSplit <- function(leg              = "topright",
   col2        <- .getShade(2, opacity)
 
   b <- barplot(t(allCatch),
-               inset=c(-0.25,0),
+               ## inset=c(-0.25,0),
                axes=FALSE,
                col=c(col1,col2),
                border=c("black","black"),
@@ -633,7 +633,7 @@ plotFT <- function(leg         = "topright",
   col4        <- .getShade(4, opacity)
 
   b <- barplot(t(allCatch),
-               inset=c(-0.25,0),
+               ## inset=c(-0.25,0),
                axes=FALSE,
                col=c(col1,col2,col3,col4),
                border=c("black","black","black","black"),
