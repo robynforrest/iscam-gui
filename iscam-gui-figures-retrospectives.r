@@ -76,7 +76,7 @@ plotCohorts <- function(scenario   = 1,         # Scenario number
       postscript(filename)
     }
   }else{
-    windows(width=widthScreen,height=heightScreen)
+    ##windows(width=widthScreen,height=heightScreen)
   }
 
   for(year in length(years):1){
