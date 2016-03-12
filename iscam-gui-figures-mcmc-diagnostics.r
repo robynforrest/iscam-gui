@@ -189,11 +189,7 @@ stripStaticParams <- function(scenario, dat){
     }
     dat <- dat[,-staticSelInds]
   }
-<<<<<<< HEAD
- 
-  dat <- dat[,-staticSelInds]
-=======
->>>>>>> cgrandin/master
+
   datNames <- names(dat)
   return(dat)
 }
