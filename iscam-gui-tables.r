@@ -767,7 +767,7 @@ refPointsTable <- function(outMPD    = NULL,
   if(retxtable){
     # Put the latex-pretty names in another column of the table. It doesn't like it when they are actual rownames
     quants <- as.data.frame(quants)
-    newcol <- c("B\\subscr{0}","B\\subscr{MSY}","MSY","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",endyrbio,"}"),
+    newcol <- c("B\\subscr{0}","B\\subscr{MSY}","MSY","F\\subscr{MSY}","U\\subscr{MSY}",paste0("B\\subscr{",as.numeric(endyrbio) - 1,"}"),
                 "0.2B\\subscr{0}","0.4B\\subscr{0}",
                 "0.4B\\subscr{MSY}","0.8B\\subscr{MSY}",paste0("B\\subscr{",startyrbio,"}"),
                 paste0("B\\subscr{",endyrbio,"}/B\\subscr{0}"),paste0("F\\subscr{",endyrF,"}"))
