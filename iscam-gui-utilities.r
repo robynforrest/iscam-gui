@@ -1,3 +1,41 @@
+create.sim.files <- function(sim.dir, num){
+  ## creates a number of rdata files to allow for testing of
+  ## the merge.df.from.sim.files() function below.
+  for(i in 1:num){
+    df <- as.data.frame(matrix(c(i+1,i+2,i+3,i+4,i+5,i+6,i+7,i+8,i+9), byrow = TRUE, nrow = 3))
+    junk <- c("this","is","junk")
+    save(list = ls(all.names = TRUE), envir = environment(), file = file.path(sim.dir, paste0("Sim", i, ".Rdata")))
+  }
+}
+
+merge.df.from.sim.files <- function(sim.dir, data.frame.name){
+  ## Merge data frames with all the same name from multiple rdata files
+  ## Assumes the sim.dir holds only rdata files, each with a data frame
+  ##  with the name given by data.frame.name.
+  data <- lapply(as.list(file.path(sim.dir, list.files(sim.dir))),
+                 function(x){
+                   load(file = x)
+                   get(ls()[ls() == data.frame.name])})
+  out <- do.call(rbind, data)
+  return(out)
+}
+## Testing of the merge.df.from.sim.files() function.
+## sim.dir <- "sims"
+## create.sim.files(sim.dir, 10)
+## output.df <- merge.df.from.sim.files(sim.dir, "df")
+
+merge.df.from.sim.files <- function(sim.dir, data.frame.name){
+  data <- lapply(as.list(file.path(sim.dir, list.files(sim.dir))),
+                 function(x){
+                   load(file = x)
+                   get(ls()[ls() == data.frame.name])})
+  out <- do.call(rbind, data)
+  return(out)
+}
+
+## output.df <- merge.df.from.sim.files(sim.dir, "df")
+
+
 .getShade <- function(color, opacity){
   # If color is a single R color string or single number,
   #  returns an rgb string of the specified color and opacity

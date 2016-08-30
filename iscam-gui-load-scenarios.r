@@ -736,7 +736,14 @@ readData <- function(file = NULL, verbose = FALSE){
   tmp$sd50   <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$usemat <- as.numeric(dat[ind <- ind + 1])
   tmp$matvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
-  # Catch data
+
+  ## Delay-difference options
+  tmp$dd.kage    <- as.numeric(dat[ind <- ind + 1])
+  tmp$dd.alpha.g <- as.numeric(dat[ind <- ind + 1])
+  tmp$dd.rho.g   <- as.numeric(dat[ind <- ind + 1])
+  tmp$dd.wk      <- as.numeric(dat[ind <- ind + 1])
+
+  ## Catch data
   tmp$nctobs <- as.numeric(dat[ind <- ind + 1])
   tmp$catch  <- matrix(NA, nrow = tmp$nctobs, ncol = 7)
 
@@ -948,7 +955,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   tmp$weight_sig <-  vector(length=nvals)
   for(val in 1:nvals)  tmp$weight_sig[val] <- as.numeric(dat[ind <- ind + 1])
 
-  nrows <- 15
+  nrows <- 16
   tmp$misc <- matrix(NA, nrow = nrows, ncol = 1)
   for(row in 1:nrows){
     tmp$misc[row,1] <- as.numeric(dat[ind <- ind + 1])
@@ -957,7 +964,7 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
   rownames(tmp$misc) <- c("verbose","rectype","sdobscatchfirstphase","sdobscatchlastphase",
                           "unfishedfirstyear","maternaleffects","meanF","sdmeanFfirstphase",
                           "sdmeanFlastphase","mdevphase","sdmdev","mnumestnodes",
-                          "fracZpriorspawn","agecompliketype","IFDdist")
+                          "fracZpriorspawn","agecompliketype","IFDdist","fitToMeanWeight")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
   return(tmp)
 }

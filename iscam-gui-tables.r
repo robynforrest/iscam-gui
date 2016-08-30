@@ -487,6 +487,8 @@ decisionTable <- function(outMCMC   = NULL,
     dlen <- length(dat[,1])
     probs <- rbind(probs,
                    c(tac[t],
+                     tac[t] / 0.786,                  ## Average female prop for last 4 years
+                     tac[t] / 0.8206,                 ## Average female prop for whole time series
                      length(which(dat[,8]<1))/dlen,   # B2016/B2015
                      length(which(dat[,9]<1))/dlen,   # B2016/0.4B0
                      length(which(dat[,10]<1))/dlen,  # B2016/0.2B0
@@ -508,7 +510,9 @@ decisionTable <- function(outMCMC   = NULL,
   probs <- as.data.frame(probs, stringsAsFactors=FALSE)
   if(retxtable){
     # HACK! Set names with proper latex markup.
-    names(probs) <- c("\\specialcell{\\textbf{2015 Catch}\\\\\\textbf{(1000 t)}}",
+    names(probs) <- c("\\specialcell{\\textbf{2015}\\\\\\textbf{Female}\\\\\\textbf{Catch}\\\\\\textbf{(1000 t)}}",
+                      "\\specialcell{\\textbf{2015}\\\\\\textbf{Total}\\\\\\textbf{Catch}\\\\\\textbf{last 4}\\\\\\textbf{yrs avg}\\\\\\textbf{(1000 t)}}",
+                      "\\specialcell{\\textbf{2015}\\\\\\textbf{Total}\\\\\\textbf{Catch}\\\\\\textbf{all}\\\\\\textbf{yrs avg}\\\\\\textbf{(1000 t)}}",
                       "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{B_{2015})}$}",
                       "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.4B_0)}$}",
                       "\\specialcell{$\\mathbf{P(B_{2016}<}$\\\\$\\mathbf{0.2B_0)}$}",
