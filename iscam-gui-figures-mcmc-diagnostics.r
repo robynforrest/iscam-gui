@@ -684,7 +684,6 @@ plotPriorsPosts <- function(mcmcData, mpdData, inputs = NULL, burnthin = list(0,
   nside <- getRowsCols(numWithPriors)
   par(mfrow = nside, oma = c(2,3,1,1), mai = c(0.2,0.4,0.3,0.2))
 
-
   for(postInd in 1:ncol(mcmcData)){
     # Find the parameter name from mcmcData in the priorSpecs table
     # and plot if it is in the paramSpecs table
