@@ -48,10 +48,10 @@ Thanks to the following people involved in the development of this software:
   files the model requires into the **Scenarios** directory.
 
 - There should also be a file called **ScenarioInfo.txt** in each Scenario directory
-  which must contain three values representing:
+  which must contain 2 values representing:
     1. *Sensitivity Group* - A number which represents which group this scenario belongs to.
     2. *Color for plotting* - the R number color for plotting this scenario..
-    3. *Plotting Order* - NOT YET IMPLEMENTED where 1 is highest. If there are multiple values, they will be ordered by name alphabetically.
+    3. *Plotting Order* - NOT YET IMPLEMENTED
 
     These value can be changed inside the GUI as well,
   and when that change is made, the file will be modified to contain the new value.
@@ -74,15 +74,17 @@ Thanks to the following people involved in the development of this software:
 
   - **sens** - This is a list of *Sensitivity Group*, one for each unique *Sensitivity Group*.  names(sens) will return NULL
 since the groups are nameless.
-  - **bio** - This is a list of length two, containing the input data and output parameter estimates for the
+  - **bio** - This is a list of length 2, containing the input data and output parameter estimates for the
 length-weight, maturity-at-age, and VonB relationships.
+  - **catch** - This is a list of length 7, containing the catch data for use in catch plots. See below for row descriptions.
 
 
 - There are three objects containing the valid surveys. These are used by functions in iscam-gui-load-biodata.r. They are:
   surveyList, a data frame of key/description pairs, surveyKeys, the keys, and surveyValues, the descriptions.
 
-The following depicts the **op**, **sens**, and **bio** object structures. Indentations reflect sub-object structure.
-See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see how these lists are populated or to add new elements.
+The following depicts the **op**, **sens**, **bio**, and **catch** object structures. Indentations reflect sub-object structure.
+See source files iscam-gui-load-scenarios.r, iscam-gui-load-biodata.r, and iscam-gui-load-catchdata.r to see how these lists are
+populated or to add new elements.
 
     op[[N]] - Each unique scenario number N contains the following
       op[[N]]$names - Full path names for the files and directories used in iscam-gui
@@ -193,11 +195,14 @@ See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see 
         op[[N]]$fileSuccess$lastCommandRun   - Last command run file
       op[[N]]$outputs - A list containing all the outputs from the model run
         op[[N]]$outputs$mpd  - Data Frame containing the ouput of the mpd model run
-        op[[N]]$outputs$mcmc - Data frame containing the output of the mcmc model run
-          op[[N]]$outputs$mcmc$params - Output parameter posteriors from the MCEVAL phase
-          op[[N]]$outputs$mcmc$sbt    - Spawning biomass posteriors from the MCEVAL phase
-          op[[N]]$outputs$mcmc$rt     - Recruitment posteriors from the MCEVAL phase
-          op[[N]]$outputs$mcmc$ft     - Fishing mortality posteriors from the MCEVAL phase
+        op[[N]]$outputs$mcmc - Data frame containing the output of the mcmc model run (MCEVAL phase)
+          op[[N]]$outputs$mcmc$params - Output parameter posteriors
+          op[[N]]$outputs$mcmc$sbt    - Spawning biomass posteriors
+          op[[N]]$outputs$mcmc$vbt    - Vulnerable biomass posteriors
+          op[[N]]$outputs$mcmc$rt     - Recruitment posteriors
+          op[[N]]$outputs$mcmc$rdev   - Recruitment deviations posteriors
+          op[[N]]$outputs$mcmc$ft     - Fishing mortality (F) posteriors
+          op[[N]]$outputs$mcmc$ut     - Fishing moratility (U) posteriors
         op[[N]]$outputs$par  - Parameter file contents (iscam model PAR file)
         op[[N]]$outputs$par$theta1                  - log_ro parameter estimate
         op[[N]]$outputs$par$theta2                  - h (steepness) parameter estimate
@@ -247,6 +252,14 @@ See source files iscam-gui-load-scenarios.r and iscam-gui-load-biodata.r to see 
       bio$ma[[2]] - Maturity/age data and parameter estimates for females (optional).
         bio$ma[[2]][[1]] - Two-column matrix of age (column 1) and proportion mature (column 2).
         bio$ma[[2]][[2]] - Vector of the two parameter estimates for this sex.
+    catch - Catch data from a csv file with 7 columns and a header, in the following order with exact names:
+      catch[[1]] - Year
+      catch[[2]] - Month
+      catch[[4]] - Day
+      catch[[5]] - AreaCode (3=3C, 4=3D, 5=5A, 6=5B, 7=5C, 8=5D, 9=5E)
+      catch[[6]] - CatchKG
+      catch[[7]] - DiscardedKG
+      catch[[8]] - Vessel_ID (Vessel Registration number)
 
 ---
 
