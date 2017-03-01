@@ -451,39 +451,39 @@ decisionTable <- function(outMCMC   = NULL,
   projfields <- names(projdat)
   burn <- burnthin[[1]]
   thin <- burnthin[[2]]
-  # Code assumes that the fields are in the order show here. The names (years) may change from year to year,
-  # but they must be in this order:
-  # 1  TAC
-  # 2  B2015
-  # 3  B2016
-  # 4  B0
-  # 5  04B0
-  # 6  02B0
-  # 7  B1996
-  # 8  B2016B2015
-  # 9  B201604B0
-  # 10 B201602B0
-  # 11 B2016B1996
-  # 12 F2014
-  # 13 F2015
-  # 14 F2015F2014
-  # 15 U2015
-  # 16 U2015U2014
-  # 17 BMSY
-  # 18 B2016BMSY
-  # 19 B201608BMSY
-  # 20 B201604BMSY
-  # 21 FMSY
-  # 22 F2015FMSY
-  # 23 UMSY
-  # 24 U2015UMSY
+  ## Code assumes that the fields are in the order show here. The names (years) may change from year to year,
+  ## but they must be in this order:
+  ## 1  TAC
+  ## 2  B2015
+  ## 3  B2016
+  ## 4  B0
+  ## 5  04B0
+  ## 6  02B0
+  ## 7  B1996
+  ## 8  B2016B2015
+  ## 9  B201604B0
+  ## 10 B201602B0
+  ## 11 B2016B1996
+  ## 12 F2014
+  ## 13 F2015
+  ## 14 F2015F2014
+  ## 15 U2015
+  ## 16 U2015U2014
+  ## 17 BMSY
+  ## 18 B2016BMSY
+  ## 19 B201608BMSY
+  ## 20 B201604BMSY
+  ## 21 FMSY
+  ## 22 F2015FMSY
+  ## 23 UMSY
+  ## 24 U2015UMSY
 
   probs <- data.frame()
   probsnames <- NULL
   tac <- sort(unique(projdat[,1]))
   for(t in 1:length(tac)){
     dat <- projdat[projdat[,1]==tac[t],]
-    dat <- dat[(burn+1):nrow(dat),] # Remove burn-in samples
+    dat <- dat[(burn+1):nrow(dat),] ## Remove burn-in samples
     dlen <- length(dat[,1])
     probs <- rbind(probs,
                    c(tac[t],
@@ -493,19 +493,19 @@ decisionTable <- function(outMCMC   = NULL,
                      length(which(dat[,9]<1))/dlen,   # B2016/0.4B0
                      length(which(dat[,10]<1))/dlen,  # B2016/0.2B0
                      length(which(dat[,11]<1))/dlen,  # B2016/B1996
-                     #length(which(dat[,18]<1))/dlen,  # B2016/Bmsy
+                     ##length(which(dat[,18]<1))/dlen,  # B2016/Bmsy
                      length(which(dat[,19]<1))/dlen,  # B2016/0.8Bmsy
                      length(which(dat[,20]<1))/dlen,  # B2016/0.4Bmsy
-                     #length(which(dat[,14]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
-                     #length(which(dat[,22]>1))/dlen,  # F2015/Fmsy
+                     ##length(which(dat[,14]>1))/dlen,  # F2015/F2014 - Note the change from < to > for Fs
+                     ##length(which(dat[,22]>1))/dlen,  # F2015/Fmsy
                      length(which(dat[,16]>1))/dlen,  # U2015/U2014
                      length(which(dat[,24]>1))/dlen)) # U2015/Umsy
   }
-  #tmp <- projdat[,c(1,8,9,10,11,18,19,20,14,22,16,24)] # Same numbers as in loop above
+  ##tmp <- projdat[,c(1,8,9,10,11,18,19,20,14,22,16,24)] # Same numbers as in loop above
   tmp <- projdat[,c(1,8,9,10,11,19,20,16,24)] # Same numbers as in loop above
-  # Round values and make all the same number of digits
+  ## Round values and make all the same number of digits
   pattern <- paste0("% 1.",digits,"f")
-  # Make all columns have three 'digits' decimal places except for TAC (column 1)
+  ## Make all columns have three 'digits' decimal places except for TAC (column 1)
   probs <- cbind(probs[,1], apply(probs[,2:ncol(probs)], c(1,2), function(d){d <- round(d,digits);sprintf(pattern, d)}))
   probs <- as.data.frame(probs, stringsAsFactors=FALSE)
   if(retxtable){
@@ -530,33 +530,37 @@ decisionTable <- function(outMCMC   = NULL,
     ##                   "\\specialcell{$P(B_{2016}<$\\\\$0.4B_{MSY})$}",
     ##                   "\\specialcell{$P(U_{2015}>$\\\\$U_{2014})$}",
     ##                   "\\specialcell{$P(U_{2015}>$\\\\$U_{MSY})$}")
-    # Make TAC==11 and TAC==15 boldface (Last year's catch and this year's TAC)
-    # Add a star for last year's catch value (item 1)
-    #tprob <- probs[probs[,1]==11,]
-    #tname <- tprob[1]
-    #tdata <- tprob[-1]
-    #tname <- paste0("\\textbf{",tname,"*}")
-    #tdata <- paste0("\\textbf{",tdata,"}")
-    #probs[probs[,1]==11,] <- c(tname,tdata)
-    # Add two stars for current TAC value (item 2)
-    #tprob <- probs[probs[,1]==15,]
-    #tname <- tprob[1]
-    #tdata <- tprob[-1]
-    #tname <- paste0("\\textbf{",tname,"**}")
-    #tdata <- paste0("\\textbf{",tdata,"}")
-    #probs[probs[,1]==15,] <- c(tname,tdata)
+    ## Make TAC==11 and TAC==15 boldface (Last year's catch and this year's TAC)
+    ## Add a star for last year's catch value (item 1)
+    ##tprob <- probs[probs[,1]==11,]
+    ##tname <- tprob[1]
+    ##tdata <- tprob[-1]
+    ##tname <- paste0("\\textbf{",tname,"*}")
+    ##tdata <- paste0("\\textbf{",tdata,"}")
+    ##probs[probs[,1]==11,] <- c(tname,tdata)
+    ## Add two stars for current TAC value (item 2)
+    ##tprob <- probs[probs[,1]==15,]
+    ##tname <- tprob[1]
+    ##tdata <- tprob[-1]
+    ##tname <- paste0("\\textbf{",tname,"**}")
+    ##tdata <- paste0("\\textbf{",tdata,"}")
+    ##probs[probs[,1]==15,] <- c(tname,tdata)
   }else{
     names(probs) <- c(names(tmp)[1], paste0("P_",names(tmp)[-1])) #Prepend 'P_', except for first one which is TAC
   }
 
   if(retxtable){
-    #footnote <- list()
-    #footnote$pos <- list()
-    #footnote$pos[[1]] <- c(nrow(probs))
-    #footnote$command <- c(paste0("\\hline \\multicolumn{5}{l}{\\textbf{* Approximate 2014 catch; ** 2014 TAC}.}"))
+    ##footnote <- list()
+    ##footnote$pos <- list()
+    ##footnote$pos[[1]] <- c(nrow(probs))
+    ##footnote$command <- c(paste0("\\hline \\multicolumn{5}{l}{\\textbf{* Approximate 2014 catch; ** 2014 TAC}.}"))
+    v.space <- list()
+    v.space$pos <- list()
+    v.space$pos[[1]] <- 0 ## Breaks it but 1 or more puts space in table properly
+    v.space$command <- "\\vspace{3mm}"
     return(print(xtable(probs, caption=xcaption, label=xlabel, align=getAlign(ncol(probs))),
-                 caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x}, scalebox="0.75",
-                 hline.after=c(-1,0)))
+                 caption.placement = "top", include.rownames=FALSE, sanitize.text.function=function(x){x},
+                 size="\\fontsize{10pt}{12pt}\\selectfont")) ##, add.to.row = v.space))
 #                 add.to.row=footnote, hline.after=c(-1,0)))
   }
   if(savetable){
