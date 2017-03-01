@@ -157,6 +157,10 @@
   # Try to load starter file
   tryCatch({
     starterData             <- readStarter(file = tmp$names$starter, verbose=!silent)
+    ## Strip any comments
+    starterData <- gsub("#.*", "", starterData)
+    ## Strip any trailing whitespace
+    starterData <- gsub(" +$", "", starterData)
     tmp$names$data          <- file.path(dired,starterData[1])
     tmp$names$control       <- file.path(dired,starterData[2])
     tmp$names$projection    <- file.path(dired,starterData[3])
@@ -170,7 +174,6 @@
     cat0(.PROJECT_NAME,"->",currFuncName,err$message)
     # Do nothing, is is likely not a scenario directory
   })
-
   # Try to load data file.
   tryCatch({
     tmp$inputs$data      <- readData(file = tmp$names$data, verbose=!silent)
@@ -751,7 +754,7 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$catch[row,] <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   }
   colnames(tmp$catch) <- c("year","gear","area","group","sex","type","value")
-  # Abundance indices are a ragged object and are stored as a list of matrices
+  ## Abundance indices are a ragged object and are stored as a list of matrices
   tmp$nit     <- as.numeric(dat[ind <- ind + 1])
   tmp$nitnobs <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmpsurvtype <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -771,6 +774,7 @@ readData <- function(file = NULL, verbose = FALSE){
   #if(!tmp$hasAgeGearNames){
   #  tmp$ageGearNames <- 1:length(tmp$nagears)
   #}
+
   tmp$nagearsvec  <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearssage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
   tmp$nagearsnage <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
@@ -790,7 +794,7 @@ readData <- function(file = NULL, verbose = FALSE){
      colnames(tmp$agecomps[[gear]]) <- c("year","gear","area","group","sex",tmp$nagearssage[gear]:tmp$nagearsnage[gear])
    }
   }
-  # Build a list of age comp gear N's
+  ## Build a list of age comp gear N's
   tmp$agearsN <- list()
   start <- 1
   for(ng in 1:length(tmp$nagearsvec)){
@@ -798,7 +802,7 @@ readData <- function(file = NULL, verbose = FALSE){
     tmp$agearsN[[ng]] <- agen[start:end]
     start <- end + 1
   }
-  # Empirical weight-at-age data
+  ## Empirical weight-at-age data
   tmp$nwttab <- as.numeric(dat[ind <- ind + 1])
   tmp$nwtobs <- as.numeric(dat[ind <- ind + 1])
   tmp$waa <- NULL
@@ -1013,10 +1017,16 @@ readProjection <- function(file = NULL, verbose = FALSE){
   for(row in 1:nrows){
     tmp$cntrloptions[row,1] <- as.numeric(dat[ind <- ind + 1])
   }
-  # Rownames here are hardwired, so if you add a new row you must add a name for it here
-  rownames(tmp$cntrloptions) <- c("syrmeanm","nyrmeanm",
-                                  "syrmeanfecwtageproj","nyrmeanfecwtageproj",
-                                  "syrmeanrecproj","nyrmeanrecproj")
+
+  ## Rownames here are hardwired, so if you add a new row you must add a name for it here
+  rownames(tmp$cntrloptions) <- c("syrmeanm",
+                                  "nyrmeanm",
+                                  "syrmeanfecwtageproj",
+                                  "nyrmeanfecwtageproj",
+                                  "syrmeanrecproj",
+                                  "nyrmeanrecproj",
+                                  "shortcntrlpts",
+                                  "longcntrlpts")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
   return(tmp)
 }
