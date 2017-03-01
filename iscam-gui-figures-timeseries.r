@@ -307,7 +307,7 @@ plotBiomassMPD <- function(out       = NULL,
   if(showtitle){
     title <- "Spawning Biomass"
   }
-  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  plot(out[[1]]$mpd$yrs, out[[1]]$mpd$sbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
   points(out[[1]]$mpd$yr[1], out[[1]]$mpd$sbo, col=colors[[1]], pch=20)
   if(length(out) > 1){
     for(line in 2:length(out)){
@@ -399,7 +399,7 @@ plotBiomassMCMC <- function(out         = NULL,
   if(showtitle){
     title <- "Spawning Biomass"
   }
-  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
   # Draw SB0 and uncertainty over top
   incOffset <- offset
   points(yrs[1] - incOffset, boquants[[1]][2], pch = 19, col = colors[[1]])
@@ -752,10 +752,10 @@ plotVBiomassMPD <- function(out       = NULL,
   vbt <- vbt[vbt[,1]==1,] # Filters only gear #1
   yrs <- vbt[,3]
   vbt <- vbt[,4]
-  plot(yrs, vbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  plot(yrs, vbt, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Biomass  (mt)\n", xlab="Year", main=title, las=1)
   if(length(out) == 1 && showSbio){
     # Make the spawning biomass the same color as the vulnerable, but up one linetype
-    lines(yrs, sbt, type="l", col=colors[[1]], lty=lty[[1]]+1, lwd=2,ylim=c(0,yUpper),ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+    lines(yrs, sbt, type="l", col=colors[[1]], lty=lty[[1]]+1, lwd=2,ylim=c(0,yUpper),ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
     vbioname <- paste0("VBio - ",names[[1]])
     sbioname <- paste0("Sbio - ",names[[1]])
     names[[1]] <- vbioname
@@ -858,8 +858,8 @@ plotVBiomassMCMC <- function(out       = NULL,
   if(length(out) == 1){
     if(showSbio){
       # Make the spawning biomass the same linetype as the vulnerable, but up one color
-      drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
-      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(syrs, squants[[1]], colors[[1]] + 1, 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=FALSE, opacity=opacity, ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
       vbioname <- "Vulnerable B"
       sbioname <- "Spawning B"
 #      vbioname <- paste0("VBio - ",names[[1]])
@@ -868,7 +868,7 @@ plotVBiomassMCMC <- function(out       = NULL,
       names[[2]] <- sbioname
       colors[[2]] <- colors[[1]] + 1
     }else{
-      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+      drawEnvelope(vyrs, vquants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (mt)\n", xlab="Year", main=title, las=1)
     }
   }
   if(length(out) > 1 && !showSbio){
