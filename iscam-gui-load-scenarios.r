@@ -974,42 +974,46 @@ readControl <- function(file = NULL, ngears = NULL, nagears = NULL, verbose = FA
 }
 
 readProjection <- function(file = NULL, verbose = FALSE){
-  # Read in the projection file given by 'file'
-  # Parses the file into its constituent parts
-  # And returns a list of the contents
+  ## Read in the projection file given by 'file'
+  ## Parses the file into its constituent parts
+  ## And returns a list of the contents
 
   data <- readLines(file, warn=FALSE)
 
-  # Remove any empty lines
+  ## Remove any empty lines
   data <- data[data != ""]
 
-  # remove preceeding whitespace if it exists
+  ## remove preceeding whitespace if it exists
   data <- gsub("^[[:blank:]]+","",data)
 
-  # Get the element numbers which start with #.
+  ## Get the element numbers which start with #.
   dat <- grep("^#.*",data)
-  # remove the lines that start with #.
+  ## remove the lines that start with #.
   dat <- data[-dat]
 
-  # remove comments which come at the end of a line
+  ## remove comments which come at the end of a line
   dat <- gsub("#.*","",dat)
 
-  # remove preceeding and trailing whitespace
+  ## remove preceeding and trailing whitespace
   dat <- gsub("^[[:blank:]]+","",dat)
   dat <- gsub("[[:blank:]]+$","",dat)
 
-  # Now we have a nice bunch of string elements which are the inputs for iscam.
-  # Here we parse them into a list structure
-  # This is dependent on the current format of the DAT file and needs to
-  # be updated whenever the DAT file changes format
+  ## Now we have a nice bunch of string elements which are the inputs for iscam.
+  ## Here we parse them into a list structure
+  ## This is dependent on the current format of the DAT file and needs to
+  ## be updated whenever the DAT file changes format
   tmp <- list()
   ind <- 0
 
-  # Get the TAC values
+  ## Get the TAC values
   tmp$ntac  <- as.numeric(dat[ind <- ind + 1])
-  tmp$tacvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
+  for(tac in 1:tmp$ntac){
+    tmp$tacvec[tac] <- as.numeric(dat[ind <- ind + 1])
+  }
+  ## Below used if the tac vector is on one line
+  ## tmp$tacvec <- as.numeric(strsplit(dat[ind <- ind + 1],"[[:blank:]]+")[[1]])
 
-  # Get the control options vector
+  ## Get the control options vector
   tmp$ncntrloptions <- as.numeric(dat[ind <- ind + 1])
   nrows <- tmp$ncntrloptions
   ncols <- 1
@@ -1026,7 +1030,8 @@ readProjection <- function(file = NULL, verbose = FALSE){
                                   "syrmeanrecproj",
                                   "nyrmeanrecproj",
                                   "shortcntrlpts",
-                                  "longcntrlpts")
+                                  "longcntrlpts",
+                                  "bmin")
   tmp$eof <- as.numeric(dat[ind <- ind + 1])
   return(tmp)
 }
