@@ -287,7 +287,7 @@
 
   # Try to load MCMC results.
   tryCatch({
-    tmp$outputs$mcmc <- readMCMC(dired = dired, verbose=!silent)
+    tmp$outputs$mcmc <- readMCMC(dired = file.path(dired, "mcmc"), verbose=!silent)
     tmp$fileSuccess$mcmc    <- TRUE
     cat0(.PROJECT_NAME,"->",currFuncName,"MCMC output loaded for scenario '",dired,"'. (op[[n]]$fileSuccess$mcmc)\n")
   },error=function(err){
