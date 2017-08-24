@@ -39,6 +39,10 @@ plotSelex <-
            showmat    = FALSE,        ## Used in the plot with both
                                       ##  selectivities and maturity ogives
                                       ##  only (#3)
+           use.bio.for.mat = FALSE,   ## Use the bio object as created in the
+                                      ##  Biotool tab for maturity. If FALSE,
+                                      ##  the maturity vector will be read in
+                                      ##  from the data file.
            plot.fixed = TRUE          ## Plot selectivities which are fixed
                                       ##  in the model?
            ){
@@ -154,6 +158,7 @@ plotSelex <-
                             showtitle = showtitle,
                             add = add,
                             showmat = showmat,
+                            use.bio.for.mat = use.bio.for.mat,
                             plot.fixed = plot.fixed)
   }
 
@@ -183,6 +188,7 @@ plotLogisticSelAllGears	<- function(scenario,
                                     showtitle = TRUE,
                                     add = FALSE,
                                     showmat = FALSE,
+                                    use.bio.for.mat = use.bio.for.mat,
                                     plot.fixed = TRUE){
   ## Currently only implemented for seltypes 1, 6, and 11 (estimated logistic
   ##  age-based, fixed logistic age-based, or estimated logistic length-based)
@@ -192,6 +198,9 @@ plotLogisticSelAllGears	<- function(scenario,
   ## Assumes 'out' is list of length 1, this is not a sensitivity plot but a
   ##  single-scenario plot with multiple gears.
   ## If showmat is TRUE then maturity ogive will be included in plot
+  ## If use.bio.for.mat is TRUE then the object 'bio' will be used for the
+  ##  maturity. This is created using the Biotool tab in iscam-gui. If FALSE,
+  ##  the maturity vector will be extracted from the data file inputs.
   ## If plot.fixed is TRUE then selectivities which are fixed in the model
   ##  will be plotted.
 
@@ -247,19 +256,31 @@ plotLogisticSelAllGears	<- function(scenario,
   if(showmat){
     ## Add maturity ogive to selectivity plot
     ## Plots female only - number 2 in next line signifies female
-    data <- bio$ma
-    sex <- 2
-    a50 <- data[[sex]][[2]][1,]
-    sigma_a50 <- data[[sex]][[2]][2,]
-    if(is.null(a50) || is.null(sigma_a50)){
-      cat0(.PROJECT_NAME,"->",getCurrFunc(),"Error - element 'ma' of object 'bio' does not exist. Run the maturity/age model from the Biotool tab.")
-      return(NULL)
+    if(use.bio.for.mat){
+      data <- bio$ma
+      sex <- 2
+      a50 <- data[[sex]][[2]][1,]
+      sigma_a50 <- data[[sex]][[2]][2,]
+      if(is.null(a50) || is.null(sigma_a50)){
+        cat0(.PROJECT_NAME,
+             "->",
+             getCurrFunc(),
+             "Error - element 'ma' of object 'bio' does not exist. Run the maturity/age model from the Biotool tab.")
+        return(NULL)
+      }
+      gearnames <- c(gearnames, "Female maturity")
+      col <- c(col, ncol(mat)+1)
+      lty <- c(lty, 2)
+      lwd <- c(lwd, 3)
+      curve(1/(1+exp(-(x-a50)/sigma_a50)), col=ncol(mat)+1, lty=2, lwd=3, add=TRUE)
+    }else{
+      gearnames <- c(gearnames, "Maturity")
+      col <- c(col, ncol(mat)+1)
+      lty <- c(lty, 2)
+      lwd <- c(lwd, 3)
+      data <- inputs[[1]]$matvec
+      lines(data, col=ncol(mat)+1, lty=2, lwd=3)
     }
-    gearnames <- c(gearnames, "Female maturity")
-    col <- c(col, ncol(mat)+1)
-    lty <- c(lty, 2)
-    lwd <- c(lwd, 3)
-    curve(1/(1+exp(-(x-a50)/sigma_a50)), col=ncol(mat)+1, lty=2, lwd=3, add=TRUE)
   }
   if(!is.null(leg)){
     legend(leg, legend=gearnames, col=col, lty=lty, lwd=lwd)
