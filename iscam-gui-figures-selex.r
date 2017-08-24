@@ -1,46 +1,53 @@
-#**********************************************************************************
-# iscam-gui-figures-selex.r
-# This file contains the code for plotting selectivity values SS outputs using the
-# infrastructure provided with ss-explore.
-#
-# Author            : Chris Grandin
-# Development Date  : October 2013 - February 2015
-# Current version   : 1.0
-#**********************************************************************************
+plotSelex <-
+  function(scenario   = 1,            ## Scenario number
+           plotNum    = 1,            ## Plot code number
+           savefig    = .SAVEFIG,     ## TRUE/FALSE for PNG image output
+           fileText   = "Default",    ## Name of the file if png==TRUE
+           plotMCMC   = FALSE,        ## TRUE/FALSE to plot MCMC output
+           ci         = NULL,         ## confidence interval in % (0-100)
+           multiple   = FALSE,        ## TRUE/FALSE to plot sensitivity cases
+           sensGroup  = 1,            ## Sensitivity group to plot if
+                                      ##  multiple==TRUE
+           index      = 1,            ## Gear index to plot
+           ## PlotSpecs: Width, height, and resolution of screen and file
+           ps         = list(pngres = .RESOLUTION,
+                             pngw   = .WIDTH,
+                             pngh   = .HEIGHT,
+                             res    = .RESOLUTION,
+                             w      = .WIDTH,
+                             h      = .HEIGHT),
+           leg        = "topright",   ## Legend location. If NULL, none will
+                                      ##  be drawn
+           figtype    = .FIGURE_TYPE, ## The filetype of the figure with period,
+                                      ##  e.g. ".png"
+           showtitle  = TRUE,         ## Show the main title on the plot
+           units      = .UNITS,       ## Units to use in plotting
+           silent     = .SILENT,
+           colors     = NULL,         ## Allow a color vector to be input (for
+                                      ##  use with latex). If NULL, colors will
+                                      ##  come from gui.
+           linetypes  = NULL,         ## Allow a linetypes vector to be input
+                                      ##  (for use with latex). If NULL,
+                                      ##  linetypes will come from gui.
+           names      = NULL,         ## Allow a names vector to be input (for
+                                      ##  use with latex). If NULL, names will
+                                      ##  come from gui.
+           add        = FALSE,        ## If TRUE, plot will be added to current
+                                      ##  device
+           indletter  = NULL,         ## A letter to plot on the panel. If NULL,
+                                      ##  no letter will be printed.
+           showmat    = FALSE,        ## Used in the plot with both
+                                      ##  selectivities and maturity ogives
+                                      ##  only (#3)
+           plot.fixed = TRUE          ## Plot selectivities which are fixed
+                                      ##  in the model?
+           ){
 
-plotSelex <- function(scenario   = 1,            # Scenario number
-                      plotNum    = 1,            # Plot code number
-                      savefig    = .SAVEFIG,     # TRUE/FALSE for PNG image output
-                      fileText   = "Default",    # Name of the file if png==TRUE
-                      plotMCMC   = FALSE,        # TRUE/FALSE to plot MCMC output
-                      ci         = NULL,         # confidence interval in % (0-100)
-                      multiple   = FALSE,        # TRUE/FALSE to plot sensitivity cases
-                      sensGroup  = 1,            # Sensitivity group to plot if multiple==TRUE
-                      index      = 1,            # Gear index to plot
-                      # PlotSpecs: Width, height, and resolution of screen and file
-                      ps         = list(pngres = .RESOLUTION,
-                                        pngw   = .WIDTH,
-                                        pngh   = .HEIGHT,
-                                        res    = .RESOLUTION,
-                                        w      = .WIDTH,
-                                        h      = .HEIGHT),
-                      leg        = "topright",   # Legend location. If NULL, none will be drawn
-                      figtype    = .FIGURE_TYPE, # The filetype of the figure with period, e.g. ".png"
-                      showtitle  = TRUE,         # Show the main title on the plot
-                      units      = .UNITS,       # Units to use in plotting
-                      silent     = .SILENT,
-                      colors     = NULL,         # Allow a color vector to be input (for use with latex). If NULL, colors will come from gui.
-                      linetypes  = NULL,         # Allow a linetypes vector to be input (for use with latex). If NULL, linetypes will come from gui.
-                      names      = NULL,         # Allow a names vector to be input (for use with latex). If NULL, names will come from gui.
-                      add        = FALSE,        # If TRUE, plot will be added to current device
-                      indletter  = NULL,         # A letter to plot on the panel. If NULL, no letter will be printed.
-                      showmat    = FALSE         # Used in the plot with both selectivities and maturity ogives only (#3)
-                      ){
-
-  # plotNum must be one of:
-  # 1  Logistic selectivity one gear  - age or length based will be detected automatically
-  # 2  Logistic selectivity all gears - age or length based will be detected automatically
-  # 3  Logistic selectivity all gears with maturity - age only
+  ## plotNum must be one of:
+  ## 1 - Logistic selectivity one gear  - age or length based will be detected
+  ##      automatically
+  ## 2 - Logistic selectivity all gears - age or length based will be detected
+  ##      automatically
 
   currFuncName <- getCurrFunc()
 
@@ -113,18 +120,41 @@ plotSelex <- function(scenario   = 1,            # Scenario number
       png(filename,res=res,width=width,height=height,units=units)
     }
     if(figtype == .EPS_TYPE){
-      postscript(filename, horizontal=FALSE, paper="special",width=width,height=height)
+      postscript(filename,
+                 horizontal = FALSE,
+                 paper = "special",
+                 width = width,
+                 height = height)
     }
   }else if(!add){
     ## windows(width=widthScreen,height=heightScreen)
   }
 
-  if(plotNum==1){
-    plotLogisticSel(scenario, out, colors, names, lty = linetypes, inputs = inputs,
-                    controlinputs = controlinputs, index = index, verbose = !silent, leg = leg, showtitle = showtitle, add=add)
+  if(plotNum == 1){
+    plotLogisticSel(scenario,
+                    out,
+                    colors,
+                    names,
+                    lty = linetypes,
+                    inputs = inputs,
+                    controlinputs = controlinputs,
+                    index = index,
+                    verbose = !silent,
+                    leg = leg,
+                    showtitle = showtitle,
+                    add = add)
   }
-  if(plotNum==2){
-    plotLogisticSelAllGears(scenario, out, inputs=inputs, controlinputs=controlinputs, verbose = !silent, leg = leg, showtitle = showtitle, add=add, showmat=showmat)
+  if(plotNum == 2){
+    plotLogisticSelAllGears(scenario,
+                            out,
+                            inputs = inputs,
+                            controlinputs = controlinputs,
+                            verbose = !silent,
+                            leg = leg,
+                            showtitle = showtitle,
+                            add = add,
+                            showmat = showmat,
+                            plot.fixed = plot.fixed)
   }
 
   if(!is.null(indletter)){
@@ -132,42 +162,69 @@ plotSelex <- function(scenario   = 1,            # Scenario number
   }
 
   if(savefig){
-    cat(.PROJECT_NAME,"->",currFuncName,"Wrote figure to disk: ",filename,"\n\n",sep="")
+    cat(.PROJECT_NAME,
+        "->",
+        currFuncName,
+        "Wrote figure to disk: ",
+        filename,
+        "\n\n",
+        sep = "")
     dev.off()
   }
   return(TRUE)
 }
 
-plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbose, leg, showtitle = TRUE, add=FALSE, showmat=FALSE){
-  # Currently only implemented for seltypes 1,6 and 11 (estimated logistic age-based, fixed logistic age-based, or estimated logistic length-based)
-  # Single sex only, no time blocks
-  # Parses the control inputs to see which gears have age comps and therefore selectivity estimates
-  # Assumes 'out' is list of length 1, this is not a sensitivity plot but a single-scenario plot with multiple gears.
-  # If showmat is TRUE then maturity ogive will be included in plot
+plotLogisticSelAllGears	<- function(scenario,
+                                    out,
+                                    inputs,
+                                    controlinputs,
+                                    verbose,
+                                    leg,
+                                    showtitle = TRUE,
+                                    add = FALSE,
+                                    showmat = FALSE,
+                                    plot.fixed = TRUE){
+  ## Currently only implemented for seltypes 1, 6, and 11 (estimated logistic
+  ##  age-based, fixed logistic age-based, or estimated logistic length-based)
+  ## Single sex only, no time blocks
+  ## Parses the control inputs to see which gears have age comps and therefore
+  ##  selectivity estimates
+  ## Assumes 'out' is list of length 1, this is not a sensitivity plot but a
+  ##  single-scenario plot with multiple gears.
+  ## If showmat is TRUE then maturity ogive will be included in plot
+  ## If plot.fixed is TRUE then selectivities which are fixed in the model
+  ##  will be plotted.
 
   currFuncName <- getCurrFunc()
   if(!add){
     oldPar <- par(no.readonly=TRUE)
     on.exit(par(oldPar))
   }
-  # Get gear names
+  ## Get gear names
   gearnames <- inputs[[1]]$gearNames
-  # Get phase information for the gears, negatives are fixed, positives are estimated
+  ## Get phase information for the gears, negatives are fixed, positives are estimated
   estphase <- controlinputs[[1]]$sel[6,]
-  # Selectivity parameter values from the model. Even if fixed, they appear in the output.
+  ## Selectivity parameter values from the model. Even if fixed, they appear in the output.
   selex <- out[[1]]$mpd$sel
-  # Change the names of the fixed selectivities in the legend
-  gearnames[estphase<0] <- paste0(gearnames[estphase<0]," (Fixed)")
+  ## Change the names of the fixed selectivities in the legend
+  gearnames[estphase < 0] <- paste0(gearnames[estphase<0]," (Fixed)")
   age <- out[[1]]$mpd$age
 
-  # Get selectivity outputs
+  ## Get selectivity outputs
   logselData   <- out[[1]]$mpd$log_sel
-  # Make matrix for plotting
+  ## Remove fixed selectivity gears if requested
+  if(!plot.fixed){
+    inds <- logselData[,1] %in% which(estphase > 0)
+    logselData <- logselData[inds,]
+    selex <- selex[which(estphase > 0), ]
+    gearnames <- gearnames[which(estphase > 0)]
+  }
+  ## Make matrix for plotting
   mat <- NULL
   for(gearnum in 1:nrow(selex)){
-    # For each gear, extract the log sel and years
+    ## For each gear, extract the log sel and years
     logseldata   <- logselData[which(logselData[,1] == gearnum),]
-    #nb <- controlinputs[[1]]$sel["nselblocks",][gearnum]
+    ##nb <- controlinputs[[1]]$sel["nselblocks",][gearnum]
     yrs <- logseldata[,3]
     selData <- exp(logseldata[,4:ncol(logseldata)])
     selData <- selData[nrow(selData),] # end-year selectivity for the only block
@@ -176,7 +233,11 @@ plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbos
 
   titletext <- ""
   if(showtitle){
-    titletext <- "Selectivities for all gears"
+    if(plot.fixed){
+      titletext <- "Selectivities for all gears"
+    }else{
+      titletext <- "Selectivities for all estimated gears"
+    }
   }
   col <- seq(1,ncol(mat))
   lty <- rep(1,ncol(mat))
@@ -184,8 +245,8 @@ plotLogisticSelAllGears	<-	function(scenario, out, inputs, controlinputs, verbos
   matplot(age, mat, type = "l", lwd = lwd, col = col, lty = lty, las = 1,
           main = titletext, xlim = c(1,max(age)), ylim = c(0,1.1), ylab="Selectivity", xlab="Age")
   if(showmat){
-    # Add maturity ogive to selectivity plot
-    # Plots female only - number 2 in next line signifies female
+    ## Add maturity ogive to selectivity plot
+    ## Plots female only - number 2 in next line signifies female
     data <- bio$ma
     sex <- 2
     a50 <- data[[sex]][[2]][1,]
