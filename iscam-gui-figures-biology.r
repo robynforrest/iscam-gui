@@ -1,13 +1,4 @@
-#**********************************************************************************
-# iscam-gui-figures-biology.r
-# This file contains the code for plotting biological values iScam outputs.
-#
-# Author            : Chris Grandin
-# Development Date  : August 2013 - Present
-# Current version   : 1.0
-#**********************************************************************************
-
-plotBiology <- function(plotNum    = 1,         # Plot code number
+plotBiology <- function(plotNum    = 1,
                         compFitSex = 1,         # Composition plots sex to plot (1=M/Both, 2=F)
                         savefig    = .SAVEFIG,  # TRUE/FALSE for PNG image output
                         fileText   = "Default", # Name of the file if png==TRUE
