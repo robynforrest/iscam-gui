@@ -77,6 +77,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   #11 Recruitment deviations
   #12 Vulnerable biomass all areas (+Spawning biomass all areas)
   #13 Relative spawning biomass with USR (0.8MSY) and LRP (0.4MSY) with uncertainties and 0.2B0 and 0.4B0 lines
+  #14 Natural mortlaity all areas
 
   currFuncName <- getCurrFunc()
 
@@ -138,7 +139,7 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 13){
+  if(plotNum < 1 || plotNum > 15){
     cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 12. You passed ",plotNum)
     return(FALSE)
   }
@@ -234,6 +235,18 @@ plotTS <- function(scenario   = 1,         # Scenario number
       cat0(.PROJECT_NAME,"->",currFuncName,"No Relative biomass/USR/LRP plot available for MPD runs. Check the plot MCMC box.")
     }
   }
+  
+  if(plotNum == 14){
+    # Natural mortality
+    if(plotMCMC){
+      plotNaturalMortalityMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg=leg, showtitle = showtitle, opacity=opacity, add=add)
+    }else{
+      plotNaturalMortalityMPD(out, colors, names, lty = linetypes, verbose = !silent, leg=leg, showtitle = showtitle, opacity=opacity, add=add)
+    }
+  }
+
+
+
 
   if(!is.null(indletter)){
     .gletter(indletter)
@@ -481,9 +494,10 @@ plotDepletionMPD <- function(out       = NULL,
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   title <- ""
   if(showtitle){
-    title <- "Relative Spawning Biomass"
+    title <- "Depletion"
+	
   }
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,1.1),ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,1.1),ylab="Depletion (sbt/sbo)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
@@ -571,6 +585,191 @@ plotDepletionMCMC <- function(out       = NULL,
     legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
+
+
+
+plotNaturalMortalityMPD <- function(out       = NULL,
+                           colors    = NULL,
+                           names     = NULL,
+                           lty       = NULL,
+                           verbose   = FALSE,
+                           showtitle = TRUE,
+                           leg         = "topright",		   
+                           add       = FALSE,
+                           opacity   = 90){
+  # Natural mortality plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  
+
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
+  # Natural mortality is estimated as a matrix of nages and nyears. Age-variant M is not estimated, thus let M_vector equal column 1 of M_matrix
+  out[[1]]$mpd$M_vector <- out[[1]]$mpd$M[,1]
+  
+  yUpper <- max(out[[1]]$mpd$M_vector*2)
+  
+  
+  #par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    title <- "Natural Mortality"
+  }
+  plot(out[[1]]$mpd$yr, out[[1]]$mpd$M_vector, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Instantaneous natural mortality\n", xlab="Year", main=title, las=1)
+  
+  #browser()
+  
+  points(out[[1]]$mpd$yr, out[[1]]$mpd$M_vector, col=colors[[1]], pch=20)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+	  out[[line]]$mpd$M_vector <- out[[line]]$mpd$M[,1]	
+      lines(out[[line]]$mpd$yr, out[[line]]$mpd$M_vector, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
+      points(out[[line]]$mpd$yr, out[[line]]$mpd$M_vector, col=colors[[line]], pch=20)
+    }
+}
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+	}
+}
+
+
+plotNaturalMortalityMCMC <- function(out         = NULL,
+                            colors      = NULL,
+                            names       = NULL,
+                            ci          = NULL,
+                            burnthin    = list(0,1),
+                            offset      = 0.1,
+                            verbose     = FALSE,
+                            showtitle   = TRUE,
+                            showB0Ref   = FALSE,  # Show the 0.2 and 0.4 B0 lines on the plot
+                            showBMSYRef = FALSE,  # Show the 0.4 and 0.8 BMSY lines on the plot
+                            leg         = "topright",
+                            add         = FALSE,
+                            opacity     = 90){
+  # Biomass plot for an MCMC
+  # out is a list of the mcmc outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # offset is the number of years to offset the points and bars
+
+  print("This function is not working- code reflects plotNaturalMortalityMCMC and needs updating")
+
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  quants <- vector("list", length(out))
+  boquants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    sbo <- window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(sbt, ci)
+    boquants[[model]] <- getQuants(sbo, ci)
+  }
+  yUpper <- max(quants[[1]], boquants[[1]][3])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]], boquants[[1]][3])
+  }
+
+  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  #par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    title <- "Spawning Biomass"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  # Draw SB0 and uncertainty over top
+  incOffset <- offset
+  points(yrs[1] - incOffset, boquants[[1]][2], pch = 19, col = colors[[1]])
+  arrows(yrs[1] - incOffset, boquants[[1]][1], yrs[1] - incOffset, boquants[[1]][3], lwd = 2, code = 0, col = colors[[1]])
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
+      incOffset <- incOffset + offset
+      points(yrs[1] - incOffset, boquants[[line]][2], pch = 19, col = colors[[line]])
+      arrows(yrs[1] - incOffset, boquants[[line]][1], yrs[1] - incOffset, boquants[[line]][3], lwd = 2, code = 0, col = colors[[line]])
+    }
+  }
+  # Add 0.4BMSY, 0.8BMSY, 0.2B0, and 0.4B0 lines for the reference case [[1]] to plot
+  if(showB0Ref){
+    abline(h=0.2*boquants[[1]][2], col="red", lty=1, lwd=2)  # sbo1 set above in loop through models
+    mtext("0.2B0",2,at=0.2*boquants[[1]][2],col="red",las=1)
+    abline(h=0.4*boquants[[1]][2], col="green", lty=1, lwd=2)
+    mtext("0.4B0",2,at=0.4*boquants[[1]][2],col="green",las=1)
+  }
+  if(showBMSYRef){
+    bmsy <- window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin)
+    bmsyquants <- getQuants(bmsy, ci)
+    abline(h=0.4*bmsyquants[2], col="red", lty=2, lwd=2)
+    mtext("0.4BMSY",2,at=0.4*bmsyquants[2],col="red",las=1)
+    abline(h=0.8*bmsyquants[2], col="green", lty=2, lwd=2)
+    mtext("0.8BMSY",2,at=0.8*bmsyquants[2],col="green",las=1)
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
+}
+
+
 
 plotSAR <- function(out       = NULL,
                     colors    = NULL,
