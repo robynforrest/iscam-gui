@@ -681,7 +681,7 @@ plotNaturalMortalityMCMC <- function(out         = NULL,
   # ci is the confidence interval to use in percent, eg. 95
   # offset is the number of years to offset the points and bars
 
-  print("This function is not working- code reflects plotNaturalMortalityMCMC and needs updating")
+  print("This function is not working- see github issue #2")
 
 
   currFuncName <- getCurrFunc()
