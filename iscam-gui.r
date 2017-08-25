@@ -249,6 +249,7 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity,recrShowFinalYear=recrShowFinalYear)},
            "sTSRecruitmentDevsAllAreas"             = {plotTS(s,11,savefig,"RecrDevs",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecrByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
+           "sTSNaturalMortalityAllAreas"            = {plotTS(s,14,savefig,"M",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            # Only MPD for Index
            # Index requires a check of the current gear number so that figures for other gears do not overwrite the file
            "sTSIndex"                               = {plotTS(s,7,savefig,paste0("Index-",currIndexName),plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=indfixaxis,opacity=opacity)},
@@ -378,6 +379,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
            "sSensCatchFit"                          = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensSelex"                              = {plotSelex(s,1,savefig,paste0("Selex-",currIndexName),plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+		   "sSensNatMort"							= {plotTS(s,14,savefig,"M",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
 
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSB",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
