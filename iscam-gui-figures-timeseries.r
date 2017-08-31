@@ -1679,8 +1679,6 @@ plotIndexMPD <- function(scenario   = NULL,
   }
 }
 
-#JSC
-
 plotIndexResidualsMPD <- function(scenario   = NULL,
                          out        = NULL,
                          inputs     = NULL,
@@ -1893,8 +1891,6 @@ plotIndexResidualsMPD <- function(scenario   = NULL,
   }
 }
 
-
-#JSC
 
 plotFMPD <- function(out       = NULL,
                      colors    = NULL,
