@@ -253,7 +253,8 @@ iscam <- function(reloadScenarios      = FALSE,
            # Only MPD for Index
            # Index requires a check of the current gear number so that figures for other gears do not overwrite the file
            "sTSIndex"                               = {plotTS(s,7,savefig,paste0("Index-",currIndexName),plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=indfixaxis,opacity=opacity)},
-           "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
+           "sTSIndexResiduals"                      = {plotTS(s,15,savefig,paste0("IndexResiduals-",currIndexName),plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=indfixaxis,opacity=opacity)},
+		   "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sFishingMortality"                      = {plotTS(s,9,savefig,"F",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sFishingMortalityU"                     = {plotTS(s,9,savefig,"U",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,plotU=TRUE,opacity=opacity)},
            "sRefPoints"                             = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,showumsy=showumsy,opacity=opacity)},
@@ -368,7 +369,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sSensRecruit"                           = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity,recrOffset=val$entryRecrOffset,recrShowFinalYear=recrsensShowFinalYear)},
            # No sensitivity plot for MCMC Indices
            "sSensIndex"                             = {plotTS(s,7,savefig,paste0("Index-",currIndexName),FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=sensindfixaxis,opacity=opacity)},
-           #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensIndexResiduals"                    = {plotTS(s,15,savefig,paste0("IndexResiduals-",currIndexName),FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=sensindfixaxis,opacity=opacity)},
+		   #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,savefig,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
            "sSensF"                                 = {plotTS(s,9,savefig,"F",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
