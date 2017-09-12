@@ -1490,7 +1490,7 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
   }
 }
 
-plotIndexMPD <- function(scenario   = NULL,
+plotIndexMPDkeep <- function(scenario   = NULL,
                          out        = NULL,
                          inputs     = NULL,
                          index      = NULL,
@@ -1660,17 +1660,211 @@ plotIndexMPD <- function(scenario   = NULL,
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, ylim = ylim,
             xlab="", ylab="", axes=FALSE)
-    #axis(1, at = yrs)
-    #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
   }
-  points(yrs, inputindices$it, pch = 3)
+  points(yrs, inputindices$it, pch = 19)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
 
   axis(1, at     = seq(min(xlim),max(xlim)),
           labels = seq(min(xlim),max(xlim)))
   axis(2)
+  
   box()
+  
+  mtext("Year", 1, line=2)
+  mtext("x 1,000 tonnes", 2, line=2)
+
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
+  }
+}
+
+
+#rename this function as: plotIndexAndIndexFitMPD
+plotIndexMPD <- function(scenario   = NULL,
+                         out        = NULL,
+                         inputs     = NULL,
+                         index      = NULL,
+                         colors     = NULL,
+                         names      = NULL,
+                         lty        = NULL,
+                         verbose    = FALSE,
+                         showtitle  = TRUE,
+                         leg        = "topright",
+                         add        = FALSE,
+                         indfixaxis = FALSE){
+  # Plots scaled index (obs_It/q) and scaled index fits (It/q) for an MPD
+  # scenario is the sccenario number. Only used if 'out' is of length 1.
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # Notes:
+  # - Models may have different gears than others, but we want the index plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
+  # indfixaxis, if TRUE then all index plots will be scaled to the overall year span of all indices
+
+  currFuncName <- getCurrFunc()
+  if(is.null(scenario)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
+    return(NULL)
+  }
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(inputs)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an inputs list (inputs).")
+    return(NULL)
+  }
+  if(is.null(index)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  ## For future: No assumption of first model having all indices
+  # Get the names of all models' input indices so that the plot will work
+  # even if some indices are not included in the first one.
+  ## indexnames <- NULL
+  ## for(model in 1:length(inputs)){
+  ##   indices <- inputs[[model]]$indices
+  ##   gearnames <- inputs[[model]]$gearNames
+  ##   for(ind in 1:length(indices)){
+  ##     indexmat <- as.data.frame(indices[[ind]])
+  ##     gearindex <- unique(indexmat$gear)
+  ##     indexnames <- c(indexnames, gearnames[gearindex])
+  ##   }
+  ## }
+  ## indexnames <- unique(indexnames)
+  # At this point, indexnames holds the names of all indices used in
+  # all models. Each name is unique in the vector.
+
+  # Get index names included in the model
+  indices <- inputs[[1]]$indices
+  gearindices <- NULL
+  for(ind in 1:length(indices)){
+    indexmat <- as.data.frame(indices[[ind]])
+    gearindices <- c(gearindices, unique(indexmat$gear))
+  }
+  if(!is.element(index,gearindices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }
+
+  currindexname <- inputs[[1]]$gearNames[index]
+  mat <- NULL
+  for(model in 1:length(out)){
+    # For each model, match the data with the gear name 'currgearname'
+    # If it does not match, it will be skipped
+    indexnames <- inputs[[1]]$gearNames[index]
+    gearnum <- match(currindexname, inputs[[1]]$gearNames)
+    if(is.na(gearnum)){
+      # Remove the gear from the legend lists, using the property that if a list
+      # element is set to NULL, it will be removed completely from the list.
+      lty[[model]] <- NA
+      colors[[model]] <- NA
+      names[[model]] <- NA
+    }else{
+      # Get correct ind for the given gear
+      indices <- inputs[[model]]$indices
+      gearindreal <- NA
+      for(ind in 1:length(indices)){
+        indexmat <- as.data.frame(indices[[ind]])
+        gearindex <- unique(indexmat$gear)
+        if(gearindex == gearnum){
+          gearindreal <- ind
+        }
+      }
+      if(!is.na(gearindreal)){
+		inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]])	#raw survey index
+        outputit     <- as.data.frame(out[[model]]$mpd$it_hat)	#raw survey index
+        if(ncol(outputit) == 1){
+          dat          <- as.numeric(outputit[,1])
+        }else{
+          dat          <- as.numeric(outputit[gearindreal,])
+        }
+        tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+        yrs          <- tmpindices$iyr #here, yrs is specific to the survey index specified by user in the gui
+        cv           <- 1 / inputindices$wt
+        dat          <- dat[!is.na(dat)]
+        mat          <- cbind(mat, dat)
+      }else{
+        # Remove the gear from the legend lists, using the property that if a list
+        # element is set to NULL, it will be removed completely from the list.
+        lty[[model]] <- NA
+        colors[[model]] <- NA
+        names[[model]] <- NA
+      }
+    }
+  }
+  title <- ""
+  if(showtitle){
+    title <- paste0("Index fit - ",currindexname)
+  }
+  # Change the NAs to NULLs for the legend variables, using the property that if a list
+  # element is set to NULL, it will be removed completely from the list.
+  lty[sapply(lty, is.na)] <- NULL
+  colors[sapply(colors, is.na)] <- NULL
+  names[sapply(names, is.na)] <- NULL
+  # If user requests a fixed scale x-axis, go through all indices to get year range
+  if(indfixaxis){
+    xmin <- NULL
+    xmax <- NULL
+    for(ind in 1:length(indices)){
+      xmin <- min(xmin, indices[[ind]][,1])
+      xmax <- max(xmax, indices[[ind]][,1])
+    }
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
+	
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
+            ylab="", axes=FALSE)
+  }else{
+    xmin <- min(yrs)
+    xmax <- max(yrs)
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, ylim = ylim,
+            xlab="", ylab="", axes=FALSE)
+  }
+  points(yrs, inputindices$it, pch = 19)
+#  arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
+#         code = 3, angle = 90, length = 0.01, col = "black")
+
+#  axis(1, at     = seq(min(xlim),max(xlim)),
+  #        labels = seq(min(xlim),max(xlim)))
+#  axis(2)
+  
+  axis( side=1 )
+  axis( side=2)#, las=.VIEWLAS )
+
+  box()
+  
   mtext("Year", 1, line=2)
   mtext("x 1,000 tonnes", 2, line=2)
 
@@ -1807,7 +2001,7 @@ plotIndexResidualsMPD <- function(scenario   = NULL,
         }
       }
       if(!is.na(gearindreal)){
-        inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+        inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]]) #survey index
         outputit     <- as.data.frame(out[[model]]$mpd$it_hat)	#model fit to survey data
 		residuals    <- as.data.frame(out[[model]]$mpd$epsilon)
         if(ncol(outputit) == 1){
@@ -1854,34 +2048,40 @@ plotIndexResidualsMPD <- function(scenario   = NULL,
       xmin <- min(xmin, indices[[ind]][,1])
 	  xmax <- max(xmax, indices[[ind]][,1])
     }
-	ymin <- -2
-	ymax <- 2	#max(residvec)+max(residvec)
+	ymin <- -1.2
+	ymax <- 1.2	#max(residvec)+max(residvec)
     xlim <- c(xmin, xmax)
     ylim <- c(ymin, ymax)
 	
-    matplot(yrs, mat2, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+    matplot(yrs, mat2, type = "h", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
             ylab="", axes=FALSE)
+	
 	abline(h=0, lty=2)
 	
   }else{
     xmin <- min(yrs)
     xmax <- max(yrs)
-	ymin <- -2
-	ymax <- 2
+	ymin <- -1.2
+	ymax <- 1.2
 	#ymin <- min(residvec)+min(residvec)
 	#ymax <- max(residvec)+max(residvec)
     xlim <- c(xmin, xmax)
     ylim <- c(ymin, ymax)
-    matplot(yrs, mat2, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+    matplot(yrs, mat2, type = "h", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, ylim = ylim,
             xlab="", ylab="", axes=FALSE)
 	abline(h=0, lty=2)
   }
 
-  axis(1, at     = seq(min(xlim),max(xlim)),
-          labels = seq(min(xlim),max(xlim)))
-  axis(2)
+  #axis(1, at     = seq(min(xlim),max(xlim)),
+  #        labels = seq(min(xlim),max(xlim)))
+  #axis(2)
+  
+  
+  axis( side=1 )
+  axis( side=2)#, las=.VIEWLAS )
+  
   box()
   mtext("Year", 1, line=2)
   mtext("Survey residuals", 2, line=2)
