@@ -119,7 +119,7 @@ if(.OS == "Linux" || .OS == "Darwin"){
 .PLOT_LINETYPE_LABEL             <- "Line"
 
 # Messages
-.TELL_USER_HOW_TO_START_GUI      <- "Type iscam() to start iscam-gui\n"
+.TELL_USER_HOW_TO_START_GUI      <- "Type iscam() to start iscam-gui. For mac, type iscam(T) then iscam()\n"
 .TELL_USER_ABOUT_GUI_ARGUMENTS   <- paste0("Optional ",.PROJECT_NAME," arguments: ",.MAIN_FUNCTION_CALL,
                                            "(reloadScenarios = FALSE, showgui = TRUE, silent = TRUE)\n\n")
 

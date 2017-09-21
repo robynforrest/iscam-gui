@@ -249,10 +249,12 @@ iscam <- function(reloadScenarios      = FALSE,
            "sTSRecruitmentAllAreas"                 = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity,recrShowFinalYear=recrShowFinalYear)},
            "sTSRecruitmentDevsAllAreas"             = {plotTS(s,11,savefig,"RecrDevs",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sTSRecruitmentByArea"                   = {plotTS(s,6,savefig,"RecrByArea",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
+           "sTSNaturalMortalityAllAreas"            = {plotTS(s,14,savefig,"M",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            # Only MPD for Index
            # Index requires a check of the current gear number so that figures for other gears do not overwrite the file
            "sTSIndex"                               = {plotTS(s,7,savefig,paste0("Index-",currIndexName),plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=indfixaxis,opacity=opacity)},
-           "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
+           "sTSIndexResiduals"                      = {plotTS(s,15,savefig,paste0("IndexResiduals-",currIndexName),plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=indfixaxis,opacity=opacity)},
+		   "sSPRRatio"                              = {plotTS(s,8,savefig,"SPRRatio",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sFishingMortality"                      = {plotTS(s,9,savefig,"F",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
            "sFishingMortalityU"                     = {plotTS(s,9,savefig,"U",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,plotU=TRUE,opacity=opacity)},
            "sRefPoints"                             = {plotTS(s,10,savefig,"RefPoints",plotMCMC,ci,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,showumsy=showumsy,opacity=opacity)},
@@ -367,7 +369,8 @@ iscam <- function(reloadScenarios      = FALSE,
            "sSensRecruit"                           = {plotTS(s,5,savefig,"Recr",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity,recrOffset=val$entryRecrOffset,recrShowFinalYear=recrsensShowFinalYear)},
            # No sensitivity plot for MCMC Indices
            "sSensIndex"                             = {plotTS(s,7,savefig,paste0("Index-",currIndexName),FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=sensindfixaxis,opacity=opacity)},
-           #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
+           "sSensIndexResiduals"                    = {plotTS(s,15,savefig,paste0("IndexResiduals-",currIndexName),FALSE,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,indfixaxis=sensindfixaxis,opacity=opacity)},
+		   #"sSensSPRRatio"                          = {plotTS(7,savefig,"SPRRatio",plotMCMC,ci,TRUE,btarg=val$entryBtarg,blim=val$entryBlim)},
            #"sSensRecruitU"                          = {plotTS(8,savefig,"RecruitUncertainty",plotMCMC,ci,TRUE)},
            # No sensitivity plot for MCMC Fs yet, it would likely be too busy anyway
            "sSensF"                                 = {plotTS(s,9,savefig,"F",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
@@ -378,6 +381,7 @@ iscam <- function(reloadScenarios      = FALSE,
            #"sSensDensity"                           = {plotTS(13,savefig,"Density",plotMCMC,ci,TRUE)},
            "sSensCatchFit"                          = {plotCatch(s,3,savefig,"CatchFit",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
            "sSensSelex"                              = {plotSelex(s,1,savefig,paste0("Selex-",currIndexName),plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle)},
+		   "sSensNatMort"							= {plotTS(s,14,savefig,"M",plotMCMC,ci,multiple=TRUE,sensGroup=sgr,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},
 
            # Plot Retrospectives
            "sRetroSB"                               = {plotTS(s,1,savefig,"RetroSB",retros=TRUE,index=ind,burnthin=burnthin,ps=ps,leg=leg,figtype=figtype,showtitle=showtitle,opacity=opacity)},

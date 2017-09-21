@@ -77,6 +77,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   #11 Recruitment deviations
   #12 Vulnerable biomass all areas (+Spawning biomass all areas)
   #13 Relative spawning biomass with USR (0.8MSY) and LRP (0.4MSY) with uncertainties and 0.2B0 and 0.4B0 lines
+  #14 Natural mortlaity all areas
+  #15 Survey residuals
 
   currFuncName <- getCurrFunc()
 
@@ -138,8 +140,8 @@ plotTS <- function(scenario   = 1,         # Scenario number
   widthScreen  <- ps$w
   heightScreen <- ps$h
 
-  if(plotNum < 1 || plotNum > 13){
-    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 12. You passed ",plotNum)
+  if(plotNum < 1 || plotNum > 16){
+    cat0(.PROJECT_NAME,"->",currFuncName,"The plotNum must be between 1 and 15. You passed ",plotNum)
     return(FALSE)
   }
   if(multiple || retros){
@@ -191,11 +193,13 @@ plotTS <- function(scenario   = 1,         # Scenario number
     }
   }
   if(plotNum == 7){
+	# Survey index and model fits to survey index  
     if(plotMCMC){
       cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented. Plotting MPD.")
     }
     plotIndexMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle, indfixaxis=indfixaxis, add=add)
   }
+    
   if(plotNum == 9){
     if(plotMCMC){
       plotFMCMC(out, colors, names, ci, burnthin = burnthin, verbose = !silent, leg = leg, showtitle = showtitle, plotU=plotU, opacity=opacity, add=add)
@@ -234,6 +238,24 @@ plotTS <- function(scenario   = 1,         # Scenario number
       cat0(.PROJECT_NAME,"->",currFuncName,"No Relative biomass/USR/LRP plot available for MPD runs. Check the plot MCMC box.")
     }
   }
+  
+  if(plotNum == 14){
+    # Natural mortality
+    if(plotMCMC){
+      plotNaturalMortalityMCMC(out, colors, names, burnthin = burnthin, ci, verbose = !silent, leg=leg, showtitle = showtitle, opacity=opacity, add=add)
+    }else{
+      plotNaturalMortalityMPD(out, colors, names, lty = linetypes, verbose = !silent, leg=leg, showtitle = showtitle, opacity=opacity, add=add)
+    }
+  }
+
+  if(plotNum == 15){
+	#Survey residuals  
+    if(plotMCMC){
+      cat0(.PROJECT_NAME,"->",currFuncName,"MCMC plots for Indices not implemented. Plotting MPD.")
+    }
+    plotIndexResidualsMPD(scenario, out, inputs, index, colors, names, linetypes, verbose = !silent, leg = leg, showtitle = showtitle, indfixaxis=indfixaxis, add=add)
+  }  
+
 
   if(!is.null(indletter)){
     .gletter(indletter)
@@ -481,9 +503,10 @@ plotDepletionMPD <- function(out       = NULL,
   depl <- out[[1]]$mpd$sbt / out[[1]]$mpd$sbo
   title <- ""
   if(showtitle){
-    title <- "Relative Spawning Biomass"
+    title <- "Depletion"
+	
   }
-  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,1.1),ylab="Relative Spawning Biomass", xlab="Year", main=title, las=1)
+  plot(out[[1]]$mpd$yrs, depl, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,1.1),ylab="Depletion (sbt/sbo)", xlab="Year", main=title, las=1)
   if(length(out) > 1){
     for(line in 2:length(out)){
       depl <- out[[line]]$mpd$sbt / out[[line]]$mpd$sbo
@@ -571,6 +594,191 @@ plotDepletionMCMC <- function(out       = NULL,
     legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
   }
 }
+
+
+
+plotNaturalMortalityMPD <- function(out       = NULL,
+                           colors    = NULL,
+                           names     = NULL,
+                           lty       = NULL,
+                           verbose   = FALSE,
+                           showtitle = TRUE,
+                           leg         = "topright",		   
+                           add       = FALSE,
+                           opacity   = 90){
+  # Natural mortality plot for an MPD
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  currFuncName <- getCurrFunc()
+  
+
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
+  # Natural mortality is estimated as a matrix of nages and nyears. Age-variant M is not estimated, thus let M_vector equal column 1 of M_matrix
+  out[[1]]$mpd$M_vector <- out[[1]]$mpd$M[,1]
+  
+  yUpper <- max(out[[1]]$mpd$M_vector*2)
+  
+  
+  #par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    title <- "Natural Mortality"
+  }
+  plot(out[[1]]$mpd$yr, out[[1]]$mpd$M_vector, type="l", col=colors[[1]], lty=lty[[1]], lwd=2,ylim=c(0,yUpper),ylab="Instantaneous natural mortality\n", xlab="Year", main=title, las=1)
+  
+  #browser()
+  
+  points(out[[1]]$mpd$yr, out[[1]]$mpd$M_vector, col=colors[[1]], pch=20)
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+	  out[[line]]$mpd$M_vector <- out[[line]]$mpd$M[,1]	
+      lines(out[[line]]$mpd$yr, out[[line]]$mpd$M_vector, type="l", col=colors[[line]], lty=lty[[line]], lwd=2, ylim=c(0,yUpper))
+      points(out[[line]]$mpd$yr, out[[line]]$mpd$M_vector, col=colors[[line]], pch=20)
+    }
+}
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2)
+	}
+}
+
+
+plotNaturalMortalityMCMC <- function(out         = NULL,
+                            colors      = NULL,
+                            names       = NULL,
+                            ci          = NULL,
+                            burnthin    = list(0,1),
+                            offset      = 0.1,
+                            verbose     = FALSE,
+                            showtitle   = TRUE,
+                            showB0Ref   = FALSE,  # Show the 0.2 and 0.4 B0 lines on the plot
+                            showBMSYRef = FALSE,  # Show the 0.4 and 0.8 BMSY lines on the plot
+                            leg         = "topright",
+                            add         = FALSE,
+                            opacity     = 90){
+  # Biomass plot for an MCMC
+  # out is a list of the mcmc outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # ci is the confidence interval to use in percent, eg. 95
+  # offset is the number of years to offset the points and bars
+
+  print("This function is not working- see github issue #2")
+
+
+  currFuncName <- getCurrFunc()
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a confidence interval in % (ci).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  burn <- burnthin[[1]]
+  thin <- burnthin[[2]]
+
+  # This is required on biomass plots to make the y-axis label visible, only 2nd item is +1 from default
+  par(mar=c(5.1,5.1,4.1,2.1))
+
+  # Calculate quantiles for the posterior data if an MCMC is to be plotted
+  quants <- vector("list", length(out))
+  boquants <- vector("list", length(out))
+  for(model in 1:length(out)){
+    sbo <- window(mcmc(out[[model]]$mcmc$params$bo), start=burn, thin=thin)
+    sbt <- window(mcmc(out[[model]]$mcmc$sbt[[1]]), start=burn, thin=thin)
+    quants[[model]] <- getQuants(sbt, ci)
+    boquants[[model]] <- getQuants(sbo, ci)
+  }
+  yUpper <- max(quants[[1]], boquants[[1]][3])
+  for(model in 1:length(out)){
+    yUpper <- max(yUpper, quants[[model]], boquants[[1]][3])
+  }
+
+  yrs <- as.numeric(names(out[[1]]$mcmc$sbt[[1]]))
+  #par(mar=c(3,6,3,3))
+  title <- ""
+  if(showtitle){
+    title <- "Spawning Biomass"
+  }
+  drawEnvelope(yrs, quants[[1]], colors[[1]], 0, yUpper, first=TRUE, opacity=opacity, ylab="Biomass (1000 mt)\n", xlab="Year", main=title, las=1)
+  # Draw SB0 and uncertainty over top
+  incOffset <- offset
+  points(yrs[1] - incOffset, boquants[[1]][2], pch = 19, col = colors[[1]])
+  arrows(yrs[1] - incOffset, boquants[[1]][1], yrs[1] - incOffset, boquants[[1]][3], lwd = 2, code = 0, col = colors[[1]])
+  if(length(out) > 1){
+    for(line in 2:length(out)){
+      drawEnvelope(yrs, quants[[line]], colors[[line]], 0, yUpper, first=FALSE, opacity=opacity)
+      incOffset <- incOffset + offset
+      points(yrs[1] - incOffset, boquants[[line]][2], pch = 19, col = colors[[line]])
+      arrows(yrs[1] - incOffset, boquants[[line]][1], yrs[1] - incOffset, boquants[[line]][3], lwd = 2, code = 0, col = colors[[line]])
+    }
+  }
+  # Add 0.4BMSY, 0.8BMSY, 0.2B0, and 0.4B0 lines for the reference case [[1]] to plot
+  if(showB0Ref){
+    abline(h=0.2*boquants[[1]][2], col="red", lty=1, lwd=2)  # sbo1 set above in loop through models
+    mtext("0.2B0",2,at=0.2*boquants[[1]][2],col="red",las=1)
+    abline(h=0.4*boquants[[1]][2], col="green", lty=1, lwd=2)
+    mtext("0.4B0",2,at=0.4*boquants[[1]][2],col="green",las=1)
+  }
+  if(showBMSYRef){
+    bmsy <- window(mcmc(out[[1]]$mcmc$params$bmsy), start=burn, thin=thin)
+    bmsyquants <- getQuants(bmsy, ci)
+    abline(h=0.4*bmsyquants[2], col="red", lty=2, lwd=2)
+    mtext("0.4BMSY",2,at=0.4*bmsyquants[2],col="red",las=1)
+    abline(h=0.8*bmsyquants[2], col="green", lty=2, lwd=2)
+    mtext("0.8BMSY",2,at=0.8*bmsyquants[2],col="green",las=1)
+  }
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=1, lwd=2)
+  }
+}
+
+
 
 plotSAR <- function(out       = NULL,
                     colors    = NULL,
@@ -1282,7 +1490,7 @@ plotRecruitmentDevsMPD <- function(out       = NULL,
   }
 }
 
-plotIndexMPD <- function(scenario   = NULL,
+plotIndexMPDkeep <- function(scenario   = NULL,
                          out        = NULL,
                          inputs     = NULL,
                          index      = NULL,
@@ -1406,7 +1614,7 @@ plotIndexMPD <- function(scenario   = NULL,
           dat          <- as.numeric(outputit[gearindreal,])
         }
         tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
-        yrs          <- tmpindices$iyr
+        yrs          <- tmpindices$iyr #here, yrs is specific to the survey index specified by user in the gui
         cv           <- 1 / inputindices$wt
         dat          <- dat[!is.na(dat)]
         mat          <- cbind(mat, dat)
@@ -1439,6 +1647,7 @@ plotIndexMPD <- function(scenario   = NULL,
     ymax <- max(inputindices$it + cv * inputindices$it)
     xlim <- c(xmin, xmax)
     ylim <- c(0, ymax)
+	
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
             ylab="", axes=FALSE)
@@ -1451,17 +1660,17 @@ plotIndexMPD <- function(scenario   = NULL,
     matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
             las = 1, main = title, ylim = ylim,
             xlab="", ylab="", axes=FALSE)
-    #axis(1, at = yrs)
-    #axis(2, at = seq(0, max(mat, inputindices$it + cv * inputindices$it), by = max(mat, inputindices$it + cv * inputindices$it) / 10))
   }
-  points(yrs, inputindices$it, pch = 3)
+  points(yrs, inputindices$it, pch = 19)
   arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
          code = 3, angle = 90, length = 0.01, col = "black")
 
   axis(1, at     = seq(min(xlim),max(xlim)),
           labels = seq(min(xlim),max(xlim)))
   axis(2)
+  
   box()
+  
   mtext("Year", 1, line=2)
   mtext("x 1,000 tonnes", 2, line=2)
 
@@ -1469,6 +1678,419 @@ plotIndexMPD <- function(scenario   = NULL,
     legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
   }
 }
+
+
+#rename this function as: plotIndexAndIndexFitMPD
+plotIndexMPD <- function(scenario   = NULL,
+                         out        = NULL,
+                         inputs     = NULL,
+                         index      = NULL,
+                         colors     = NULL,
+                         names      = NULL,
+                         lty        = NULL,
+                         verbose    = FALSE,
+                         showtitle  = TRUE,
+                         leg        = "topright",
+                         add        = FALSE,
+                         indfixaxis = FALSE){
+  # Plots scaled index (obs_It/q) and scaled index fits (It/q) for an MPD
+  # scenario is the sccenario number. Only used if 'out' is of length 1.
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # Notes:
+  # - Models may have different gears than others, but we want the index plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
+  # indfixaxis, if TRUE then all index plots will be scaled to the overall year span of all indices
+
+  currFuncName <- getCurrFunc()
+  if(is.null(scenario)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
+    return(NULL)
+  }
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(inputs)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an inputs list (inputs).")
+    return(NULL)
+  }
+  if(is.null(index)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  ## For future: No assumption of first model having all indices
+  # Get the names of all models' input indices so that the plot will work
+  # even if some indices are not included in the first one.
+  ## indexnames <- NULL
+  ## for(model in 1:length(inputs)){
+  ##   indices <- inputs[[model]]$indices
+  ##   gearnames <- inputs[[model]]$gearNames
+  ##   for(ind in 1:length(indices)){
+  ##     indexmat <- as.data.frame(indices[[ind]])
+  ##     gearindex <- unique(indexmat$gear)
+  ##     indexnames <- c(indexnames, gearnames[gearindex])
+  ##   }
+  ## }
+  ## indexnames <- unique(indexnames)
+  # At this point, indexnames holds the names of all indices used in
+  # all models. Each name is unique in the vector.
+
+  # Get index names included in the model
+  indices <- inputs[[1]]$indices
+  gearindices <- NULL
+  for(ind in 1:length(indices)){
+    indexmat <- as.data.frame(indices[[ind]])
+    gearindices <- c(gearindices, unique(indexmat$gear))
+  }
+  if(!is.element(index,gearindices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }
+
+  currindexname <- inputs[[1]]$gearNames[index]
+  mat <- NULL
+  for(model in 1:length(out)){
+    # For each model, match the data with the gear name 'currgearname'
+    # If it does not match, it will be skipped
+    indexnames <- inputs[[1]]$gearNames[index]
+    gearnum <- match(currindexname, inputs[[1]]$gearNames)
+    if(is.na(gearnum)){
+      # Remove the gear from the legend lists, using the property that if a list
+      # element is set to NULL, it will be removed completely from the list.
+      lty[[model]] <- NA
+      colors[[model]] <- NA
+      names[[model]] <- NA
+    }else{
+      # Get correct ind for the given gear
+      indices <- inputs[[model]]$indices
+      gearindreal <- NA
+      for(ind in 1:length(indices)){
+        indexmat <- as.data.frame(indices[[ind]])
+        gearindex <- unique(indexmat$gear)
+        if(gearindex == gearnum){
+          gearindreal <- ind
+        }
+      }
+      if(!is.na(gearindreal)){
+		inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]])	#raw survey index
+        outputit     <- as.data.frame(out[[model]]$mpd$it_hat)	#raw survey index
+        if(ncol(outputit) == 1){
+          dat          <- as.numeric(outputit[,1])
+        }else{
+          dat          <- as.numeric(outputit[gearindreal,])
+        }
+        tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+        yrs          <- tmpindices$iyr #here, yrs is specific to the survey index specified by user in the gui
+        cv           <- 1 / inputindices$wt
+        dat          <- dat[!is.na(dat)]
+        mat          <- cbind(mat, dat)
+      }else{
+        # Remove the gear from the legend lists, using the property that if a list
+        # element is set to NULL, it will be removed completely from the list.
+        lty[[model]] <- NA
+        colors[[model]] <- NA
+        names[[model]] <- NA
+      }
+    }
+  }
+  title <- ""
+  if(showtitle){
+    title <- paste0("Index fit - ",currindexname)
+  }
+  # Change the NAs to NULLs for the legend variables, using the property that if a list
+  # element is set to NULL, it will be removed completely from the list.
+  lty[sapply(lty, is.na)] <- NULL
+  colors[sapply(colors, is.na)] <- NULL
+  names[sapply(names, is.na)] <- NULL
+  # If user requests a fixed scale x-axis, go through all indices to get year range
+  if(indfixaxis){
+    xmin <- NULL
+    xmax <- NULL
+    for(ind in 1:length(indices)){
+      xmin <- min(xmin, indices[[ind]][,1])
+      xmax <- max(xmax, indices[[ind]][,1])
+    }
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
+	
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
+            ylab="", axes=FALSE)
+  }else{
+    xmin <- min(yrs)
+    xmax <- max(yrs)
+    ymax <- max(inputindices$it + cv * inputindices$it)
+    xlim <- c(xmin, xmax)
+    ylim <- c(0, ymax)
+    matplot(yrs, mat, type = "l", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, ylim = ylim,
+            xlab="", ylab="", axes=FALSE)
+  }
+  points(yrs, inputindices$it, pch = 19)
+#  arrows(yrs, inputindices$it + cv * inputindices$it ,yrs, inputindices$it - cv * inputindices$it,
+#         code = 3, angle = 90, length = 0.01, col = "black")
+
+#  axis(1, at     = seq(min(xlim),max(xlim)),
+  #        labels = seq(min(xlim),max(xlim)))
+#  axis(2)
+  
+  axis( side=1 )
+  axis( side=2)#, las=.VIEWLAS )
+
+  box()
+  
+  mtext("Year", 1, line=2)
+  mtext("x 1,000 tonnes", 2, line=2)
+
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
+  }
+}
+
+plotIndexResidualsMPD <- function(scenario   = NULL,
+                         out        = NULL,
+                         inputs     = NULL,
+                         index      = NULL,
+                         colors     = NULL,
+                         names      = NULL,
+                         lty        = NULL,
+                         verbose    = FALSE,
+                         showtitle  = TRUE,
+                         leg        = "topright",
+                         add        = FALSE,
+                         indfixaxis = FALSE){
+  # Survey residuals plot for an MPD - based on function plotIndexMPD
+  # scenario is the sccenario number. Only used if 'out' is of length 1.
+  # out is a list of the mpd outputs to show on the plot
+  # col is a list of the colors to use in the plot
+  # names is a list of the names to use in the legend
+  # Notes:
+  # - Models may have different gears than others, but we want the index plots to match by gear.
+  #   The solution is to match them by name if plotting multiple (sensitivity plots)
+  #   by creating a unique vector of names which is the union of all names across all models
+  #   and using that to match to the names in each model, only plotting if the name is found.
+  # indfixaxis, if TRUE then all index plots will be scaled to the overall year span of all indices
+
+  currFuncName <- getCurrFunc()
+  if(is.null(scenario)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a scenario number.")
+    return(NULL)
+  }
+  if(is.null(out)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an output vector (out).")
+    return(NULL)
+  }
+  if(length(out) < 1){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply at least one element in the output vector (out).")
+    return(NULL)
+  }
+  if(is.null(colors)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a colors vector (colors).")
+    return(NULL)
+  }
+  if(is.null(lty)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a linetypes vector (lty).")
+    return(NULL)
+  }
+  if(is.null(names)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply a names vector (names).")
+    return(NULL)
+  }
+  if(is.null(inputs)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an inputs list (inputs).")
+    return(NULL)
+  }
+  if(is.null(index)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"You must supply an index number for plotting (index).")
+    return(NULL)
+  }
+  if(!add){
+    oldPar <- par(no.readonly=TRUE)
+    on.exit(par(oldPar))
+  }
+
+  ## For future: No assumption of first model having all indices
+  # Get the names of all models' input indices so that the plot will work
+  # even if some indices are not included in the first one.
+  ## indexnames <- NULL
+  ## for(model in 1:length(inputs)){
+  ##   indices <- inputs[[model]]$indices
+  ##   gearnames <- inputs[[model]]$gearNames
+  ##   for(ind in 1:length(indices)){
+  ##     indexmat <- as.data.frame(indices[[ind]])
+  ##     gearindex <- unique(indexmat$gear)
+  ##     indexnames <- c(indexnames, gearnames[gearindex])
+  ##   }
+  ## }
+  ## indexnames <- unique(indexnames)
+  # At this point, indexnames holds the names of all indices used in
+  # all models. Each name is unique in the vector.
+
+  # Get index names included in the model
+  indices <- inputs[[1]]$indices
+  gearindices <- NULL
+  for(ind in 1:length(indices)){
+    indexmat <- as.data.frame(indices[[ind]])
+    gearindices <- c(gearindices, unique(indexmat$gear))
+  }
+  if(!is.element(index,gearindices)){
+    cat0(.PROJECT_NAME,"->",currFuncName,"That gear does not have an index in the model.")
+    return(NULL)
+  }
+
+  # Get survey residuals ( $epsilon ) from .rep 
+  #		match $epsilon with correct years in $indices
+  residuals <- out[[1]]$mpd$epsilon
+  residlist <- NULL
+  for(i in 1:nrow(residuals)){
+	  residlist<-list(as.matrix(out[[1]]$mpd$epsilon[i,]),as.matrix(out[[1]]$mpd$epsilon[2,]))	
+  }
+  
+  currindexname <- inputs[[1]]$gearNames[index]
+  mat  <- NULL
+  mat2 <- NULL	
+  for(model in 1:length(out)){
+    # For each model, match the data with the gear name 'currgearname'
+    # If it does not match, it will be skipped
+    indexnames <- inputs[[1]]$gearNames[index]
+    gearnum <- match(currindexname, inputs[[1]]$gearNames)
+	
+    if(is.na(gearnum)){
+      # Remove the gear from the legend lists, using the property that if a list
+      # element is set to NULL, it will be removed completely from the list.
+      lty[[model]] <- NA
+      colors[[model]] <- NA
+      names[[model]] <- NA
+    }else{
+      # Get correct ind for the given gear
+      indices <- inputs[[model]]$indices
+     	
+      for(ind in 1:length(indices)){
+        indexmat  <- as.data.frame(indices[[ind]])
+		residmat  <- as.data.frame(residlist[[ind]])
+        gearindex <- unique(indexmat$gear)
+		
+        if(gearindex == gearnum){
+          gearindreal <- ind
+        }
+      }
+      if(!is.na(gearindreal)){
+        inputindices <- as.data.frame(inputs[[model]]$indices[[gearindreal]]) #survey index
+        outputit     <- as.data.frame(out[[model]]$mpd$it_hat)	#model fit to survey data
+		residuals    <- as.data.frame(out[[model]]$mpd$epsilon)
+        if(ncol(outputit) == 1){
+          dat        <- as.numeric(outputit[,1])
+		  dat2       <- as.numeric(residuals[,1])
+        }else{
+          dat        <- as.numeric(outputit[gearindreal,])
+		  dat2       <- as.numeric(residuals[gearindreal,])
+        }
+        tmpindices   <- as.data.frame(inputs[[model]]$indices[[gearindreal]])
+		yrs          <- tmpindices$iyr	#here, yrs is specific to the survey index specified by user in the gui
+        cv           <- 1 / inputindices$wt
+        dat          <- dat[!is.na(dat)]
+        mat          <- cbind(mat, dat)
+		
+        dat2         <- dat2[!is.na(dat2)]
+        mat2         <- cbind(mat2, dat2)
+
+
+      }else{
+        # Remove the gear from the legend lists, using the property that if a list
+        # element is set to NULL, it will be removed completely from the list.
+        lty[[model]] <- NA
+        colors[[model]] <- NA
+        names[[model]] <- NA
+      }
+    }
+  }
+  title <- ""
+  if(showtitle){
+    title <- paste0("Survey residuals - ",currindexname)
+  }
+  # Change the NAs to NULLs for the legend variables, using the property that if a list
+  # element is set to NULL, it will be removed completely from the list.
+  lty[sapply(lty, is.na)] <- NULL
+  colors[sapply(colors, is.na)] <- NULL
+  names[sapply(names, is.na)] <- NULL
+  # If user requests a fixed scale x-axis, go through all indices to get complete year range
+  if(indfixaxis){
+	#plot timeseries with fixed x-axes
+    xmin <- NULL
+    xmax <- NULL
+    for(ind in 1:length(indices)){
+      xmin <- min(xmin, indices[[ind]][,1])
+	  xmax <- max(xmax, indices[[ind]][,1])
+    }
+	ymin <- -1.2
+	ymax <- 1.2	#max(residvec)+max(residvec)
+    xlim <- c(xmin, xmax)
+    ylim <- c(ymin, ymax)
+	
+    matplot(yrs, mat2, type = "h", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, xlim = xlim, ylim = ylim, xlab="",
+            ylab="", axes=FALSE)
+	
+	abline(h=0, lty=2)
+	
+  }else{
+    xmin <- min(yrs)
+    xmax <- max(yrs)
+	ymin <- -1.2
+	ymax <- 1.2
+	#ymin <- min(residvec)+min(residvec)
+	#ymax <- max(residvec)+max(residvec)
+    xlim <- c(xmin, xmax)
+    ylim <- c(ymin, ymax)
+    matplot(yrs, mat2, type = "h", lwd = 2, lty = unlist(lty), col = unlist(colors),
+            las = 1, main = title, ylim = ylim,
+            xlab="", ylab="", axes=FALSE)
+	abline(h=0, lty=2)
+  }
+
+  #axis(1, at     = seq(min(xlim),max(xlim)),
+  #        labels = seq(min(xlim),max(xlim)))
+  #axis(2)
+  
+  
+  axis( side=1 )
+  axis( side=2)#, las=.VIEWLAS )
+  
+  box()
+  mtext("Year", 1, line=2)
+  mtext("Survey residuals", 2, line=2)
+
+  if(!is.null(leg)){
+    legend(leg, legend=names, col=unlist(colors), lty=unlist(lty), lwd=2, y.intersp=1)
+  }
+}
+
 
 plotFMPD <- function(out       = NULL,
                      colors    = NULL,
